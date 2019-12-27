@@ -6,12 +6,15 @@ import time
 # Create the database
 create_db.create_db()
 
+# Test for history and estimate it if it's not there
+create_db.test_history()
+
 # Enter main loop
 while True:
 
     # Make the measurement
     result = measurement.make_measurement()
-    print(result)
+    print(result, end="\n\n")
 
     # Get the time and make another measurement in 5 minutes
     wait = config.interval - (time.time() - result["time"])

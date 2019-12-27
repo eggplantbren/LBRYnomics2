@@ -52,7 +52,7 @@ def make_measurement():
 
 
     # Open output DB and write to it
-    lbrynomics_db = sqlite3.connect("./lbrynomics.db")
+    lbrynomics_db = sqlite3.connect("db/lbrynomics.db")
     query = """
             INSERT INTO measurements (time, num_channels, num_streams,
                                       lbc_deposits, num_supports, lbc_supports)
