@@ -1,6 +1,7 @@
 import config
 import create_db
 import measurement
+import plotter
 import time
 
 # Create the database
@@ -15,6 +16,9 @@ while True:
     # Make the measurement
     result = measurement.make_measurement()
     print(result, end="\n\n")
+
+    # Make plots
+    plotter.make_plots()
 
     # Get the time and make another measurement in 5 minutes
     wait = config.interval - (time.time() - result["time"])
