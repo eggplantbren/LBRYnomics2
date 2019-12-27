@@ -11,9 +11,6 @@ def make_plots():
 
     # Plot channel history
     ts, ys = [], []
-    for row in c.execute("SELECT time, num_channels FROM history;"):
-        ts.append(row[0])
-        ys.append(row[1])
     for row in c.execute("SELECT time, num_channels FROM measurements;"):
         ts.append(row[0])
         ys.append(row[1])

@@ -20,30 +20,16 @@ def create_db():
     CREATE TABLE IF NOT EXISTS measurements
         (id INTEGER PRIMARY KEY,
          time REAL NOT NULL,
-         num_channels INTEGER,
-         num_streams INTEGER,
+         num_channels INTEGER NOT NULL,
+         num_streams INTEGER NOT NULL,
          lbc_deposits REAL,
          num_supports INTEGER,
          lbc_supports REAL);
     """)
 
-    # Create table for imputed measurements from history
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS history
-        (id INTEGER PRIMARY KEY,
-         time REAL NOT NULL,
-         num_channels INTEGER,
-         num_streams INTEGER);
-    """)
-
-
     # Create indices
     c.execute("""
     CREATE INDEX IF NOT EXISTS time ON measurements (time);
-    """)
-
-    c.execute("""
-    CREATE INDEX IF NOT EXISTS time ON history (time);
     """)
 
     conn.close()
@@ -63,8 +49,9 @@ def test_history():
     conn = sqlite3.connect("db/lbrynomics.db")
     c = conn.cursor()
 
-    # Count rows in history table
-    rows = c.execute("SELECT COUNT(*) FROM history;").fetchone()[0]
+    # Count rows of history in table
+    rows = c.execute("""SELECT COUNT(*) FROM measurements
+                        WHERE lbc_deposits IS NULL;""").fetchone()[0]
     if rows > 0:
         # No need to do anything if history exists
         conn.close()
@@ -98,7 +85,7 @@ def test_history():
     t = start
     rows = 0
     while True:
-        c.execute("""INSERT INTO history (time, num_channels, num_streams)
+        c.execute("""INSERT INTO measurements (time, num_channels, num_streams)
                      VALUES (?, ?, ?);""", (t,
                                             int(np.sum(ts_channels <= t)),
                                             int(np.sum(ts_streams <= t))))
