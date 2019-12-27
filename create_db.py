@@ -51,6 +51,11 @@ def create_db():
 
     
 def test_history():
+    """
+    See whether the history table is populated. If not, populate it.
+    Not the fastest ever method but this shouldn't really be needed very
+    much.
+    """
 
     print("Generating approximate historical data...", end="", flush=True)
 
@@ -84,19 +89,27 @@ def test_history():
     ts_channels = np.sort(np.array(ts_channels))
     ts_streams = np.sort(np.array(ts_streams))
 
-    # Make 1000 fake measurements
-    start = min(min(ts_channels), min(ts_streams))
+    # Make fake measurements
+    start = min(min(ts_channels), min(ts_streams)) - 0.5
     now = time.time()
-    dt = (now - start)/1000
 
     conn = sqlite3.connect("db/lbrynomics.db")
     c = conn.cursor()
-    for i in range(1000):
-        cutoff = start + i*dt
+    t = start
+    rows = 0
+    while True:
         c.execute("""INSERT INTO history (time, num_channels, num_streams)
-                     VALUES (?, ?, ?);""", (cutoff,
-                                            int(np.sum(ts_channels <= cutoff)),
-                                            int(np.sum(ts_streams <= cutoff))))
+                     VALUES (?, ?, ?);""", (t,
+                                            int(np.sum(ts_channels <= t)),
+                                            int(np.sum(ts_streams <= t))))
+        t += config.interval
+        rows += 1
+        print("\r", end="")
+        print("Generating approximate historical data...", end="")
+        print("Inserted {rows} rows.".format(rows=rows), end="\r", flush=True)
+        if t > now:
+            break
+
     c.execute("COMMIT;")
     conn.close()
     print("done.")
