@@ -108,7 +108,7 @@ def test_history():
                      VALUES (?, ?, ?);""", (t, counts[0, i], counts[1, i]))
         print("    Inserted {rows} rows into database."\
                     .format(rows=i+1), end="\r", flush=True)
-        print("")
+    print("")
 
     c.execute("COMMIT;")
     conn.close()
