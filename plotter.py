@@ -1,10 +1,33 @@
+import config
 import matplotlib.pyplot as plt
+from numba import njit
 import numpy as np
 import sqlite3
 import time
 
-def make_plots():
-    print("Making plots.", flush=True)
+@njit
+def derivative(ts, ys):
+    result = np.empty(len(ys) - 1)
+    for i in range(len(result)):
+        result[i] = (ys[i+1] - ys[i])/(ts[i+1] - ts[i])
+    return result
+
+@njit
+def moving_average(ys, length=10):
+    result = np.empty(len(ys))
+    for i in range(len(ys)):
+        start = i - length
+        if start < 0:
+            start = 0
+        result[i] = np.mean(ys[start:(i+1)])
+    return result
+
+def make_plot(mode):
+    assert mode == "channels" or mode == "streams"
+
+    string = mode
+    if mode == "streams":
+        string = "publications"
 
     # Connect to database file
     conn = sqlite3.connect("db/lbrynomics.db")
@@ -21,10 +44,6 @@ def make_plots():
     ts = np.array(ts)
     ys = np.array(ys)
 
-    # Set mode # TODO work with streams as well
-    mode = "channels"
-    string = mode
-
     # Plotting stuff
     plt.rcParams["font.family"] = "Liberation Sans"
     plt.rcParams["font.size"] = 14
@@ -33,14 +52,14 @@ def make_plots():
     plt.rcParams["savefig.facecolor"] = "#3c3d3c"
 
     plt.figure(figsize=(15, 11))
-#    plt.subplot(2, 1, 1)
+    plt.subplot(2, 1, 1)
     times_in_days = (ts - 1483228800)/86400.0
     days = times_in_days.astype("int64")
     plt.plot(times_in_days, ys, "w-", linewidth=1.5)
     plt.ylabel("Number of {mode}".format(mode=string))
     plt.title("Total number of {mode} = {n}.".format(n=ys[-1], mode=string))
     plt.xlim([0.0, days.max() + 1])
-    plt.ylim(bottom=-100)
+    plt.ylim(bottom=0.0)
     plt.gca().tick_params(labelright=True)
 
     # Add vertical lines for new years (approximately)
@@ -62,50 +81,44 @@ def make_plots():
             "@MH video\n\'Why I Left YouTube\'\ngoes viral",
             fontsize=10)
 
-#    plt.subplot(2, 1, 2)
-#    print("Here 1")
+    plt.subplot(2, 1, 2)
 
+    # It's ts[1:] because if a claim appears at a certain measurement, it
+    # was published BEFORE that.
+    color = "#6b95ef"
+    thin = int(86400.0/config.interval)
+    t = times_in_days[0::thin][1:]
+    y = derivative(t, ys[0::thin])
 
-#    # It's ts[1:] because if a claim appears at a certain measurement, it
-#    # was published BEFORE that.
-#    color = "#6b95ef"
-#    t, y = ts[1:], np.diff(ys)
-#    plt.plot(t, y, alpha=0.9, color=color, label="Raw")
-#    print("Here 2")
+    plt.plot(t, y, alpha=0.9, color=color, label="Raw")
+    plt.plot(t, moving_average(y), alpha=0.9, color="w", label="10-day moving average")
 
-
-#    # Compute 10-day moving average
-#    moving_average = np.zeros(len(y))
-#    for i in range(len(moving_average)):
-#        subset = y[0:(i+1)]
-#        if len(subset) >= 10:
-#            subset = y[-10:]
-#        moving_average[i] = np.mean(subset)
-#    plt.plot(t, moving_average, "w-",
-#                label="10-day moving average", linewidth=1.5)
-#    print("Here 3")
-
-
-#    plt.xlim([0.0, days.max() + 1])
-#    plt.xlabel("Time (days since 2017-01-01)")
-#    plt.ylabel("New {mode} added each day".format(mode=string))
-#    subset = y[-31:-1]
+    plt.xlim([0.0, days.max() + 1])
+    plt.ylim(bottom=0.0)
+    plt.xlabel("Time (days since 2017-01-01)")
+    plt.ylabel("New {mode} added each day".format(mode=string))
 #    plt.title("Recent average rate (last 30 days) = {n} {mode} per day.".\
 #                format(n=int(np.sum(ts >= ts[-1] - 30.0*86400.0)/30.0),
 #                       mode=string))
 
-#    plt.gca().tick_params(labelright=True)
-#    # Year lines
-#    for year in new_years:
-#        plt.axvline(year, color="r", alpha=0.8, linestyle="--")
+    plt.gca().tick_params(labelright=True)
 
-#    # MH line
-#    plt.axvline(890.0, linestyle="dotted", linewidth=2, color="g")
-#    plt.legend()
+    # Year lines
+    for year in new_years:
+        plt.axvline(year, color="r", alpha=0.8, linestyle="--")
+
+    # MH line
+    plt.axvline(890.0, linestyle="dotted", linewidth=2, color="g")
+    plt.legend()
 
     plt.savefig("{mode}.svg".format(mode=mode), bbox_inches="tight")
     plt.savefig("{mode}.png".format(mode=mode), bbox_inches="tight", dpi=70)
     print("    Figure saved to {mode}.svg and {mode}.png.".format(mode=mode))
-    print("Done.\n")
 
+
+def make_plots():
+    print("Making plots.", flush=True)
+    make_plot("channels")
+    make_plot("streams")
+    print("Done.\n")
 
