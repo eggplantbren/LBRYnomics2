@@ -38,7 +38,7 @@ while True:
                             + "-o ./subscriber_counts.json.zst", shell=True)
         subprocess.run("mv lbrynomics.db.zst " + config.backup_dir, shell=True)
         subprocess.run("mv subscriber_counts.json.zst " + config.backup_dir, shell=True)
-    print("\nDone.")
+    print("\nDone.\n")
 
     # Get the time and make another measurement in 5 minutes
     wait = config.interval - (time.time() - result["time"])
