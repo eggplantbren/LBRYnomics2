@@ -15,7 +15,7 @@ def create_db():
     PRAGMA journal_mode = WAL;
     """)
 
-    # Create table for actual measurements
+    # Create table for measurements
     c.execute("""
     CREATE TABLE IF NOT EXISTS measurements
         (id INTEGER PRIMARY KEY,
@@ -31,7 +31,6 @@ def create_db():
     c.execute("""
     CREATE INDEX IF NOT EXISTS time ON measurements (time);
     """)
-
     conn.close()
 
 
