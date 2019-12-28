@@ -4,3 +4,4 @@ json/*.json
 db/*.db
 upload/*
 __pycache__
+url.txt
