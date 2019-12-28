@@ -37,9 +37,12 @@ def make_plot(mode):
 
     # Plot channel history
     ts, ys = [], []
-    for row in c.execute("SELECT time, num_channels FROM measurements;"):
+    for row in c.execute("SELECT time, num_channels, num_streams FROM measurements;"):
         ts.append(row[0])
-        ys.append(row[1])
+        if mode == "channels":
+            ys.append(row[1])
+        elif mode == "streams":
+            ys.append(row[2])
     conn.close()
 
     # Convert to numpy arrays
