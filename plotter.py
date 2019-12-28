@@ -25,39 +25,47 @@ def moving_average(ys, length=10):
     return result
 
 
-def annotate_all(mode):
-    annotate_mh(mode)
-    annotate_crypto_purge(mode)
-    annotate_year_lines(mode)
-    annotate_onboarding(mode)
+def annotate_all(mode, subplot=1):
 
-def annotate_mh(mode):
-    if mode == "num_channels" or mode == "num_streams":
-        loc = mdates.date2num(datetime.date(2019, 6, 9))
-        plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
-        plt.text(loc,
-                 0.8*plt.gca().get_ylim()[1],
-                 "@MH video\n\'Why I Quit YouTube\'\npublished",
-                 fontsize=10)
-
-def annotate_crypto_purge(mode):
-    if mode == "num_channels" or mode == "num_streams":
-        loc = mdates.date2num(datetime.date(2019, 12, 25))
-        plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
-        plt.text(loc,
-                 0.8*plt.gca().get_ylim()[1],
-                 "YouTube purges\ncrypto channels",
-                 fontsize=10)
-
-def annotate_year_lines(mode):
+    # Everyone gets year lines
     # Add vertical lines for new years (approximately)
     for year in range(2017, 2021):
         plt.axvline(mdates.date2num(datetime.date(year, 1, 1)),
                     color="r", alpha=0.8, linestyle="--")
 
-def annotate_onboarding(mode):
+    # Text vertical position depends on whether we're in the upper or
+    # lower subplot.
+    text_pos = 0.05*plt.gca().get_ylim()[1]
+    if subplot == 2:
+        text_pos = 0.65*plt.gca().get_ylim()[1]
+
+    # MH
+    if mode == "num_channels" or mode == "num_streams":
+        loc = mdates.date2num(datetime.date(2019, 6, 9))
+        plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
+        plt.text(loc - 28.0,
+                 text_pos,
+                 "@MH video 'Why I Quit\nYouTube\' published",
+                 fontsize=10, rotation=90)
+
+    # Crypto purge
+    if mode == "num_channels" or mode == "num_streams":
+        loc = mdates.date2num(datetime.date(2019, 12, 25))
+        plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
+        plt.text(loc - 28.0,
+                 text_pos,
+                 "YouTube purges\ncrypto channels",
+                 fontsize=10, rotation=90)
+
+    # Onboarding
     if mode == "num_channels":
-        pass
+        loc = mdates.date2num(datetime.date(2019, 10, 15))
+        plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
+        plt.text(loc - 28.0,
+                 text_pos,
+                 "New users prompted to\ncreate a channel",
+                 fontsize=10, rotation=90)
+
 
 
 def title(mode, value):
@@ -200,7 +208,7 @@ def make_plot(mode):
     plt.gca().tick_params(labelright=True)
 
     # Add annotations
-    annotate_all(mode)
+    annotate_all(mode, 2)
 
     plt.legend()
     plt.savefig("plots/{mode}.svg".format(mode=mode), bbox_inches="tight")
