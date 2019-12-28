@@ -34,6 +34,12 @@ def annotate_mh(mode):
                  "@MH video\n\'Why I Quit YouTube\'\npublished",
                  fontsize=10)
 
+def annotate_year_lines(mode):
+    # Add vertical lines for new years (approximately)
+    for year in range(2017, 2021):
+        plt.axvline(mdates.date2num(datetime.date(year, 1, 1)),
+                    color="r", alpha=0.8, linestyle="--")
+
 
 
 def make_plot(mode):
@@ -97,13 +103,10 @@ def make_plot(mode):
     plt.ylim(bottom=0.0)
     plt.gca().tick_params(labelright=True)
 
-    # Add vertical lines for new years (approximately)
-    for year in range(2017, 2021):
-        plt.axvline(mdates.date2num(datetime.date(year, 1, 1)),
-                    color="r", alpha=0.8, linestyle="--")
 
     # Add text about MH's video
     annotate_mh(mode)
+    annotate_year_lines(mode)
 
     plt.subplot(2, 1, 2)
 
@@ -127,6 +130,7 @@ def make_plot(mode):
     plt.gca().tick_params(labelright=True)
 
     annotate_mh(mode)
+    annotate_year_lines(mode)
 
     plt.legend()
     plt.savefig("plots/{mode}.svg".format(mode=mode), bbox_inches="tight")
