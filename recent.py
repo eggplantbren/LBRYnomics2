@@ -63,7 +63,7 @@ def count_recent(mode, now):
     f.write(json.dumps(result_dict, indent=4))
     f.close()
 
-    print("    Saved {filename}. ".format(filename=filename), end=" ")
+    print("    Saved {filename}.".format(filename=filename), end=" ")
 
     # When did today start?
     start_of_today = datetime.datetime.fromtimestamp(now, datetime.timezone.utc)\
