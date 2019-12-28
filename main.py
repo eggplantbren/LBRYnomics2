@@ -23,8 +23,7 @@ while True:
     wait = config.interval - (time.time() - result["time"])
     if wait < 0.0:
         wait = 0.0
-    print("Waiting.", flush=True)
+    print("Waiting for {wait} seconds.".format(wait=wait), end="", flush=True)
     time.sleep(wait)
-    print("Done.\n")
-
+    print("\nDone.\n")
 
