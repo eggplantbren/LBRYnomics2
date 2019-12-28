@@ -58,6 +58,21 @@ def title(mode, value):
     return string
 
 
+def ylabel(mode):
+    string = ""
+    if mode == "num_channels":
+        string += "Number of channels"
+    if mode == "num_streams":
+        string += "Number of publications"
+    if mode == "lbc_deposits":
+        string += "LBC staked in deposits"
+    if mode == "num_supports":
+        string += "Number of active supports+tips"
+    if mode == "lbc_supports":
+        string += "LBC in active supports+tips"
+    return string
+
+
 def make_plot(mode):
 
     # Connect to database file
@@ -114,7 +129,7 @@ def make_plot(mode):
     plt.xticks([])
     plt.xlim(xlim)
 
-    plt.ylabel("{mode}".format(mode=mode))
+    plt.ylabel(ylabel(mode))
     plt.title(title(mode, ys[-1]))
     plt.ylim(bottom=0.0)
     plt.gca().tick_params(labelright=True)
@@ -142,7 +157,7 @@ def make_plot(mode):
     plt.xticks(mdates.date2num(ticks), ticks, rotation=70)
     plt.xlim(xlim)
     plt.ylim(bottom=0.0)
-    plt.ylabel("{mode} daily change".format(mode=mode))
+    plt.ylabel(ylabel(mode) + " daily change")
     plt.gca().tick_params(labelright=True)
 
     annotate_mh(mode)
