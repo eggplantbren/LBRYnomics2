@@ -40,6 +40,22 @@ def annotate_year_lines(mode):
         plt.axvline(mdates.date2num(datetime.date(year, 1, 1)),
                     color="r", alpha=0.8, linestyle="--")
 
+def title(mode, value):
+    string = ""
+    if mode == "num_channels":
+        string += "Total number of channels = {num}".format(num=value)
+    if mode == "num_streams":
+        string += "Total number of publications = {num}".format(num=value)
+    if mode == "lbc_deposits":
+        string += "Total staked in deposits = {lbc:.2f} LBC"\
+                .format(lbc=value)
+    if mode == "num_supports":
+        string += "Total number of active supports+tips = {num}"\
+                .format(num=value)
+    if mode == "lbc_supports":
+        string += "Total locked in active supports+tips = {lbc:.2f} LBC"\
+                .format(lbc=value)
+    return string
 
 
 def make_plot(mode):
@@ -99,7 +115,7 @@ def make_plot(mode):
     plt.xlim(xlim)
 
     plt.ylabel("{mode}".format(mode=mode))
-    plt.title("Total {mode} = {n}.".format(n=ys[-1], mode=mode))
+    plt.title(title(mode, ys[-1]))
     plt.ylim(bottom=0.0)
     plt.gca().tick_params(labelright=True)
 
