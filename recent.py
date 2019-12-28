@@ -40,7 +40,7 @@ def count_recent(mode, now):
     result_dict["human_time_utc"] = str(datetime.datetime.\
                                        utcfromtimestamp(int(now))) + " UTC"
 
-    # Connect to the wallet server
+    # Connect to the wallet server DB
     conn = sqlite3.connect(config.claims_db_file)
     c = conn.cursor()
 
@@ -62,8 +62,21 @@ def count_recent(mode, now):
     f = open(filename.format(mode=mode), "w")
     f.write(json.dumps(result_dict, indent=4))
     f.close()
+
+    print("    Saved {filename}. ".format(filename=filename), end=" ")
+
+    # When did today start?
+    start_of_today = datetime.datetime.fromtimestamp(now, datetime.timezone.utc)\
+                        .replace(hour=0, minute=0, second=0, microsecond=0)
+    start_of_today = start_of_today.timestamp()
+    query = """
+            SELECT COUNT(*) FROM claim
+            WHERE creation_timestamp >= ?
+            AND claim_type = ?;
+            """
+    new_today = c.execute(query, (start_of_today, claim_type)).fetchone()[0]
+    print("{new} so far this UTC day.".format(new=new_today))
     conn.close()
-    print("    Saved {filename}.".format(filename=filename), flush=True)
 
 
 
