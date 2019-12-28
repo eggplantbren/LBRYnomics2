@@ -165,9 +165,8 @@ def make_plot(mode):
 
     plt.legend()
     plt.savefig("plots/{mode}.svg".format(mode=mode), bbox_inches="tight")
-    plt.savefig("plots/{mode}.png".format(mode=mode), bbox_inches="tight")
     plt.close("all")
-    print("    Figure saved to {mode}.svg and {mode}.png.".format(mode=mode))
+    print("    Figure saved to {mode}.svg.".format(mode=mode))
 
 
 def make_plots():
