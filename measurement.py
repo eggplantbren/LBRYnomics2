@@ -13,9 +13,9 @@ def make_measurement():
     # Get current timestamp
     now = time.time()
 
-    print("Making measurement. ", flush=True)
+    print("Making measurement. ", end="")
     print("The time is " + str(datetime.datetime.utcfromtimestamp(int(now)))\
-                 + " UTC.")
+                 + " UTC.", flush=True)
 
     # Connect to the wallet server DB and the output DB
     claims_db = sqlite3.connect(config.claims_db_file)
