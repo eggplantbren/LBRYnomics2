@@ -34,6 +34,15 @@ def annotate_mh(mode):
                  "@MH video\n\'Why I Quit YouTube\'\npublished",
                  fontsize=10)
 
+def annotate_crypto_purge(mode):
+    if mode == "num_channels" or mode == "num_streams":
+        loc = mdates.date2num(datetime.date(2019, 12, 25))
+        plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
+        plt.text(loc,
+                 0.8*plt.gca().get_ylim()[1],
+                 "YouTube purges\ncrypto channels",
+                 fontsize=10)
+
 def annotate_year_lines(mode):
     # Add vertical lines for new years (approximately)
     for year in range(2017, 2021):
@@ -72,6 +81,10 @@ def ylabel(mode):
         string += "LBC in active supports+tips"
     return string
 
+def set_ylim(mode):
+    if mode == "num_channels" or mode == "num_streams":
+        plt.ylim(bottom=0)
+
 
 def make_plot(mode):
 
@@ -91,21 +104,28 @@ def make_plot(mode):
     ts = np.array(ts)
     ys = np.array(ys)
 
-    # Convert ts to datetimes so as to calculate good tick positions
+    # Convert ts to datetimes to facilitate good tick positions
     datetimes = []
     for i in range(len(ts)):
         datetimes.append(datetime.datetime.utcfromtimestamp(ts[i]))
 
+    # Gap in ticks, in months
+    tick_gap_months = 3
+
+    # Shorter datasets, use one month
+    if (ts[-1] - ts[0]) < 90*86400.0:
+        tick_gap_months = 1
+
     # Generate ticks as dates on the first of each quarter
     # Go back in time
     ticks = [datetimes[0].date()]
-    while (ticks[0].month - 1)% 3 != 0 or ticks[0].day != 1:
+    while (ticks[0].month - 1)% tick_gap_months != 0 or ticks[0].day != 1:
         ticks[0] -= datetime.timedelta(1)
 
     # Go forward in time
     while True:
         tick = ticks[-1] + datetime.timedelta(1)
-        while tick.day != 1 or (tick.month - 1) % 3 != 0:
+        while tick.day != 1 or (tick.month - 1) % tick_gap_months != 0:
             tick += datetime.timedelta(1)
         ticks.append(tick)
         if tick > datetimes[-1].date():
@@ -131,13 +151,14 @@ def make_plot(mode):
 
     plt.ylabel(ylabel(mode))
     plt.title(title(mode, ys[-1]))
-    plt.ylim(bottom=0.0)
+    set_ylim(mode)
     plt.gca().tick_params(labelright=True)
 
 
     # Add text about MH's video
     annotate_mh(mode)
     annotate_year_lines(mode)
+    annotate_crypto_purge(mode)
 
     plt.subplot(2, 1, 2)
 
@@ -164,12 +185,13 @@ def make_plot(mode):
 
     plt.xticks(mdates.date2num(ticks), ticks, rotation=70)
     plt.xlim(xlim)
-    plt.ylim(bottom=0.0)
+    set_ylim(mode)
     plt.ylabel(ylabel(mode) + " daily change")
     plt.gca().tick_params(labelright=True)
 
     annotate_mh(mode)
     annotate_year_lines(mode)
+    annotate_crypto_purge(mode)
 
     plt.legend()
     plt.savefig("plots/{mode}.svg".format(mode=mode), bbox_inches="tight")
