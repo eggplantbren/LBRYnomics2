@@ -55,7 +55,7 @@ def test_history():
     if rows > 0:
         # No need to do anything if history exists
         conn.close()
-        print("done.\n")
+        print("Done.\n")
         return
 
     # Estimate history
