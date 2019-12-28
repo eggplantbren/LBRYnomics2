@@ -1,4 +1,5 @@
 import collections
+import datetime
 import config
 import json
 import sqlite3
@@ -9,10 +10,12 @@ import time
 
 def make_measurement():
 
-    print("Making measurement.", flush=True)
-
     # Get current timestamp
     now = time.time()
+
+    print("Making measurement. ", flush=True)
+    print("The time is " + str(datetime.datetime.utcfromtimestamp(int(now)))\
+                 + " UTC.")
 
     # Connect to the wallet server DB and the output DB
     claims_db = sqlite3.connect(config.claims_db_file)
@@ -26,7 +29,7 @@ def make_measurement():
             SELECT COUNT(*), claim_type FROM claim
             GROUP BY claim_type
             HAVING claim_type = 1 OR claim_type = 2
-            ORDER BY claim_type DESC; 
+            ORDER BY claim_type DESC;
             """
     output = claims_db.cursor().execute(query)
     measurement["num_channels"] = output.fetchone()[0]
@@ -51,7 +54,6 @@ def make_measurement():
     # Close claims.db
     claims_db.close()
 
-
     # Open output DB and write to it
     lbrynomics_db = sqlite3.connect("db/lbrynomics.db")
     query = """
@@ -66,9 +68,4 @@ def make_measurement():
     print("    " + json.dumps(measurement, indent=4).replace("\n", "\n    "))
     print("Done.\n")
     return measurement
-
-
-if __name__ == "__main__":
-    measurement = make_measurement()
-    print(measurement)
 
