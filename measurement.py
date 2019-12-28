@@ -1,5 +1,6 @@
 import collections
 import config
+import json
 import sqlite3
 import time
 
@@ -62,7 +63,7 @@ def make_measurement():
     lbrynomics_db.cursor().execute("COMMIT;")
     lbrynomics_db.close()
 
-    print("    " + str(measurement))
+    print("    " + json.dumps(measurement, indent=4).replace("\n", "\n    "))
     print("Done.\n")
     return measurement
 

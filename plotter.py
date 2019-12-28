@@ -4,6 +4,7 @@ import sqlite3
 import time
 
 def make_plots():
+    print("Making plots.", flush=True)
 
     # Connect to database file
     conn = sqlite3.connect("db/lbrynomics.db")
@@ -104,6 +105,7 @@ def make_plots():
 
     plt.savefig("{mode}.svg".format(mode=mode), bbox_inches="tight")
     plt.savefig("{mode}.png".format(mode=mode), bbox_inches="tight", dpi=70)
-    print("Figure saved to {mode}.svg and {mode}.png.".format(mode=mode))
-    plt.show()
+    print("    Figure saved to {mode}.svg and {mode}.png.".format(mode=mode))
+    print("Done.\n")
+
 
