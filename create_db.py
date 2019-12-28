@@ -43,7 +43,7 @@ def test_history():
     much.
     """
 
-    print("Generating approximate historical data...", end="", flush=True)
+    print("Generating approximate historical data.", flush=True)
 
     # Connect to database file
     conn = sqlite3.connect("db/lbrynomics.db")
@@ -55,7 +55,7 @@ def test_history():
     if rows > 0:
         # No need to do anything if history exists
         conn.close()
-        print("done.")
+        print("done.\n")
         return
 
     # Estimate history
@@ -79,25 +79,38 @@ def test_history():
     # Make fake measurements
     start = min(min(ts_channels), min(ts_streams)) - 0.5
     now = time.time()
+    num = int((now - start)/config.interval)
+    counts = np.zeros((2, num))
+    n = 0
+    for t in ts_channels:
+        k = int((t - start)/config.interval)
+        if k < num:
+            counts[0, k] += 1
+        n += 1
+        print("    Processed {n} claims.".format(n=n), end="\r", flush=True)
+
+    for t in ts_streams:
+        k = int((t - start)/config.interval)
+        if k < num:
+            counts[1, k] += 1
+        n += 1
+        print("    Processed {n} claims.".format(n=n), end="\r", flush=True)
+    print("")
+
+    counts = np.cumsum(counts, axis=1)
 
     conn = sqlite3.connect("db/lbrynomics.db")
     c = conn.cursor()
-    t = start
-    rows = 0
-    while True:
+
+    for i in range(counts.shape[1]):
+        t = start + i*config.interval
         c.execute("""INSERT INTO measurements (time, num_channels, num_streams)
-                     VALUES (?, ?, ?);""", (t,
-                                            int(np.sum(ts_channels <= t)),
-                                            int(np.sum(ts_streams <= t))))
-        t += config.interval
-        rows += 1
-        print("\r", end="")
-        print("Generating approximate historical data...", end="")
-        print("Inserted {rows} rows.".format(rows=rows), end="\r", flush=True)
-        if t > now:
-            break
+                     VALUES (?, ?, ?);""", (t, counts[0, i], counts[1, i]))
+        print("    Inserted {rows} rows into database."\
+                    .format(rows=i+1), end="\r", flush=True)
+        print("")
 
     c.execute("COMMIT;")
     conn.close()
-    print("done.")
+    print("Done.\n")
 

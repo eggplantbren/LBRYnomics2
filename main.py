@@ -15,7 +15,6 @@ while True:
 
     # Make the measurement
     result = measurement.make_measurement()
-    print(result, end="\n\n")
 
     # Make plots
     plotter.make_plots()

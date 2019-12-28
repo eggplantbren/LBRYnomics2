@@ -32,7 +32,7 @@ def make_plots():
     plt.rcParams["savefig.facecolor"] = "#3c3d3c"
 
     plt.figure(figsize=(15, 11))
-    plt.subplot(2, 1, 1)
+#    plt.subplot(2, 1, 1)
     times_in_days = (ts - 1483228800)/86400.0
     days = times_in_days.astype("int64")
     plt.plot(times_in_days, ys, "w-", linewidth=1.5)
@@ -61,43 +61,46 @@ def make_plots():
             "@MH video\n\'Why I Left YouTube\'\ngoes viral",
             fontsize=10)
 
-    plt.subplot(2, 1, 2)
-
-    # Bin edges including right edge of last bin
-    color = "#6b95ef"
-    plt.bar(ts, np.diff(ys), alpha=0.9, color=color, label="Raw",
-                     align="mid")
-
-    # Compute 10-day moving average
-    moving_average = np.zeros(len(bins)-1)
-    for i in range(len(moving_average)):
-        subset = counts[0:(i+1)]
-        if len(subset) >= 10:
-            subset = subset[-10:]
-        moving_average[i] = np.mean(subset)
-    plt.plot(bins[0:-2] + 0.5*bin_width, moving_average[0:-1], "w-",
-                label="10-day moving average", linewidth=1.5)
-
-    plt.xlim([0.0, days.max() + 1])
-    plt.xlabel("Time (days since 2017-01-01)")
-    plt.ylabel("New {mode} added each day".format(mode=string))
-    subset = counts[-31:-1]
-    plt.title("Recent average rate (last 30 days) = {n} {mode} per day.".\
-                format(n=int(np.sum(ts >= ts[-1] - 30.0*86400.0)/30.0),
-                       mode=string))
-
-    plt.gca().tick_params(labelright=True)
-    # Year lines
-    for year in new_years:
-        plt.axvline(year, color="r", alpha=0.8, linestyle="--")
-
-    # MH line
-    plt.axvline(890.0, linestyle="dotted", linewidth=2, color="g")
+#    plt.subplot(2, 1, 2)
+#    print("Here 1")
 
 
-    #        plt.gca().set_yticks([1.0, 10.0, 100.0, 1000.0, 10000.0])
-    #        plt.gca().set_yticklabels(["1", "10", "100", "1000", "10000"])
-    plt.legend()
+#    # It's ts[1:] because if a claim appears at a certain measurement, it
+#    # was published BEFORE that.
+#    color = "#6b95ef"
+#    t, y = ts[1:], np.diff(ys)
+#    plt.plot(t, y, alpha=0.9, color=color, label="Raw")
+#    print("Here 2")
+
+
+#    # Compute 10-day moving average
+#    moving_average = np.zeros(len(y))
+#    for i in range(len(moving_average)):
+#        subset = y[0:(i+1)]
+#        if len(subset) >= 10:
+#            subset = y[-10:]
+#        moving_average[i] = np.mean(subset)
+#    plt.plot(t, moving_average, "w-",
+#                label="10-day moving average", linewidth=1.5)
+#    print("Here 3")
+
+
+#    plt.xlim([0.0, days.max() + 1])
+#    plt.xlabel("Time (days since 2017-01-01)")
+#    plt.ylabel("New {mode} added each day".format(mode=string))
+#    subset = y[-31:-1]
+#    plt.title("Recent average rate (last 30 days) = {n} {mode} per day.".\
+#                format(n=int(np.sum(ts >= ts[-1] - 30.0*86400.0)/30.0),
+#                       mode=string))
+
+#    plt.gca().tick_params(labelright=True)
+#    # Year lines
+#    for year in new_years:
+#        plt.axvline(year, color="r", alpha=0.8, linestyle="--")
+
+#    # MH line
+#    plt.axvline(890.0, linestyle="dotted", linewidth=2, color="g")
+#    plt.legend()
 
     plt.savefig("{mode}.svg".format(mode=mode), bbox_inches="tight")
     plt.savefig("{mode}.png".format(mode=mode), bbox_inches="tight", dpi=70)

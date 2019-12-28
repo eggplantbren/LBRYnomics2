@@ -8,7 +8,7 @@ import time
 
 def make_measurement():
 
-    print("Making measurement...", end="", flush=True)
+    print("Making measurement.", flush=True)
 
     # Get current timestamp
     now = time.time()
@@ -62,7 +62,8 @@ def make_measurement():
     lbrynomics_db.cursor().execute("COMMIT;")
     lbrynomics_db.close()
 
-    print("done.")
+    print("    " + str(measurement))
+    print("Done.\n")
     return measurement
 
 
