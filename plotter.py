@@ -26,8 +26,10 @@ def make_plot(mode):
     assert mode == "channels" or mode == "streams"
 
     string = mode
+    fname = mode
     if mode == "streams":
         string = "publications"
+        fname = "claims"
 
     # Connect to database file
     conn = sqlite3.connect("db/lbrynomics.db")
@@ -111,9 +113,9 @@ def make_plot(mode):
     plt.axvline(890.0, linestyle="dotted", linewidth=2, color="g")
     plt.legend()
 
-    plt.savefig("{mode}.svg".format(mode=mode), bbox_inches="tight")
-    plt.savefig("{mode}.png".format(mode=mode), bbox_inches="tight", dpi=70)
-    print("    Figure saved to {mode}.svg and {mode}.png.".format(mode=mode))
+    plt.savefig("plots/{mode}.svg".format(mode=fname), bbox_inches="tight")
+    plt.savefig("plots/{mode}.png".format(mode=fname), bbox_inches="tight", dpi=70)
+    print("    Figure saved to {mode}.svg and {mode}.png.".format(mode=fname))
 
 
 def make_plots():
