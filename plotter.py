@@ -180,6 +180,8 @@ def make_plot(mode):
     index = np.nonzero(dist == min(dist))[0]
     rise = ys[-1] - ys[index]
     run =  ts[-1] - ts[index]
+    if run == 0.0:
+        run = 1.0
     plt.title("Recent average (last 30 days) = {value} per day."\
                 .format(value=int(rise/(run/86400.0))))
 
