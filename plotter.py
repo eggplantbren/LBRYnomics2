@@ -23,13 +23,6 @@ def moving_average(ys, length=10):
     return result
 
 def make_plot(mode):
-    assert mode == "channels" or mode == "streams"
-
-    string = mode
-    fname = mode
-    if mode == "streams":
-        string = "publications"
-        fname = "claims"
 
     # Connect to database file
     conn = sqlite3.connect("db/lbrynomics.db")
@@ -37,15 +30,13 @@ def make_plot(mode):
 
     # Plot channel history
     ts, ys = [], []
-    for row in c.execute("SELECT time, num_channels, num_streams FROM measurements;"):
-        ts.append(row[0])
-        if mode == "channels":
+    for row in c.execute("SELECT time, {y} FROM measurements;".format(y=mode)):
+        if row[1] is not None:
+            ts.append(row[0])
             ys.append(row[1])
-        elif mode == "streams":
-            ys.append(row[2])
     conn.close()
 
-    # Convert to numpy arrays
+    # Numpy arrays
     ts = np.array(ts)
     ys = np.array(ys)
 
@@ -58,11 +49,12 @@ def make_plot(mode):
 
     plt.figure(figsize=(15, 11))
     plt.subplot(2, 1, 1)
+
     times_in_days = (ts - 1483228800)/86400.0
     days = times_in_days.astype("int64")
     plt.plot(times_in_days, ys, "w-", linewidth=1.5)
-    plt.ylabel("Number of {mode}".format(mode=string))
-    plt.title("Total number of {mode} = {n}.".format(n=ys[-1], mode=string))
+    plt.ylabel("{mode}".format(mode=mode))
+    plt.title("Total {mode} = {n}.".format(n=ys[-1], mode=mode))
     plt.xlim([0.0, days.max() + 1])
     plt.ylim(bottom=0.0)
     plt.gca().tick_params(labelright=True)
@@ -101,10 +93,10 @@ def make_plot(mode):
     plt.xlim([0.0, days.max() + 1])
     plt.ylim(bottom=0.0)
     plt.xlabel("Time (days since 2017-01-01)")
-    plt.ylabel("New {mode} added each day".format(mode=string))
+    plt.ylabel("New {mode} added each day".format(mode=mode))
 #    plt.title("Recent average rate (last 30 days) = {n} {mode} per day.".\
 #                format(n=int(np.sum(ts >= ts[-1] - 30.0*86400.0)/30.0),
-#                       mode=string))
+#                       mode=mode))
 
     plt.gca().tick_params(labelright=True)
 
@@ -116,14 +108,17 @@ def make_plot(mode):
     plt.axvline(890.0, linestyle="dotted", linewidth=2, color="g")
     plt.legend()
 
-    plt.savefig("plots/{mode}.svg".format(mode=fname), bbox_inches="tight")
-    plt.savefig("plots/{mode}.png".format(mode=fname), bbox_inches="tight", dpi=70)
-    print("    Figure saved to {mode}.svg and {mode}.png.".format(mode=fname))
+    plt.savefig("plots/{mode}.svg".format(mode=mode), bbox_inches="tight")
+    plt.savefig("plots/{mode}.png".format(mode=mode), bbox_inches="tight", dpi=70)
+    print("    Figure saved to {mode}.svg and {mode}.png.".format(mode=mode))
 
 
 def make_plots():
     print("Making plots.", flush=True)
-    make_plot("channels")
-    make_plot("streams")
+    make_plot("num_channels")
+    make_plot("num_streams")
+    make_plot("lbc_deposits")
+    make_plot("num_supports")
+    make_plot("lbc_supports")
     print("Done.\n")
 
