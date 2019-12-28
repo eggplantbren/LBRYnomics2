@@ -66,7 +66,12 @@ def make_plot(mode):
         datetimes.append(datetime.datetime.utcfromtimestamp(ts[i]))
 
     # Generate ticks as dates on the first of each quarter
-    ticks = [datetimes[0].replace(day=1).date()]
+    # Go back in time
+    ticks = [datetimes[0].date()]
+    while (ticks[0].month - 1)% 3 != 0 or ticks[0].day != 1:
+        ticks[0] -= datetime.timedelta(1)
+
+    # Go forward in time
     while True:
         tick = ticks[-1] + datetime.timedelta(1)
         while tick.day != 1 or (tick.month - 1) % 3 != 0:
@@ -77,12 +82,7 @@ def make_plot(mode):
 
     # Compute xlim
     xlim = [mdates.date2num(ticks[0]) - 0.5,
-            mdates.date2num(ticks[1]) + 0.5]
-    if mdates.epoch2num(ts[0]) < xlim[0]:
-        xlim[0] = mdates.epoch2num(ts[0]) - 0.5
-    if mdates.epoch2num(ts[-1]) > xlim[1]:
-        xlim[1] = mdates.epoch2num(ts[-1]) + 0.5
-
+            mdates.date2num(ticks[-1]) + 0.5]
 
     # Plotting stuff
     plt.rcParams["font.family"] = "Liberation Sans"
