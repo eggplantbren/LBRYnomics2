@@ -154,6 +154,14 @@ def make_plot(mode):
         plt.plot(t, moving_average(y), alpha=0.9, color="w",
                     label="10-day moving average")
 
+    # Find 30-day gap if possible
+    dist = np.abs(ts - (ts[-1] - 30.0*86400.0))
+    index = np.nonzero(dist == min(dist))[0]
+    rise = ys[-1] - ys[index]
+    run =  ts[-1] - ts[index]
+    plt.title("Recent average (last 30 days) = {value} per day."\
+                .format(value=int(rise/(run/86400.0))))
+
     plt.xticks(mdates.date2num(ticks), ticks, rotation=70)
     plt.xlim(xlim)
     plt.ylim(bottom=0.0)
