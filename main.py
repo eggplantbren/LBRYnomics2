@@ -4,6 +4,7 @@ import measurement
 import plotter
 import recent
 import time
+import upload
 
 # Create the database
 create_db.create_db()
@@ -22,6 +23,9 @@ while True:
 
     # Make plots
     plotter.make_plots()
+
+    # Upload
+    upload.upload()
 
     # Get the time and make another measurement in 5 minutes
     wait = config.interval - (time.time() - result["time"])
