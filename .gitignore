@@ -1,0 +1,4 @@
+plots/*.svg
+plots/*.png
+db/*.db
+__pycache__
