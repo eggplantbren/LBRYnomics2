@@ -22,6 +22,7 @@ def moving_average(ys, length=10):
         result[i] = np.mean(ys[start:(i+1)])
     return result
 
+
 def make_plot(mode):
 
     # Connect to database file
@@ -48,14 +49,14 @@ def make_plot(mode):
     plt.rcParams["savefig.facecolor"] = "#3c3d3c"
 
     plt.figure(figsize=(15, 11))
-    plt.subplot(2, 1, 1)
 
+    plt.subplot(2, 1, 1)
     times_in_days = (ts - 1483228800)/86400.0
     days = times_in_days.astype("int64")
     plt.plot(times_in_days, ys, "w-", linewidth=1.5)
     plt.ylabel("{mode}".format(mode=mode))
     plt.title("Total {mode} = {n}.".format(n=ys[-1], mode=mode))
-    plt.xlim([0.0, days.max() + 1])
+    plt.xlim([days.min() - 1, days.max() + 1])
     plt.ylim(bottom=0.0)
     plt.gca().tick_params(labelright=True)
 
@@ -88,9 +89,12 @@ def make_plot(mode):
     y = derivative(t, ys[0::thin])
 
     plt.plot(t, y, alpha=0.9, color=color, label="Raw")
-    plt.plot(t, moving_average(y), alpha=0.9, color="w", label="10-day moving average")
+    m = moving_average(y)
+    if len(m) >= 2:
+        plt.plot(t, moving_average(y), alpha=0.9, color="w",
+                    label="10-day moving average")
 
-    plt.xlim([0.0, days.max() + 1])
+    plt.xlim([days.min() - 1, days.max() + 1])
     plt.ylim(bottom=0.0)
     plt.xlabel("Time (days since 2017-01-01)")
     plt.ylabel("New {mode} added each day".format(mode=mode))
@@ -107,9 +111,8 @@ def make_plot(mode):
     # MH line
     plt.axvline(890.0, linestyle="dotted", linewidth=2, color="g")
     plt.legend()
-
     plt.savefig("plots/{mode}.svg".format(mode=mode), bbox_inches="tight")
-    plt.savefig("plots/{mode}.png".format(mode=mode), bbox_inches="tight", dpi=70)
+    plt.savefig("plots/{mode}.png".format(mode=mode), bbox_inches="tight")
     print("    Figure saved to {mode}.svg and {mode}.png.".format(mode=mode))
 
 
