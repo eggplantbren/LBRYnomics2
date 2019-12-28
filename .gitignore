@@ -1,4 +1,5 @@
 plots/*.svg
 plots/*.png
+json/*.json
 db/*.db
 __pycache__

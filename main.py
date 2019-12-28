@@ -2,6 +2,7 @@ import config
 import create_db
 import measurement
 import plotter
+import recent
 import time
 
 # Create the database
@@ -15,6 +16,9 @@ while True:
 
     # Make the measurement
     result = measurement.make_measurement()
+
+    # Count recent activity and write to JSON
+    recent.count_recent_all(result["time"])
 
     # Make plots
     plotter.make_plots()
