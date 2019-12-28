@@ -25,6 +25,17 @@ def moving_average(ys, length=10):
     return result
 
 
+def annotate_mh(mode):
+    if mode == "num_channels" or mode == "num_streams":
+        loc = mdates.date2num(datetime.date(2019, 6, 9))
+        plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
+        plt.text(loc,
+                 0.8*plt.gca().get_ylim()[1],
+                 "@MH video\n\'Why I Quit YouTube\'\npublished",
+                 fontsize=10)
+
+
+
 def make_plot(mode):
 
     # Connect to database file
@@ -92,13 +103,7 @@ def make_plot(mode):
                     color="r", alpha=0.8, linestyle="--")
 
     # Add text about MH's video
-    if mode == "num_channels" or mode == "num_streams":
-        loc = mdates.date2num(datetime.date(2019, 8, 1))
-        plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
-        plt.text(loc,
-                 0.2*plt.gca().get_ylim()[1],
-                 "@MH video\n\'Why I Left YouTube\'\ngoes viral",
-                 fontsize=10)
+    annotate_mh(mode)
 
     plt.subplot(2, 1, 2)
 
@@ -121,12 +126,8 @@ def make_plot(mode):
     plt.ylabel("{mode} daily change".format(mode=mode))
     plt.gca().tick_params(labelright=True)
 
-#    # Year lines
-#    for year in new_years:
-#        plt.axvline(year, color="r", alpha=0.8, linestyle="--")
+    annotate_mh(mode)
 
-#    # MH line
-#    plt.axvline(890.0, linestyle="dotted", linewidth=2, color="g")
     plt.legend()
     plt.savefig("plots/{mode}.svg".format(mode=mode), bbox_inches="tight")
     plt.savefig("plots/{mode}.png".format(mode=mode), bbox_inches="tight")
