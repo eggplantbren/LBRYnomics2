@@ -25,6 +25,12 @@ def moving_average(ys, length=10):
     return result
 
 
+def annotate_all(mode):
+    annotate_mh(mode)
+    annotate_crypto_purge(mode)
+    annotate_year_lines(mode)
+    annotate_onboarding(mode)
+
 def annotate_mh(mode):
     if mode == "num_channels" or mode == "num_streams":
         loc = mdates.date2num(datetime.date(2019, 6, 9))
@@ -48,6 +54,11 @@ def annotate_year_lines(mode):
     for year in range(2017, 2021):
         plt.axvline(mdates.date2num(datetime.date(year, 1, 1)),
                     color="r", alpha=0.8, linestyle="--")
+
+def annotate_onboarding(mode):
+    if mode == "num_channels":
+        pass
+
 
 def title(mode, value):
     string = ""
@@ -154,11 +165,8 @@ def make_plot(mode):
     set_ylim(mode)
     plt.gca().tick_params(labelright=True)
 
-
-    # Add text about MH's video
-    annotate_mh(mode)
-    annotate_year_lines(mode)
-    annotate_crypto_purge(mode)
+    # Add annotations
+    annotate_all(mode)
 
     plt.subplot(2, 1, 2)
 
@@ -191,9 +199,8 @@ def make_plot(mode):
     plt.ylabel(ylabel(mode) + " daily change")
     plt.gca().tick_params(labelright=True)
 
-    annotate_mh(mode)
-    annotate_year_lines(mode)
-    annotate_crypto_purge(mode)
+    # Add annotations
+    annotate_all(mode)
 
     plt.legend()
     plt.savefig("plots/{mode}.svg".format(mode=mode), bbox_inches="tight")
