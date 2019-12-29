@@ -228,6 +228,6 @@ def make_plots():
     make_plot("lbc_deposits")
     make_plot("num_supports")
     make_plot("lbc_supports")
-    make_plot("ytysnc_new_pending")
+    make_plot("ytsync_new_pending")
     print("Done.\n")
 
