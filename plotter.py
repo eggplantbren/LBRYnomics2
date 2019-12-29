@@ -203,7 +203,7 @@ def make_plot(mode):
     run =  ts[-1] - ts[index]
     if run == 0.0:
         run = 1.0
-    plt.title("Recent average (last 30 days) = {value} per day."\
+    plt.title("Recent average daily change (last 30 days) = {value}."\
                 .format(value=int(rise/(run/86400.0))))
 
     plt.xticks(mdates.date2num(ticks), ticks, rotation=70)
