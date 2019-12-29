@@ -83,6 +83,9 @@ def title(mode, value):
     if mode == "lbc_supports":
         string += "Total locked in active supports+tips = {lbc:.2f} LBC"\
                 .format(lbc=value)
+    if mode == "ytsync_new_pending":
+        string += "Total number of channels in sync queue = {num}"\
+                .format(num=value)
     return string
 
 
@@ -98,6 +101,8 @@ def ylabel(mode):
         string += "Number of active supports+tips"
     if mode == "lbc_supports":
         string += "LBC in active supports+tips"
+    if mode == "ytsync_new_pending":
+        string += "Number of channels in sync queue"
     return string
 
 def set_ylim(mode):
@@ -223,5 +228,6 @@ def make_plots():
     make_plot("lbc_deposits")
     make_plot("num_supports")
     make_plot("lbc_supports")
+    make_plot("ytysnc_new_pending")
     print("Done.\n")
 
