@@ -2,6 +2,7 @@ import collections
 import datetime
 import config
 import json
+import requests
 import sqlite3
 import time
 
@@ -54,12 +55,33 @@ def make_measurement():
     # Close claims.db
     claims_db.close()
 
+    # Get ytsync numbers
+    url = "https://api.lbry.com/yt/queue_status"
+    try:
+        response = requests.get(url, timeout=5).json()
+    except:
+        response = { "success": False }
+    if response["success"]:
+        data = response["data"]
+        measurement["ytsyc_new_pending"] = data["NewPending"]
+        measurement["ytsyc_pending_update"] = data["PendingUpdate"]
+        measurement["ytsync_pending_upgrade"] = data["PendingUpgrade"]
+        measurement["ytsync_failed"] = data["Failed"]
+    else:
+        measurement["ytsyc_new_pending"] = None
+        measurement["ytsyc_pending_update"] = None
+        measurement["ytsync_pending_upgrade"] = None
+        measurement["ytsync_failed"] = None
+
+
     # Open output DB and write to it
     lbrynomics_db = sqlite3.connect("db/lbrynomics.db")
     query = """
             INSERT INTO measurements (time, num_channels, num_streams,
-                                      lbc_deposits, num_supports, lbc_supports)
-            VALUES (?, ?, ?, ?, ?, ?);
+                                      lbc_deposits, num_supports, lbc_supports,
+                                      ytsync_new_pending, ytsync_pending_update,
+                                      ytsync_pending_upgrade, ytsync_failed)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
     lbrynomics_db.cursor().execute(query, tuple(measurement.values()))
     lbrynomics_db.cursor().execute("COMMIT;")
