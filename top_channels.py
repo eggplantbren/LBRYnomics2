@@ -8,7 +8,7 @@ import time
 import yaml
 
 
-def subscriber_counts(preview=False):
+def subscriber_counts(num=100, preview=False):
     """
     Get subscriber counts for all channels.
     """
@@ -152,7 +152,7 @@ select c2.claim_id claim_ids, count(*) num_claims
     grey_list = ["f24ab6f03d96aada87d4e14b2dac4aa1cee8d787",
                  "fd4b56c7216c2f96db4b751af68aa2789c327d48"]
 
-    for i in range(100):
+    for i in range(num):
         my_dict["ranks"].append(i+1)
         my_dict["vanity_names"].append(vanity_names[i])
         my_dict["claim_ids"].append(claim_ids[i])
