@@ -2,6 +2,7 @@ import config
 import datetime
 import json
 import numpy as np
+import pandas
 import requests
 import sqlite3
 import time
@@ -184,16 +185,26 @@ select c2.claim_id claim_ids, count(*) num_claims
 
     if preview:
         f = open("json/subscriber_counts_preview.txt", "w")
+        # Create data frame and make CSV
+        df = pd.DataFrame()
+        df["ranks"] = my_dict["ranks"]
+        df["vanity_names"] = my_dict["vanity_names"]
+        df["claim_ids"] = my_dict["claim_ids"]
+        df["is_nsfw"] = my_dict["is_nsfw"]
+        df["followers"] = my_dict["subscribers"]
+        df["change"] = my_dict["change"]
+        df["rank_change"] = my_dict["rank_change"]
+        df.to_csv("json/subscriber_counts_preview.csv")
+
+
     else:
         f = open("subscriber_counts.json", "w")
         import update_rss
         update_rss.update(my_dict["human_time_utc"])
-    f.write(json.dumps(my_dict, indent=4))
-    f.close()
+        f.write(json.dumps(my_dict, indent=4))
+        f.close()
 
     conn.close()
-
-
 
 # Main loop
 if __name__ == "__main__":
