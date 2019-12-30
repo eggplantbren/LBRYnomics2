@@ -84,10 +84,10 @@ def title(mode, value):
         string += "Total locked in active supports+tips = {lbc:.2f} LBC"\
                 .format(lbc=value)
     if mode == "ytsync_new_pending":
-        string += "Total number of channels in sync queue = {num}"\
+        string += "New channels in queue to sync = {num}"\
                 .format(num=value)
     if mode == "ytsync_pending_update":
-        string += "Total number of channels pending an update = {num}"\
+        string += "Channels with new videos awaiting sync = {num}"\
                 .format(num=value)
     return string
 
@@ -105,9 +105,9 @@ def ylabel(mode):
     if mode == "lbc_supports":
         string += "LBC in active supports+tips"
     if mode == "ytsync_new_pending":
-        string += "Number of channels in sync queue"
+        string += "New channels in queue to sync"
     if mode == "ytsync_pending_update":
-        string += "Number of pending an update"
+        string += "Channels with new videos awaiting sync"
     return string
 
 def set_ylim(mode):
