@@ -160,6 +160,10 @@ def make_plot(mode):
         if tick > datetimes[-1].date():
             break
 
+    # Handle very short datasets differently
+    if (ts[-1] - ts[0]) < 20*86400.0:
+        ticks = np.unique([dt.date() for dt in datetimes])
+
     # Compute xlim
     xlim = [mdates.date2num(ticks[0]) - 0.5,
             mdates.date2num(ticks[-1]) + 0.5]
