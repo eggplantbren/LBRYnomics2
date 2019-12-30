@@ -184,7 +184,7 @@ select c2.claim_id claim_ids, count(*) num_claims
                     my_dict["is_nsfw"][-1] = True
 
     if preview:
-        f = open("json/subscriber_counts_preview.txt", "w")
+        f = open("json/subscriber_counts_preview.csv", "w")
         # Create data frame and make CSV
         df = pd.DataFrame()
         df["ranks"] = my_dict["ranks"]
