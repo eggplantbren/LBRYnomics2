@@ -165,8 +165,8 @@ def make_plot(mode):
         ticks = np.unique([dt.date() for dt in datetimes])
 
     # Compute xlim
-    xlim = [mdates.date2num(ticks[0]) - 0.5,
-            mdates.date2num(ticks[-1]) + 0.5]
+    xlim = [mdates.date2num(ticks[0]) - 1.0,
+            mdates.date2num(ticks[-1]) + 1.0]
 
     # Plotting stuff
     plt.rcParams["font.family"] = "Liberation Sans"
