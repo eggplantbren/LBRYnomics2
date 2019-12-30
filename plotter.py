@@ -86,6 +86,9 @@ def title(mode, value):
     if mode == "ytsync_new_pending":
         string += "Total number of channels in sync queue = {num}"\
                 .format(num=value)
+    if mode == "ytsync_pending_update":
+        string += "Total number of channels pending an update = {num}"\
+                .format(num=value)
     return string
 
 
@@ -103,6 +106,8 @@ def ylabel(mode):
         string += "LBC in active supports+tips"
     if mode == "ytsync_new_pending":
         string += "Number of channels in sync queue"
+    if mode == "ytsync_pending_update":
+        string += "Number of pending an update"
     return string
 
 def set_ylim(mode):
@@ -229,5 +234,6 @@ def make_plots():
     make_plot("num_supports")
     make_plot("lbc_supports")
     make_plot("ytsync_new_pending")
+    make_plot("ytsync_pending_update")
     print("Done.\n")
 
