@@ -9,7 +9,7 @@ import time
 import yaml
 
 
-def subscriber_counts(num=100, preview=False):
+def subscriber_counts(num=200, preview=False):
     """
     Get subscriber counts for all channels.
     """
@@ -198,7 +198,7 @@ select c2.claim_id claim_ids, count(*) num_claims
 
 
     else:
-        f = open("subscriber_counts.json", "w")
+        f = open("json/subscriber_counts.json", "w")
         import update_rss
         update_rss.update(my_dict["human_time_utc"])
         f.write(json.dumps(my_dict, indent=4))
@@ -208,6 +208,7 @@ select c2.claim_id claim_ids, count(*) num_claims
 
 # Main loop
 if __name__ == "__main__":
+
     # Needs an initial JSON file to bootstrap from
     hour = 3600.0
     day = 24*hour
@@ -219,14 +220,18 @@ if __name__ == "__main__":
     f.close()
 
 
+    # Update frequency
+    interval = 0.5*week
+
+
     while True:
         gap = time.time() - t
 
-        msg = "{d} days until next update.".format(d=(week - gap)/day)
+        msg = "{d} days until next update.".format(d=(interval - gap)/day)
         print(msg + "        ", end="\r", flush=True)
         time.sleep(1.0 - time.time()%1)
 
-        if gap >= week:
+        if gap >= interval:
             subscriber_counts()
 
             f = open("json/subscriber_counts.json")

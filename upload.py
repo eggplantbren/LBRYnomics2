@@ -7,8 +7,9 @@ def upload():
     subprocess.run("cp json/*.json upload", shell=True)
 
     # Temporary
-    subprocess.run("cp /home/brewer/Projects/LBRYnomics/subscriber_counts.json upload", shell=True)
-    subprocess.run("cp /home/brewer/Projects/LBRYnomics/rss.xml upload", shell=True)
+#    subprocess.run("cp /home/brewer/Projects/LBRYnomics/subscriber_counts.json upload", shell=True)
+#    subprocess.run("cp /home/brewer/Projects/LBRYnomics/rss.xml upload", shell=True)
+    subprocess.run("cp json/rss.xml upload", shell=True)
 
     subprocess.run("mv upload/num_streams.svg upload/claims.svg", shell=True)
     subprocess.run("mv upload/num_channels.svg upload/channels.svg", shell=True)
