@@ -9,6 +9,9 @@ import time
 import yaml
 
 
+
+
+
 def subscriber_counts(num=200, preview=False):
     """
     Get subscriber counts for all channels.
@@ -49,7 +52,7 @@ def subscriber_counts(num=200, preview=False):
     vanity_names = np.array(vanity_names)
     claim_ids = np.array(claim_ids)
 
-    # Now get number of claims in each channel from chainquery
+    # Now get number of claims in each channel
     query = \
 """
 select c2.claim_id claim_ids, count(*) num_claims
@@ -66,9 +69,15 @@ select c2.claim_id claim_ids, count(*) num_claims
         print("Getting channels with content...found {k} so far.".format(k=k))
 
     start = time.time()
+
+    # DMCA'd channels
+    black_list = {"d5557f4c61d6725f1a51141bbee43cdd2576e415": None,
+                  "35100b76e32aeb2764d334186249fa1b90d6cd74": None }
+
     include = np.zeros(len(claim_ids), dtype=bool)
     for i in range(len(claim_ids)):
-        include[i] = claim_ids[i] in claims_with_content
+        include[i] = (claim_ids[i] in claims_with_content) and \
+                            claim_ids[i] not in black_list
 
     vanity_names = vanity_names[include]
     claim_ids = claim_ids[include]
