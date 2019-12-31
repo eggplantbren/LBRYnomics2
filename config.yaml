@@ -1,0 +1,12 @@
+---
+# Full path to claims.db from a running wallet server
+claims_db_file: "/home/brewer/local/lbry-sdk/lbry/lbryum_data/claims.db"
+
+# Measurement interval in seconds
+interval: 300.0
+
+# Full path to lbry daemon binary
+lbrynet_bin: "/opt/LBRY/resources/static/daemon/lbrynet"
+
+# Directory to copy backups to
+backup_dir: "/keybase/public/brendonbrewer/lbrynomics/"

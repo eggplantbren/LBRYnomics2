@@ -1,18 +1,12 @@
-import json
-import subprocess
+import yaml
 
+# Load config from config.yaml
+f = open("config.yaml")
+config = yaml.load(f, Loader=yaml.SafeLoader)
+f.close()
 
-claims_db_file = "/home/brewer/local/lbry-sdk/lbry/lbryum_data/claims.db"
-interval = 300.0
-lbrynet_bin = "/opt/LBRY/resources/static/daemon/lbrynet"
-backup_dir = "/keybase/public/brendonbrewer/lbrynomics/"
-
-def daemon_command(command):
-    """
-    Run a daemon command and return its output.
-    """
-    command = lbrynet_bin + " " + command
-    parts = command.split(" ")
-    output = subprocess.run(parts, capture_output=True)
-    return json.loads(output.stdout)
+claims_db_file = config["claims_db_file"]
+interval = config["interval"]
+lbrynet_bin = config["lbrynet_bin"]
+backup_dir = config["backup_dir"]
 

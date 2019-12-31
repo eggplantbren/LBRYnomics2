@@ -1,5 +1,6 @@
 import config
 import datetime
+from daemon_command import daemon_command
 import json
 import math
 import sqlite3
@@ -90,7 +91,7 @@ def count_boosts(now):
     result["unix_time"] = now
     result["human_time_utc"] =\
                     str(datetime.datetime.utcfromtimestamp(int(now))) + " UTC"
-    block = config.daemon_command("status")["wallet"]["blocks"]
+    block = daemon_command("status")["wallet"]["blocks"]
 
     conn = sqlite3.connect(config.claims_db_file)
     c = conn.cursor()
