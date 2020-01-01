@@ -24,6 +24,9 @@ def moving_average(ys, length=10):
         result[i] = np.mean(ys[start:(i+1)])
     return result
 
+# Load LBRY Social logo
+# Good tutorial at https://ramiro.org/notebook/matplotlib-branding/
+logo = plt.imread("assets/logo_and_url.png")
 
 def annotate_all(mode, subplot=1):
 
@@ -189,6 +192,9 @@ def make_plot(mode):
 
     # Add annotations
     annotate_all(mode)
+
+    dpi = plt.gcf().get_dpi()
+    plt.gcf().figimage(logo, 1.3*dpi, 9.0*dpi, alpha=1)
 
     plt.subplot(2, 1, 2)
 
