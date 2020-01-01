@@ -41,7 +41,7 @@ def annotate_all(mode, subplot=1):
 
     # Text vertical position depends on whether we're in the upper or
     # lower subplot.
-    text_pos = 0.05*plt.gca().get_ylim()[1]
+    text_pos = 0.02*plt.gca().get_ylim()[1]
     if subplot == 2:
         text_pos = 0.65*plt.gca().get_ylim()[1]
 
@@ -49,7 +49,7 @@ def annotate_all(mode, subplot=1):
     if mode == "num_channels" or mode == "num_streams":
         loc = mdates.date2num(datetime.date(2019, 6, 9))
         plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
-        plt.text(loc - 28.0,
+        plt.text(loc - 30.0,
                  text_pos,
                  "@MH video 'Why I Quit\nYouTube\' published",
                  fontsize=10, rotation=90)
@@ -58,7 +58,7 @@ def annotate_all(mode, subplot=1):
     if mode == "num_channels" or mode == "num_streams":
         loc = mdates.date2num(datetime.date(2019, 12, 25))
         plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
-        plt.text(loc - 28.0,
+        plt.text(loc - 30.0,
                  text_pos,
                  "YouTube purges\ncrypto channels",
                  fontsize=10, rotation=90)
@@ -67,7 +67,7 @@ def annotate_all(mode, subplot=1):
     if mode == "num_channels":
         loc = mdates.date2num(datetime.date(2019, 10, 15))
         plt.axvline(loc, color="g", linestyle="--", alpha=0.7)
-        plt.text(loc - 28.0,
+        plt.text(loc - 30.0,
                  text_pos,
                  "New users prompted to\ncreate a channel",
                  fontsize=10, rotation=90)
