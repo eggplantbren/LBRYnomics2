@@ -1,5 +1,6 @@
 import config
 import datetime
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from numba import njit
@@ -25,8 +26,10 @@ def moving_average(ys, length=10):
     return result
 
 # Load LBRY Social logo
-# Good tutorial at https://ramiro.org/notebook/matplotlib-branding/
 logo = plt.imread("assets/logo_and_url.png")
+matplotlib.rcParams["figure.dpi"] = 500
+
+
 
 def annotate_all(mode, subplot=1):
 
@@ -193,8 +196,17 @@ def make_plot(mode):
     # Add annotations
     annotate_all(mode)
 
-    dpi = plt.gcf().get_dpi()
-    plt.gcf().figimage(logo, 1.3*dpi, 9.0*dpi, alpha=1)
+    # Add logo and tweak its position
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+    ax = plt.gca()
+    ins = inset_axes(ax, width="100%", height="100%",
+                       bbox_to_anchor=(0.01, 0.62, 0.16, 0.35),
+                       bbox_transform=ax.transAxes,
+                       borderpad=0)
+    ins.imshow(logo)
+    ins.axis("off")
+#    ins.set_xticks([])
+#    ins.set_yticks([])
 
     plt.subplot(2, 1, 2)
 
