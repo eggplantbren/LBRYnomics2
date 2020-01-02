@@ -284,9 +284,16 @@ def bokeh_plot(ts, ys):
     # Add a line renderer
     line = p.line(dts, ys, line_width=2)
 
-    # Set background color
+    # Set background and line colors
     p.background_fill_color = "#3c3d3c"
     line.glyph.line_color = "#286dc1"
+
+    # Make grid less intense
+    p.xgrid.grid_line_alpha = 0.2
+    p.ygrid.grid_line_alpha = 0.2
+    p.xgrid.grid_line_dash = [6, 4]
+    p.ygrid.grid_line_dash = [6, 4]
+
 
     save(p)
 
