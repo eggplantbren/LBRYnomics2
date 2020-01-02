@@ -121,7 +121,7 @@ def set_ylim(mode):
         plt.ylim(bottom=0)
 
 
-def make_plot(mode):
+def make_plot(mode, production=True):
 
     # Connect to database file
     conn = sqlite3.connect("db/lbrynomics.db")
@@ -241,7 +241,10 @@ def make_plot(mode):
     annotate_all(mode, 2)
 
     plt.legend()
-    plt.savefig("plots/{mode}.svg".format(mode=mode), bbox_inches="tight")
+    fname = "{mode}.svg"
+    if production:
+        fname = "plots/" + fname
+    plt.savefig(fname.format(mode=mode), bbox_inches="tight")
     plt.close("all")
     print("    Figure saved to {mode}.svg.".format(mode=mode))
 
@@ -251,15 +254,15 @@ def make_plot(mode):
         bokeh_plot(ts, ys)
 
 
-def make_plots():
+def make_plots(production=True):
     print("Making plots.", flush=True)
-    make_plot("num_channels")
-    make_plot("num_streams")
-    make_plot("lbc_deposits")
-    make_plot("num_supports")
-    make_plot("lbc_supports")
-    make_plot("ytsync_new_pending")
-    make_plot("ytsync_pending_update")
+    make_plot("num_channels", production)
+    make_plot("num_streams", production)
+    make_plot("lbc_deposits", production)
+    make_plot("num_supports", production)
+    make_plot("lbc_supports", production)
+    make_plot("ytsync_new_pending", production)
+    make_plot("ytsync_pending_update", production)
     print("Done.\n")
 
 
@@ -269,7 +272,7 @@ def bokeh_plot(ts, ys):
     """
     from bokeh.plotting import figure, output_file, save
 
-    output_file("line.html")
+    output_file("streams.html")
 
     p = figure(plot_width=1000, plot_height=400)
 
@@ -277,4 +280,8 @@ def bokeh_plot(ts, ys):
     p.line(ts, ys, line_width=2)
 
     save(p)
+
+if __name__ == "__main__":
+    make_plots(production=False)
+
 
