@@ -70,9 +70,43 @@ select c2.claim_id claim_ids, count(*) num_claims
 
     start = time.time()
 
-    # DMCA'd channels
-    black_list = {"d5557f4c61d6725f1a51141bbee43cdd2576e415": None,
-                  "35100b76e32aeb2764d334186249fa1b90d6cd74": None }
+    # DMCA'd channels + rewards scammers
+    black_list = {  "d5557f4c61d6725f1a51141bbee43cdd2576e415": None,
+                    "35100b76e32aeb2764d334186249fa1b90d6cd74": None,
+                    "f2fe17fb1c62c22f8319c38d0018726928454112": None,
+                    "17db8343914760ba509ed1f8c8e34dcc588614b7": None,
+                    "06a31b83cd38723527861a1ca5349b0187f92193": None,
+                    "9b7a749276c69f39a2d2d76ca4353c0d8f75217d": None,
+                    "b1fa196661570de64ff92d031116a2985af6034c": None,
+                    "4e5e34d0ab3cae6f379dad75afadb0c1f683d30f": None,
+                    "86612188eea0bda3efc6d550a7ad9c96079facff": None,
+                    "00aa9655c127cccb2602d069e1982e08e9f96636": None,
+                    "4f2dba9827ae28a974fbc78f1b12e67b8e0a32c9": None,
+                    "c133c44e9c6ee71177f571646d5b0000489e419f": None,
+                    "eeb3c6452b240a9f6a17c06887547be54a90a4b9": None,
+                    "f625ef83a3f34cac61b6b3bdef42be664fd827da": None,
+                    "ed77d38da413377b8b3ee752675662369b7e0a49": None,
+                    "481c95bd9865dc17770c277ae50f0cc306dfa8af": None,
+                    "3c5aa133095f97bb44f13de7c85a2a4dd5b4fcbe": None,
+                    "bd6abead1787fa94722bd7d064f847de76de5655": None,
+                    "6114b2ce20b55c40506d4bd3f7d8f917b1c37a75": None,
+                    "0c65674e28f2be555570c5a3be0c3ce2eda359d1": None,
+                    "3395d03f379888ffa789f1fa45d6619c2037e3de": None,
+                    "cd31c9ddea4ac4574df50a1f84ee86aa17910ea2": None,
+                    "9d48c8ab0ad53c392d4d6052daf5f8a8e6b5a185": None,
+                    "51fbdb73893c1b04a7d4c4465ffcd1138abc9e93": None,
+                    "5183307ce562dad27367bdf94cdafde38756dca7": None,
+                    "56dca125e775b2fe607d3d8d6c29e7ecfa3cbd96": None,
+                    "a58926cb716c954bdab0187b455a63a2c592310e": None,
+                    "aa83130864bf22c66934c1af36182c91219233aa": None,
+                    "f3c1fda9bf1f54710b62ffe4b14be6990288d9ff": None,
+                    "6291b3b53dde4160ce89067281300585bdf51905": None,
+                    "eeef31480a14684a95898ecd3bcf3a5569e41a28": None,
+                    "8b8b3c8cd3e8364c37067b80bd5a20c09a0a0094": None,
+                    "725189cd101ff372edbce1c05ef04346864d3254": None,
+                    "35100b76e32aeb2764d334186249fa1b90d6cd74": None,
+                    "47beabb163e02e10f99838ffc10ebc57f3f13938": None,
+                    "e0bb55d4d6aec9886858df8f1289974e673309c7": None }
 
     include = np.zeros(len(claim_ids), dtype=bool)
     for i in range(len(claim_ids)):
