@@ -246,6 +246,11 @@ def make_plot(mode):
     print("    Figure saved to {mode}.svg.".format(mode=mode))
 
 
+    # Make bokeh plot
+    if mode == "num_streams":
+        bokeh_plot(ts, ys)
+
+
 def make_plots():
     print("Making plots.", flush=True)
     make_plot("num_channels")
@@ -256,4 +261,20 @@ def make_plots():
     make_plot("ytsync_new_pending")
     make_plot("ytsync_pending_update")
     print("Done.\n")
+
+
+def bokeh_plot(ts, ys):
+    """
+    Very experimental.
+    """
+    from bokeh.plotting import figure, output_file, save
+
+    output_file("line.html")
+
+    p = figure(plot_width=1000, plot_height=400)
+
+    # add a line renderer
+    p.line(ts, ys, line_width=2)
+
+    save(p)
 
