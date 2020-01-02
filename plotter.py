@@ -282,7 +282,11 @@ def bokeh_plot(ts, ys):
     dts = [datetime.datetime.utcfromtimestamp(t) for t in ts]
 
     # Add a line renderer
-    p.line(dts, ys, line_width=2)
+    line = p.line(dts, ys, line_width=2)
+
+    # Set background color
+    p.background_fill_color = "#3c3d3c"
+    line.glyph.line_color = "#286dc1"
 
     save(p)
 
