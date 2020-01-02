@@ -274,10 +274,15 @@ def bokeh_plot(ts, ys):
 
     output_file("streams.html")
 
-    p = figure(plot_width=1000, plot_height=400)
+    p = figure(plot_width=1200, plot_height=400, x_axis_type="datetime",
+               x_axis_label="Time",
+               y_axis_label="Number of publications")
 
-    # add a line renderer
-    p.line(ts, ys, line_width=2)
+    # Convert times to datetimes
+    dts = [datetime.datetime.utcfromtimestamp(t) for t in ts]
+
+    # Add a line renderer
+    p.line(dts, ys, line_width=2)
 
     save(p)
 
