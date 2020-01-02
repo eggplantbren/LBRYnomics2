@@ -41,7 +41,7 @@ def annotate_all(mode, subplot=1):
 
     # Text vertical position depends on whether we're in the upper or
     # lower subplot.
-    text_pos = 0.02*plt.gca().get_ylim()[1]
+    text_pos = 0.04*plt.gca().get_ylim()[1]
     if subplot == 2:
         text_pos = 0.55*plt.gca().get_ylim()[1]
 
