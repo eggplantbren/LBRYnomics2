@@ -106,7 +106,12 @@ select c2.claim_id claim_ids, count(*) num_claims
                     "725189cd101ff372edbce1c05ef04346864d3254": None,
                     "35100b76e32aeb2764d334186249fa1b90d6cd74": None,
                     "47beabb163e02e10f99838ffc10ebc57f3f13938": None,
-                    "e0bb55d4d6aec9886858df8f1289974e673309c7": None }
+                    "e0bb55d4d6aec9886858df8f1289974e673309c7": None,
+                    "242734793097302d33b6a316c9db8d17b4beb18e": None,
+                    "71d3256c267ccc875df366258b9eff4766d6cb57": None,
+                    "dee09cad16900936d6af97154a6510a09587ad42": None,
+                    "357ce885e22f2a7bd426ac36224722d64fc90ce6": None,
+                    "c3ab2407e295cd267ced06d1fad2ed09b8d5643e": None }
 
     include = np.zeros(len(claim_ids), dtype=bool)
     for i in range(len(claim_ids)):
