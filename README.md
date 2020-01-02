@@ -11,7 +11,7 @@ This is a Python3 project.
 
 In order to get all dependencies needed just type
 ```
-pip3 install -r requirements
+pip3 install -r requirements.txt
 ```
 
 ## Contributing
