@@ -210,7 +210,7 @@ def make_plot(mode, production=True):
 
     # It's ts[1:] because if a claim appears at a certain measurement, it
     # was published BEFORE that.
-    color = "#286dc1"
+    color = "#3490ff"
     thin = int(86400.0/config.interval)
     t = mdates.epoch2num(ts)[0::thin][1:]
     y = derivative(t, ys[0::thin])
