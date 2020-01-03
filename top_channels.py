@@ -70,8 +70,46 @@ select c2.claim_id claim_ids, count(*) num_claims
 
     start = time.time()
 
-    # DMCA'd channels + rewards scammers
-    black_list = {  "d5557f4c61d6725f1a51141bbee43cdd2576e415": None,
+    # Special treatment for some claims
+    # LBRY Social channels
+    ls = { "5bd299a92e7b31865d2bb3e2313402edaca41a94": None,
+           "f8d6eccd887c9cebd36b1d42aa349279b7f5c3ed": None,
+           "e11e2fc3056137948d2cc83fb5ca2ce9b57025ec": None,
+           "1ba5acff747615510cf3f6089f54d5de669ad94f": None,
+           "4506db7fb52d3ec5d3a024c870bf86fc35f7b6a3": None,
+           "f5cd68fc0d2edcde180bee2f6de48fc9cc5ee1f3": None,
+           "4394924aa67c93d1f39b068bcfa044509cf19ec1": None,
+           "36b7bd81c1f975878da8cfe2960ed819a1c85bb5": None,
+           "ec0e86fc8fe55bd59f45ebe35f99515ef0949a38": None,
+           "0956afbfbf7be2232dccf1dc01c4d89dae060220": None,
+           "e5f33f22ef656cb1595140409850a04d60aa474b": None,
+           "631ca9fce459f1116ae5317486c7f4af69554742": None,
+           "c4dd78bcff002a2ae99e28c883a655f58e106423": None,
+           "4caa1f92fb477caed1ce07cb7762a2249050a59c": None,
+           "56e86eb938c0b93beccde0fbaaead65755139a10": None,
+           "60ea26a907f25bcbbc8215007eef2bf0fb846f5c": None,
+           "d0174cf90b6ec4e26ee2fc013714b0803dec5dd1": None,
+           "3849a35ae6122e0b7a035c2ba66e97b9e4ab9efa": None }
+
+
+    # Given mature tag by us
+    manual_mature = {"f24ab6f03d96aada87d4e14b2dac4aa1cee8d787": None,
+                     "fd4b56c7216c2f96db4b751af68aa2789c327d48": None}
+
+    # Grey list (quietly disable link)
+    grey_list = { "ca8cfeb5b6660a0b8874593058178b7ce6af5fed": None,
+                  "6c1119f18fd7a15fc7535fcb9eec3aa22af66b6b": None,
+                  "3097b755d3b8731e6103cc8752cb1b6c79da3b85": None,
+                  "11c2f6bb38f69a25dea3d0fbef67e2e3a83a1263": None,
+                  "7acf8b2fcd212afa2877afe289309a20642880c4": None,
+                  "b01a44af8b71c0c2001a78303f319ca960d341cf": None,
+                  "bc89d67d9f4d0124c347fd2c4a04e1696e8ba8b1": None,
+                  "14fcd92ad24c1f1bc50f6cbc1e972df79387d05c": None }
+
+
+    # DMCA'd channels + rewards scammers (do not appear)
+    black_list = {  "98c39de1c681139e43131e4b32c2a21272eef06e": None,
+                    "d5557f4c61d6725f1a51141bbee43cdd2576e415": None,
                     "35100b76e32aeb2764d334186249fa1b90d6cd74": None,
                     "f2fe17fb1c62c22f8319c38d0018726928454112": None,
                     "17db8343914760ba509ed1f8c8e34dcc588614b7": None,
@@ -182,7 +220,7 @@ select c2.claim_id claim_ids, count(*) num_claims
     claim_ids = np.array(claim_ids)[indices]
     subscribers = np.array(subscribers)[indices]
 
-    # Put the top 100 into the dict
+    # Put the top 200 into the dict
     my_dict = {}
     my_dict["unix_time"] = now
     my_dict["human_time_utc"] = str(datetime.datetime.utcfromtimestamp(int(now))) + " UTC"
@@ -197,9 +235,9 @@ select c2.claim_id claim_ids, count(*) num_claims
     my_dict["change"] = []
     my_dict["rank_change"] = []
     my_dict["is_nsfw"] = []
+    my_dict["grey"] = []
+    my_dict["ls"] = []
 
-    grey_list = ["f24ab6f03d96aada87d4e14b2dac4aa1cee8d787",
-                 "fd4b56c7216c2f96db4b751af68aa2789c327d48"]
 
     for i in range(num):
         my_dict["ranks"].append(i+1)
@@ -220,7 +258,7 @@ select c2.claim_id claim_ids, count(*) num_claims
             pass
 
         # Mark some channels NSFW manually
-        if my_dict["claim_ids"][-1] in grey_list:
+        if my_dict["claim_ids"][-1] in manual_mature:
             my_dict["is_nsfw"][-1] = True
         else:         
             # Do SQL queries to see if there's a mature tag
@@ -230,6 +268,12 @@ select c2.claim_id claim_ids, count(*) num_claims
             for row in c.execute(query):
                 if row[0].lower() == "mature":
                     my_dict["is_nsfw"][-1] = True
+
+        # Grey list
+        my_dict["grey"].append(my_dict["claim_ids"][-1] in grey_list)
+
+        # LS list
+        my_dict["ls"].append(my_dict["claim_ids"][-1] in ls)
 
     if preview:
         f = open("json/subscriber_counts_preview.csv", "w")
