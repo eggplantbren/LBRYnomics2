@@ -254,8 +254,8 @@ def make_plot(mode, production=True):
 
 
     # Make bokeh plot
-    if mode == "num_streams":
-        bokeh_plot(ts, ys)
+#    if mode == "num_streams":
+#        bokeh_plot(ts, ys)
 
 
 def make_plots(production=True):
