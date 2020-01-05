@@ -71,6 +71,13 @@ select c2.claim_id claim_ids, count(*) num_claims
     start = time.time()
 
     # Special treatment for some claims
+
+    # LBRY Inc channels
+    inc = set(["f3da2196b5151570d980b34d311ee0973225a68e",
+               "70b8a88fc6e5ce9e4d6e8721536688484ecd79f4",
+               "3fda836a92faaceedfe398225fb9b2ee2ed1f01a",
+               "e48d2b50501159034f68d53321f67b8aa5b1d771"])
+
     # LBRY Social channels
     ls = set(["5bd299a92e7b31865d2bb3e2313402edaca41a94",
               "f8d6eccd887c9cebd36b1d42aa349279b7f5c3ed",
@@ -238,6 +245,7 @@ select c2.claim_id claim_ids, count(*) num_claims
     my_dict["is_nsfw"] = []
     my_dict["grey"] = []
     my_dict["ls"] = []
+    my_dict["inc"] = []
 
 
     for i in range(num):
@@ -275,6 +283,7 @@ select c2.claim_id claim_ids, count(*) num_claims
 
         # LS list
         my_dict["ls"].append(my_dict["claim_ids"][-1] in ls)
+        my_dict["inc"].append(my_dict["claim_ids"][-1] in inc)
 
     if preview:
         f = open("json/subscriber_counts_preview.csv", "w")
@@ -286,6 +295,7 @@ select c2.claim_id claim_ids, count(*) num_claims
         df["is_nsfw"] = my_dict["is_nsfw"]
         df["grey"] = my_dict["grey"]
         df["ls"] = my_dict["ls"]
+        df["inc"] = my_dict["inc"]
         df["followers"] = my_dict["subscribers"]
         df["change"] = my_dict["change"]
         df["rank_change"] = my_dict["rank_change"]
