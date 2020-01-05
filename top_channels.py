@@ -109,6 +109,7 @@ select c2.claim_id claim_ids, count(*) num_claims
 
     # DMCA'd channels + rewards scammers (do not appear)
     black_list = set([ "98c39de1c681139e43131e4b32c2a21272eef06e",
+                    "9ced2a722e91f28e9d3aea9423d34e08fb11e3f4",
                     "d5557f4c61d6725f1a51141bbee43cdd2576e415",
                     "35100b76e32aeb2764d334186249fa1b90d6cd74",
                     "f2fe17fb1c62c22f8319c38d0018726928454112",
