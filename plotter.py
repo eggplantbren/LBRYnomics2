@@ -254,8 +254,8 @@ def make_plot(mode, production=True):
 
 
     # Make bokeh plot
-#    if mode == "num_streams":
-#        bokeh_plot(ts, ys)
+    if mode == "num_streams":
+        bokeh_plot(ts, ys)
 
 
 def make_plots(production=True):
@@ -270,27 +270,41 @@ def make_plots(production=True):
     print("Done.\n")
 
 
-def bokeh_plot(ts, ys):
+def bokeh_plot(ts, ys, thin=10):
     """
     Very experimental.
     """
+    from bokeh.models import HoverTool
     from bokeh.plotting import figure, output_file, save
+
+    # Thinned arrays
+    tt, yy = ts[0::thin], ys[0::thin]
 
     output_file("streams.html")
 
+    # Create the figure
     p = figure(plot_width=1200, plot_height=400, x_axis_type="datetime",
                x_axis_label="Time",
                y_axis_label="Number of publications")
 
     # Convert times to datetimes
-    dts = [datetime.datetime.utcfromtimestamp(t) for t in ts]
+    dts = [datetime.datetime.utcfromtimestamp(t) for t in tt]
 
     # Add a line renderer
-    line = p.line(dts, ys, line_width=2)
+    line = p.line(dts, yy, line_width=2)
+
+    # Add hover tool
+    tooltips = [
+        ("index", "$index"),
+        ("Date", "$x"),
+        ("Number of publications", "$y")]
+    hover_tool = HoverTool(tooltips=tooltips,
+                        formatters={"$x": "datetime", "$y": "{(.00)}"})
+    p.add_tools(hover_tool)
 
     # Set background and line colors
     p.background_fill_color = "#3c3d3c"
-    line.glyph.line_color = "#286dc1"
+    line.glyph.line_color = "#3490ff"
 
     # Make grid less intense
     p.xgrid.grid_line_alpha = 0.2
