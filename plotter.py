@@ -216,13 +216,13 @@ def make_plot(mode, production=True):
     # was published BEFORE that.
     color = "#3490ff"
     thin = int(86400.0/config.interval)
-    t = mdates.epoch2num(ts)[0::thin][1:]
+    t = mdates.epoch2num(ts[0::thin])
     y = derivative(t, ys[0::thin])
 
-    plt.plot(t, y, color=color, label="Raw")
+    plt.plot(t[1:], y, color=color, label="Raw")
     m = moving_average(y)
     if len(m) >= 2:
-        plt.plot(t, moving_average(y), color="w",
+        plt.plot(t[1:], m, color="w",
                     label="10-day moving average")
 
     # Find 30-day gap if possible
