@@ -15,7 +15,8 @@ import yaml
 inc = set(["f3da2196b5151570d980b34d311ee0973225a68e",
            "70b8a88fc6e5ce9e4d6e8721536688484ecd79f4",
            "3fda836a92faaceedfe398225fb9b2ee2ed1f01a",
-           "e48d2b50501159034f68d53321f67b8aa5b1d771"])
+           "e48d2b50501159034f68d53321f67b8aa5b1d771",
+           "e8fed337dc4ee260f4bcfa6d24ae1e4dd75c2fb3"])
 
 # LBRY Social channels
 ls = set(["5bd299a92e7b31865d2bb3e2313402edaca41a94",
