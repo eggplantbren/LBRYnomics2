@@ -95,8 +95,6 @@ def count_boosts(now):
 
     conn = sqlite3.connect(config.claims_db_file)
     c = conn.cursor()
-    conn.create_function("log", 1, math.log)
-    conn.create_function("exp", 1, math.exp)
 
     for i in range(len(labels)):
 
@@ -109,7 +107,6 @@ def count_boosts(now):
         query = """
                 SELECT
                     COUNT(amount) num,
-                    exp(AVG(log(amount))) size,
                     MAX(amount) max
                 FROM
                     support
@@ -121,11 +118,34 @@ def count_boosts(now):
             data += (cutoff, )
 
         for row in c.execute(query, data):
-            biggest = row[2]
+            biggest = row[1]
             result["num_{label}".format(label=labels[i])] = row[0]
-            result["typical_{label}".format(label=labels[i])] = row[1]/1.0E8
-            result["biggest_{label}".format(label=labels[i])] = row[2]/1.0E8
+            result["biggest_{label}".format(label=labels[i])] = row[1]/1.0E8
             break
+
+
+        # Count and aggregate tips and supports for the time window
+        query = """
+                SELECT amount, COUNT(*) AS num
+                FROM support
+                """
+        data = ()
+        if i > 0:
+            query += "WHERE height >= ?\n"
+            data += (cutoff, )
+
+        query += """
+                 GROUP BY amount
+                 ORDER BY num DESC
+                 LIMIT 1;
+                 """
+        for row in c.execute(query, data):
+            val = None
+            try:
+                val = row[0]/1.0E8
+            except:
+                pass
+            result["most_common_value_{label}".format(label=labels[i])] = val
 
         # Get claim name and ID for max
         query = """
