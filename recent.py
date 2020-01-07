@@ -14,9 +14,6 @@ def count_recent_all(now):
     print("done.\n")
 
 
-
-
-
 def count_recent(mode, now):
     """
     Count recent things. Output JSON.
@@ -92,6 +89,16 @@ def count_boosts(now):
     result["human_time_utc"] =\
                     str(datetime.datetime.utcfromtimestamp(int(now))) + " UTC"
     block = daemon_command("status")["wallet"]["blocks"]
+
+    # Save next trending block
+    blocks = {}
+    blocks["current"] = block
+    blocks["next_trending_cycle"] = (int(block / 134) + 1)*134
+    filename = "json/blocks.json"
+    f = open(filename, "w")
+    f.write(json.dumps(blocks, indent=4))
+    f.close()
+    print("    Saved {filename}.".format(filename=filename), flush=True)
 
     conn = sqlite3.connect(config.claims_db_file)
     c = conn.cursor()
