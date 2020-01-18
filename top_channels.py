@@ -48,7 +48,8 @@ grey_list = set(["ca8cfeb5b6660a0b8874593058178b7ce6af5fed",
               "bc89d67d9f4d0124c347fd2c4a04e1696e8ba8b1",
               "14fcd92ad24c1f1bc50f6cbc1e972df79387d05c",
               "977cd1c90eefe4c9831f5c93b2359202733a9c2e",
-              "b3c6591b2f64c843fa66edda91ceab91d452f94f"])
+              "b3c6591b2f64c843fa66edda91ceab91d452f94f",
+              "67c1ce0d5754490cfa573ca27f8473ba793d1842"])
 
 
 # DMCA'd channels + rewards scammers (do not appear)
