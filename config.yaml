@@ -1,6 +1,6 @@
 ---
 # Full path to claims.db from a running wallet server
-claims_db_file: "/home/brewer/local/lbry-sdk/lbry/lbryum_data/claims.db"
+claims_db_file: "/home/brewer/local/lbry-sdk/lbryum_data/claims.db"
 
 # Measurement interval in seconds
 interval: 300.0
