@@ -15,7 +15,7 @@ def create_db():
     PRAGMA journal_mode = WAL;
     """)
 
-    # Create table for measurements
+    # Create tables for measurements etc.
     c.execute("""
     CREATE TABLE IF NOT EXISTS measurements
         (id INTEGER PRIMARY KEY,
@@ -29,15 +29,23 @@ def create_db():
          ytsync_pending_update INTEGER,
          ytsync_pending_upgrade INTEGER,
          ytsync_failed INTEGER);
-    """)
 
-    c.execute("""
+    -- Create channel measurements table
     CREATE TABLE IF NOT EXISTS channel_measurements
         (id INTEGER PRIMARY KEY,
          claim_id STRING NOT NULL,
          epoch INTEGER NOT NULL,
          time REAL NOT NULL,
          num_followers INTEGER NOT NULL);
+
+    -- Channel properties (e.g., manual mature, greylist)
+    CREATE TABLE IF NOT EXISTS channels
+        (claim_id STRING PRIMARY KEY,
+         is_nsfw INTEGER NOT NULL DEFAULT 0,
+         grey  INTEGER NOT NULL DEFAULT 0,
+         ls    INTEGER NOT NULL DEFAULT 0,
+         inc   INTEGER NOT NULL DEFAULT 0,
+         black INTEGER NOT NULL DEFAULT 0) WITHOUT ROWID;
     """)
 
     # Create indices
