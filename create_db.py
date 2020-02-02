@@ -147,24 +147,35 @@ def create_db():
     c.execute("BEGIN;")
 
     for claim_id in inc:
-        c.execute("""INSERT OR REPLACE INTO channels (claim_id, inc)
-                    VALUES (?, 1);""", (claim_id, ))
+        c.execute("""INSERT INTO channels (claim_id, inc)
+                    VALUES (?, 1)
+                    ON CONFLICT (claim_id)
+                    DO UPDATE SET inc=1;""", (claim_id, ))
 
     for claim_id in ls:
-        c.execute("""INSERT OR REPLACE INTO channels (claim_id, ls)
-                    VALUES (?, 1);""", (claim_id, ))
+        c.execute("""INSERT INTO channels (claim_id, ls)
+                    VALUES (?, 1)
+                    ON CONFLICT (claim_id)
+                    DO UPDATE SET ls=1;""", (claim_id, ))
 
     for claim_id in manual_mature:
-        c.execute("""INSERT OR REPLACE INTO channels (claim_id, is_nsfw)
-                    VALUES (?, 1);""", (claim_id, ))
+        c.execute("""INSERT INTO channels (claim_id, is_nsfw)
+                    VALUES (?, 1)
+                    ON CONFLICT (claim_id)
+                    DO UPDATE SET is_nsfw=1;""", (claim_id, ))
 
     for claim_id in grey_list:
-        c.execute("""INSERT OR REPLACE INTO channels (claim_id, grey)
-                    VALUES (?, 1);""", (claim_id, ))
+        c.execute("""INSERT INTO channels (claim_id, grey)
+                    VALUES (?, 1)
+                    ON CONFLICT (claim_id)
+                    DO UPDATE SET grey=1;""", (claim_id, ))
+
 
     for claim_id in black_list:
-        c.execute("""INSERT OR REPLACE INTO channels (claim_id, black)
-                    VALUES (?, 1);""", (claim_id, ))
+        c.execute("""INSERT INTO channels (claim_id, black)
+                    VALUES (?, 1)
+                    ON CONFLICT (claim_id)
+                    DO UPDATE SET black=1;""", (claim_id, ))
 
     c.execute("COMMIT;")
     conn.close()
