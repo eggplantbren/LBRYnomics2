@@ -1,13 +1,13 @@
 import config
 import numpy as np
-import sqlite3
+import apsw
 import time
 
 
 def create_db():
 
     # Connect to database file
-    conn = sqlite3.connect("db/lbrynomics.db")
+    conn = apsw.Connection("db/lbrynomics.db")
     c = conn.cursor()
 
     # Set pragmas
@@ -29,8 +29,9 @@ def create_db():
          ytsync_pending_update INTEGER,
          ytsync_pending_upgrade INTEGER,
          ytsync_failed INTEGER);
+    """)
 
-
+    c.execute("""
     CREATE TABLE IF NOT EXISTS channel_measurements
         (id INTEGER PRIMARY KEY,
          claim_id STRING NOT NULL,
@@ -58,7 +59,7 @@ def test_history():
     print("Generating approximate historical data.", flush=True)
 
     # Connect to database file
-    conn = sqlite3.connect("db/lbrynomics.db")
+    conn = apsw.Connection("db/lbrynomics.db")
     c = conn.cursor()
 
     # Count rows of history in table
@@ -71,7 +72,7 @@ def test_history():
         return
 
     # Estimate history
-    conn = sqlite3.connect(config.claims_db_file)
+    conn = apsw.Connection(config.claims_db_file)
     c = conn.cursor()
 
     # Obtain creation times from claims.db
@@ -111,7 +112,7 @@ def test_history():
 
     counts = np.cumsum(counts, axis=1)
 
-    conn = sqlite3.connect("db/lbrynomics.db")
+    conn = apsw.Connection("db/lbrynomics.db")
     c = conn.cursor()
 
     for i in range(counts.shape[1]):
