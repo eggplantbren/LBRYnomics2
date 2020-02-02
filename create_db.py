@@ -29,11 +29,20 @@ def create_db():
          ytsync_pending_update INTEGER,
          ytsync_pending_upgrade INTEGER,
          ytsync_failed INTEGER);
+
+
+    CREATE TABLE IF NOT EXISTS channel_measurements
+        (id INTEGER PRIMARY KEY,
+         claim_id STRING NOT NULL,
+         epoch INTEGER NOT NULL,
+         time REAL NOT NULL,
+         num_followers INTEGER NOT NULL);
     """)
 
     # Create indices
     c.execute("""
     CREATE INDEX IF NOT EXISTS time ON measurements (time);
+    CREATE INDEX IF NOT EXISTS chan ON channel_measurements (claim_id, epoch);
     """)
     conn.close()
 
