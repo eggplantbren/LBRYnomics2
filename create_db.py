@@ -122,6 +122,7 @@ def test_history():
 
     conn = apsw.Connection("db/lbrynomics.db")
     c = conn.cursor()
+    c.execute("BEGIN;")
 
     for i in range(counts.shape[1]):
         t = start + i*config.interval
