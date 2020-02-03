@@ -29,3 +29,36 @@ def channels_with_content():
     conn.close()
     return result
 
+
+def get_followers(channels, start, end):
+    """
+    Get follower numbers for channels[start:end]
+    """
+    result = []
+
+    # Elegantly handle end
+    if end > len(channels):
+        end = len(channels)
+
+    # Get auth token
+    f= open("secrets.yaml")
+    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
+    f.close()
+
+    # Prepare the request to the LBRY API
+    url = "https://api.lbry.com/subscription/sub_count?auth_token=" +\
+                auth_token + "&claim_id="
+    for i in range(start, end):
+        url += channels[i]
+        if i != end-1:
+            url += ","
+
+    # JSON response from API
+    response = requests.get(url).json()
+    for value in response["data"]:
+        result.append(value)
+
+    return result
+
+
+
