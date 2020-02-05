@@ -34,9 +34,10 @@ def create_db():
     CREATE TABLE IF NOT EXISTS channel_measurements
         (id INTEGER PRIMARY KEY,
          claim_id STRING NOT NULL,
+         vanity_name STRING NOT NULL,
          epoch INTEGER NOT NULL,
-         time REAL NOT NULL,
-         num_followers INTEGER NOT NULL);
+         num_followers INTEGER NOT NULL,
+         rank INTEGER NOT NULL);
 
     -- Channel properties (e.g., manual mature, greylist)
     CREATE TABLE IF NOT EXISTS channels
@@ -50,9 +51,10 @@ def create_db():
 
     # Create indices
     c.execute("""
-    CREATE INDEX IF NOT EXISTS time ON measurements (time);
-    CREATE INDEX IF NOT EXISTS chan ON channel_measurements (claim_id, epoch);
-    CREATE INDEX IF NOT EXISTS claim_id ON channels (claim_id);
+    CREATE INDEX IF NOT EXISTS time_idx ON measurements (time);
+    CREATE INDEX IF NOT EXISTS channel_idx ON channel_measurements (claim_id, epoch);
+    CREATE INDEX IF NOT EXISTS claim_id_idx ON channels (claim_id);
+    CREATE INDEX IF NOT EXISTS epoch_idx ON channel_measurements (epoch);
     """)
 
 

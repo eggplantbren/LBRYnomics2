@@ -70,13 +70,17 @@ def get_top(n=200):
     counts = []
     for i in range(len(channels)//100 + 1):
         counts += get_followers(channels, 100*i, 100*(i+1))
-        print(len(counts))
+        if i > 0:
+            print("                                               ", end="\r")
+        print("Processed {a}/{b} channels."\
+                .format(a=len(counts), b=len(channels)), end="")
 
     ii = np.argsort(counts)[::-1]
     channels = np.array(channels)[ii]
 
     # Put into a dict
-    result = {"ranks": [],
+    result = {"unix_time": time.time(),
+              "ranks": [],
               "claim_ids": [],
               "vanity_names": []}
 
@@ -90,5 +94,36 @@ def get_top(n=200):
         result["vanity_names"].append(name)
 
     conn.close()
+
+
+#    -- Create channel measurements table
+#    CREATE TABLE IF NOT EXISTS channel_measurements
+#        (id INTEGER PRIMARY KEY,
+#         claim_id STRING NOT NULL,
+#         vanity_name STRING NOT NULL,
+#         epoch INTEGER NOT NULL,
+#         num_followers INTEGER NOT NULL,
+#         rank INTEGER NOT NULL);
+
+    # Open lbrynomics.db for writing
+    conn = apsw.Connection("db/lbrynomics.db")
+    c = conn.cursor()
+    c.execute("BEGIN;")
+    for i in range(n):
+        a, b, c, d = result["claim_ids"][i],\
+                     result["vanity_names"][i],\
+                     result["num_followers"][i],\
+                     result["ranks"][i]
+                     
+        c.execute("""
+                  INSERT INTO channel_measurements
+                      (claim_id, vanity_name, epoch, num_followers, rank)
+                  VALUES (?, ?, ?, ?, ?)
+                  SET 
+                  """, (a, b, 1, c, d))
+
+    c.execute("COMMIT;")
+    conn.close()
+
     return result
 
