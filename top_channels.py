@@ -77,21 +77,24 @@ def get_top(n=200):
 
     ii = np.argsort(counts)[::-1]
     channels = np.array(channels)[ii]
+    counts = np.array(counts)[ii]
 
     # Put into a dict
     result = {"unix_time": time.time(),
               "ranks": [],
               "claim_ids": [],
-              "vanity_names": []}
+              "vanity_names": [],
+              "num_followers": []}
 
     conn = apsw.Connection(config.claims_db_file)
     c = conn.cursor()
     for i in range(n):
         result["ranks"].append(i+1)
-        result["claim_ids"].append(channels[i])
+        result["claim_ids"].append(str(channels[i]))
         name = c.execute("SELECT claim_name FROM claim WHERE claim_id=?",
-                         (channels[i],)).fetchone()
+                         (str(channels[i]),)).fetchone()[0]
         result["vanity_names"].append(name)
+        result["num_followers"].append(int(counts[i]))
 
     conn.close()
 
@@ -108,19 +111,23 @@ def get_top(n=200):
     # Open lbrynomics.db for writing
     conn = apsw.Connection("db/lbrynomics.db")
     c = conn.cursor()
+
+    # Epoch number
+    epoch = 1 + c.execute("SELECT COUNT(id) c FROM epochs").fetchone()[0]
+    c.execute("INSERT INTO epochs VALUES (?, ?)", (epoch, time.time()))
+
     c.execute("BEGIN;")
     for i in range(n):
-        a, b, c, d = result["claim_ids"][i],\
-                     result["vanity_names"][i],\
-                     result["num_followers"][i],\
-                     result["ranks"][i]
-                     
+        values = (result["claim_ids"][i],\
+                 result["vanity_names"][i],\
+                 epoch,
+                 result["num_followers"][i],\
+                 result["ranks"][i])
         c.execute("""
                   INSERT INTO channel_measurements
                       (claim_id, vanity_name, epoch, num_followers, rank)
-                  VALUES (?, ?, ?, ?, ?)
-                  SET 
-                  """, (a, b, 1, c, d))
+                  VALUES (?, ?, ?, ?, ?);
+                  """, values)
 
     c.execute("COMMIT;")
     conn.close()

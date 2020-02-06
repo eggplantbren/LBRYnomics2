@@ -37,7 +37,13 @@ def create_db():
          vanity_name STRING NOT NULL,
          epoch INTEGER NOT NULL,
          num_followers INTEGER NOT NULL,
-         rank INTEGER NOT NULL);
+         rank INTEGER NOT NULL,
+         FOREIGN KEY (epoch) REFERENCES epochs (id));
+
+    -- Create epochs channel
+    CREATE TABLE IF NOT EXISTS epochs
+        (id       INTEGER PRIMARY KEY,
+         time     REAL NOT NULL);
 
     -- Channel properties (e.g., manual mature, greylist)
     CREATE TABLE IF NOT EXISTS channels
@@ -55,6 +61,7 @@ def create_db():
     CREATE INDEX IF NOT EXISTS channel_idx ON channel_measurements (claim_id, epoch);
     CREATE INDEX IF NOT EXISTS claim_id_idx ON channels (claim_id);
     CREATE INDEX IF NOT EXISTS epoch_idx ON channel_measurements (epoch);
+    CREATE INDEX IF NOT EXISTS epoch_id_idx ON epochs (id)
     """)
 
 
