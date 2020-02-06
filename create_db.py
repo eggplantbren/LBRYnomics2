@@ -46,7 +46,7 @@ def create_db():
          time     REAL NOT NULL);
 
     -- Channel properties (e.g., manual mature, greylist)
-    CREATE TABLE IF NOT EXISTS channels
+    CREATE TABLE IF NOT EXISTS special_channels
         (claim_id STRING PRIMARY KEY,
          is_nsfw INTEGER NOT NULL DEFAULT 0,
          grey  INTEGER NOT NULL DEFAULT 0,
@@ -59,9 +59,10 @@ def create_db():
     c.execute("""
     CREATE INDEX IF NOT EXISTS time_idx ON measurements (time);
     CREATE INDEX IF NOT EXISTS channel_idx ON channel_measurements (claim_id, epoch);
-    CREATE INDEX IF NOT EXISTS claim_id_idx ON channels (claim_id);
+    CREATE INDEX IF NOT EXISTS claim_id_idx ON special_channels (claim_id);
     CREATE INDEX IF NOT EXISTS epoch_idx ON channel_measurements (epoch);
-    CREATE INDEX IF NOT EXISTS epoch_id_idx ON epochs (id)
+    CREATE INDEX IF NOT EXISTS epoch_id_idx ON epochs (id);
+    CREATE INDEX IF NOT EXISTS black_list_idx ON special_channels (black);
     """)
 
 
@@ -156,32 +157,32 @@ def create_db():
     c.execute("BEGIN;")
 
     for claim_id in inc:
-        c.execute("""INSERT INTO channels (claim_id, inc)
+        c.execute("""INSERT INTO special_channels (claim_id, inc)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
                     DO UPDATE SET inc=1;""", (claim_id, ))
 
     for claim_id in ls:
-        c.execute("""INSERT INTO channels (claim_id, ls)
+        c.execute("""INSERT INTO special_channels (claim_id, ls)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
                     DO UPDATE SET ls=1;""", (claim_id, ))
 
     for claim_id in manual_mature:
-        c.execute("""INSERT INTO channels (claim_id, is_nsfw)
+        c.execute("""INSERT INTO special_channels (claim_id, is_nsfw)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
                     DO UPDATE SET is_nsfw=1;""", (claim_id, ))
 
     for claim_id in grey_list:
-        c.execute("""INSERT INTO channels (claim_id, grey)
+        c.execute("""INSERT INTO special_channels (claim_id, grey)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
                     DO UPDATE SET grey=1;""", (claim_id, ))
 
 
     for claim_id in black_list:
-        c.execute("""INSERT INTO channels (claim_id, black)
+        c.execute("""INSERT INTO special_channels (claim_id, black)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
                     DO UPDATE SET black=1;""", (claim_id, ))

@@ -28,6 +28,18 @@ def channels_with_content():
 
     conn.close()
     print("done. Found {k} channels.".format(k=len(result)))
+
+    # Remove blacklisted channels
+    print("Removing blacklisted channels...", flush=True, end="")
+    conn = apsw.Connection("db/lbrynomics.db")
+    c = conn.cursor()
+    black_list = c.execute("SELECT claim_id FROM special_channels WHERE black=1;")
+    black_list = black_list.fetchall()
+    black_list = set([x[0] for x in black_list])
+    conn.close()
+    result = [x for x in result if x not in black_list]
+
+    print("done. {n} channels remain.".format(n=len(result)))
     return result
 
 
@@ -97,16 +109,6 @@ def get_top(n=200):
         result["num_followers"].append(int(counts[i]))
 
     conn.close()
-
-
-#    -- Create channel measurements table
-#    CREATE TABLE IF NOT EXISTS channel_measurements
-#        (id INTEGER PRIMARY KEY,
-#         claim_id STRING NOT NULL,
-#         vanity_name STRING NOT NULL,
-#         epoch INTEGER NOT NULL,
-#         num_followers INTEGER NOT NULL,
-#         rank INTEGER NOT NULL);
 
     # Open lbrynomics.db for writing
     conn = apsw.Connection("db/lbrynomics.db")
