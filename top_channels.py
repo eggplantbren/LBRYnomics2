@@ -87,9 +87,23 @@ def time_since_last_epoch():
     conn.close()
     return time.time() - last
 
+
+def check_and_run():
+    """
+    Check whether it's time to do the top channels table. If so, do it.
+    """
+    conn = apsw.Connection("db/lbrynomics.db")
+    c = conn.cursor()
+    rows = c.execute("SELECT COUNT(*) AS rows FROM epochs;").fetchone()[0]
+    conn.close()
+
+    if rows == 0 or time_since_last_epoch() >= 86400.0:
+        get_top()
+
+
 def get_top(n=200):
     """
-    Compute the top n=200
+    Compute the top n channels
     """
     channels = channels_with_content()
     counts = []
@@ -99,6 +113,7 @@ def get_top(n=200):
             print("                                               ", end="\r")
         print("Processed {a}/{b} channels."\
                 .format(a=len(counts), b=len(channels)), end="")
+    print("")
 
     ii = np.argsort(counts)[::-1]
     channels = np.array(channels)[ii]
@@ -129,7 +144,8 @@ def get_top(n=200):
 
     # Epoch number
     epoch = 1 + c.execute("SELECT COUNT(id) c FROM epochs").fetchone()[0]
-    c.execute("INSERT INTO epochs VALUES (?, ?)", (epoch, time.time()))
+    now = time.time()
+    c.execute("INSERT INTO epochs VALUES (?, ?)", (epoch, now))
 
     c.execute("BEGIN;")
     for i in range(n):
@@ -145,6 +161,37 @@ def get_top(n=200):
                   """, values)
 
     c.execute("COMMIT;")
+
+
+    # Now create the JSON in the old format
+    result["human_time_utc"] = str(datetime.datetime.utcfromtimestamp(int(now))) + " UTC"
+    result["subscribers"] = result["num_followers"]
+    del result["num_followers"]
+
+    # Get change from 7 epochs ago
+    old_epoch = c.execute("""
+                          SELECT id, abs(id-?-7) difference FROM epochs
+                          ORDER BY difference ASC LIMIT 1;
+                          """, (epoch, )).fetchone()[0]
+    result["change"] = []
+    result["rank_change"] = []
+    for i in range(n):
+        response = c.execute("""
+                             SELECT num_followers, rank
+                             FROM channel_measurements
+                             WHERE claim_id = ? AND EPOCH = ?;
+                             """, (result["claim_ids"][i], old_epoch)).fetchone()
+        result["change"].append(result["subscribers"][i] - response[0])
+        result["rank_change"].append(result["ranks"][i] - response[1])
+
+    # Save to file
+    f = open("json/subscriber_counts.json", "w")
+    import update_rss
+    update_rss.update(result["human_time_utc"])
+    f.write(json.dumps(result, indent=4))
+    f.close()
+    
+
     conn.close()
 
     return result
