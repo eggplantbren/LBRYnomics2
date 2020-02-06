@@ -61,7 +61,6 @@ def create_db():
     CREATE INDEX IF NOT EXISTS channel_idx ON channel_measurements (claim_id, epoch);
     CREATE INDEX IF NOT EXISTS claim_id_idx ON special_channels (claim_id);
     CREATE INDEX IF NOT EXISTS epoch_idx ON channel_measurements (epoch);
-    CREATE INDEX IF NOT EXISTS epoch_id_idx ON epochs (id);
     CREATE INDEX IF NOT EXISTS black_list_idx ON special_channels (black);
     """)
 
