@@ -74,6 +74,19 @@ def get_followers(channels, start, end):
     return result
 
 
+def time_since_last_epoch():
+    """
+    Get the number of seconds since the last epoch
+    """
+    conn = apsw.Connection("db/lbrynomics.db")
+    c = conn.cursor()
+
+    last = c.execute("""
+                     SELECT time FROM epochs
+                     WHERE id = (SELECT MAX(id) FROM epochs);""").fetchone()[0]
+    conn.close()
+    return time.time() - last
+
 def get_top(n=200):
     """
     Compute the top n=200
