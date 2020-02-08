@@ -16,7 +16,8 @@ inc = set(["f3da2196b5151570d980b34d311ee0973225a68e",
            "70b8a88fc6e5ce9e4d6e8721536688484ecd79f4",
            "3fda836a92faaceedfe398225fb9b2ee2ed1f01a",
            "e48d2b50501159034f68d53321f67b8aa5b1d771",
-           "e8fed337dc4ee260f4bcfa6d24ae1e4dd75c2fb3"])
+           "e8fed337dc4ee260f4bcfa6d24ae1e4dd75c2fb3",
+           "4c29f8b013adea4d5cca1861fb2161d5089613ea"])
 
 # LBRY Social channels
 ls = set(["5bd299a92e7b31865d2bb3e2313402edaca41a94",
@@ -36,7 +37,8 @@ ls = set(["5bd299a92e7b31865d2bb3e2313402edaca41a94",
 
 # Given mature tag by us
 manual_mature = set(["f24ab6f03d96aada87d4e14b2dac4aa1cee8d787",
-                 "fd4b56c7216c2f96db4b751af68aa2789c327d48"])
+                 "fd4b56c7216c2f96db4b751af68aa2789c327d48",
+                 "ebe983567c5b64970d5dff2fe78dd1573f0d7b61"])
 
 # Grey list (quietly disable link)
 grey_list = set(["ca8cfeb5b6660a0b8874593058178b7ce6af5fed",
