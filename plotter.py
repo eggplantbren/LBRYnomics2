@@ -1,5 +1,6 @@
 import apsw
 import config
+from databases import dbs
 import datetime
 import matplotlib
 import matplotlib.pyplot as plt
@@ -131,17 +132,12 @@ def set_ylim(mode):
 
 def make_plot(mode, production=True):
 
-    # Connect to database file
-    conn = apsw.Connection("db/lbrynomics.db")
-    c = conn.cursor()
-
     # Plot channel history
     ts, ys = [], []
-    for row in c.execute("SELECT time, {y} FROM measurements;".format(y=mode)):
+    for row in dbs["lbrynomics"].execute("SELECT time, {y} FROM measurements;".format(y=mode)):
         if row[1] is not None:
             ts.append(row[0])
             ys.append(row[1])
-    conn.close()
 
     # Numpy arrays
     ts = np.array(ts)

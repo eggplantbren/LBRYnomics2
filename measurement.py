@@ -1,5 +1,6 @@
 import apsw
 import collections
+from databases import dbs
 import datetime
 import config
 import json
@@ -18,9 +19,6 @@ def make_measurement(k):
     print("The time is " + str(datetime.datetime.utcfromtimestamp(int(now)))\
                  + " UTC.", flush=True)
 
-    # Connect to the wallet server DB and the output DB
-    claims_db = apsw.Connection(config.claims_db_file)
-
     # Measurement measurement
     measurement = collections.OrderedDict()
     measurement["time"] = now
@@ -32,7 +30,7 @@ def make_measurement(k):
             HAVING claim_type = 1 OR claim_type = 2
             ORDER BY claim_type DESC;
             """
-    output = claims_db.cursor().execute(query)
+    output = dbs["claims"].execute(query)
     measurement["num_channels"] = output.fetchone()[0]
     measurement["num_streams"]  = output.fetchone()[0]
 
@@ -40,7 +38,7 @@ def make_measurement(k):
     query = """
             SELECT SUM(amount)/1E8 FROM claim;
             """
-    output = claims_db.cursor().execute(query)
+    output = dbs["claims"].execute(query)
     measurement["lbc_deposits"] = output.fetchone()[0]
 
 
@@ -48,12 +46,9 @@ def make_measurement(k):
     query = """
             SELECT COUNT(*), SUM(amount)/1E8 FROM support;
             """
-    output = claims_db.cursor().execute(query)
+    output = dbs["claims"].execute(query)
     row = output.fetchone()
     measurement["num_supports"], measurement["lbc_supports"] = row
-
-    # Close claims.db
-    claims_db.close()
 
     # Get ytsync numbers
     url = "https://api.lbry.com/yt/queue_status"
@@ -96,10 +91,9 @@ def make_measurement(k):
                                       circulating_supply)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
-    lbrynomics_db.cursor().execute("BEGIN;")
-    lbrynomics_db.cursor().execute(query, tuple(measurement.values()))
-    lbrynomics_db.cursor().execute("COMMIT;")
-    lbrynomics_db.close()
+    dbs["lbrynomics"].execute("BEGIN;")
+    dbs["lbrynomics"].execute(query, tuple(measurement.values()))
+    dbs["lbrynomics"].execute("COMMIT;")
 
     print("    " + json.dumps(measurement, indent=4).replace("\n", "\n    "))
     print("Done.\n")

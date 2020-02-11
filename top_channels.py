@@ -1,5 +1,6 @@
 import apsw
 import config
+from databases import dbs
 import datetime
 import json
 import numpy as np
@@ -15,10 +16,7 @@ def channels_with_content():
     print("    Finding channels with content...", end="", flush=True)
     result = []
 
-    # Open claims.db
-    conn = apsw.Connection(config.claims_db_file)
-    c = conn.cursor()
-    for row in c.execute("""
+    for row in dbs["claims"].execute("""
     select c2.claim_id claim_ids, count(*) num_claims
         from claim c1 inner join claim c2 on c2.claim_hash = c1.channel_hash
         group by c2.claim_hash
@@ -26,17 +24,13 @@ def channels_with_content():
     """):
         result.append(row[0])
 
-    conn.close()
     print("done. Found {k} channels.".format(k=len(result)))
 
     # Remove blacklisted channels
     print("    Removing blacklisted channels...", flush=True, end="")
-    conn = apsw.Connection("db/lbrynomics.db")
-    c = conn.cursor()
-    black_list = c.execute("SELECT claim_id FROM special_channels WHERE black=1;")
+    black_list = dbs["lbrynomics"].execute("SELECT claim_id FROM special_channels WHERE black=1;")
     black_list = black_list.fetchall()
     black_list = set([x[0] for x in black_list])
-    conn.close()
     result = [x for x in result if x not in black_list]
 
     print("done. {n} channels remain.".format(n=len(result)))
@@ -81,13 +75,9 @@ def time_since_last_epoch():
     """
     Get the number of seconds since the last epoch
     """
-    conn = apsw.Connection("db/lbrynomics.db")
-    c = conn.cursor()
-
-    last = c.execute("""
+    last = dbs["lbrynomics"].execute("""
                      SELECT time FROM epochs
                      WHERE id = (SELECT MAX(id) FROM epochs);""").fetchone()[0]
-    conn.close()
     return time.time() - last
 
 
@@ -95,10 +85,7 @@ def check_and_run():
     """
     Check whether it's time to do the top channels table. If so, do it.
     """
-    conn = apsw.Connection("db/lbrynomics.db")
-    c = conn.cursor()
-    rows = c.execute("SELECT COUNT(*) AS rows FROM epochs;").fetchone()[0]
-    conn.close()
+    rows = dbs["lbrynomics"].execute("SELECT COUNT(*) AS rows FROM epochs;").fetchone()[0]
 
     if rows == 0 or time_since_last_epoch() >= 86400.0:
         get_top()
@@ -128,41 +115,34 @@ def get_top(n=200):
               "vanity_names": [],
               "num_followers": []}
 
-    conn = apsw.Connection(config.claims_db_file)
-    c = conn.cursor()
     for i in range(n):
         result["ranks"].append(i+1)
         result["claim_ids"].append(str(channels[i]))
-        name = c.execute("SELECT claim_name FROM claim WHERE claim_id=?",
+        name = dbs["claims"].execute("SELECT claim_name FROM claim WHERE claim_id=?",
                          (str(channels[i]),)).fetchone()[0]
         result["vanity_names"].append(name)
         result["num_followers"].append(int(counts[i]))
 
-    conn.close()
-
-    # Open lbrynomics.db for writing
-    conn = apsw.Connection("db/lbrynomics.db")
-    c = conn.cursor()
 
     # Epoch number
-    epoch = 1 + c.execute("SELECT COUNT(id) c FROM epochs").fetchone()[0]
+    epoch = 1 + dbs["lbrynomics"].execute("SELECT COUNT(id) c FROM epochs").fetchone()[0]
     now = time.time()
-    c.execute("INSERT INTO epochs VALUES (?, ?)", (epoch, now))
+    dbs["lbrynomics"].execute("INSERT INTO epochs VALUES (?, ?)", (epoch, now))
 
-    c.execute("BEGIN;")
+    dbs["lbrynomics"].execute("BEGIN;")
     for i in range(n):
         values = (result["claim_ids"][i],\
                  result["vanity_names"][i],\
                  epoch,
                  result["num_followers"][i],\
                  result["ranks"][i])
-        c.execute("""
+        dbs["lbrynomics"].execute("""
                   INSERT INTO channel_measurements
                       (claim_id, vanity_name, epoch, num_followers, rank)
                   VALUES (?, ?, ?, ?, ?);
                   """, values)
 
-    c.execute("COMMIT;")
+    dbs["lbrynomics"].execute("COMMIT;")
 
 
     # Now create the JSON in the old format
@@ -171,7 +151,7 @@ def get_top(n=200):
     del result["num_followers"]
 
     # Get change from 7 epochs ago
-    old_epoch = c.execute("""
+    old_epoch = dbs["lbrynomics"].execute("""
                           SELECT id, abs(id-(?-7)) difference FROM epochs
                           ORDER BY difference ASC LIMIT 1;
                           """, (epoch, )).fetchone()[0]
@@ -181,11 +161,9 @@ def get_top(n=200):
     result["ls"] = []
     result["inc"] = []
     result["grey"] = []
-    conn2 = apsw.Connection(config.claims_db_file)
-    c2 = conn2.cursor()
 
     for i in range(n):
-        response = c.execute("""
+        response = dbs["lbrynomics"].execute("""
                              SELECT num_followers, rank
                              FROM channel_measurements
                              WHERE claim_id = ? AND epoch = ?;
@@ -204,7 +182,7 @@ def get_top(n=200):
         result["inc"].append(False)
 
         # Check for NSFW and other flags
-        response = c.execute("SELECT * FROM special_channels WHERE claim_id=?;",
+        response = dbs["lbrynomics"].execute("SELECT * FROM special_channels WHERE claim_id=?;",
                               (result["claim_ids"][i], ))
         for row in response:
             result["is_nsfw"][-1] = bool(row[0])
@@ -217,7 +195,7 @@ def get_top(n=200):
                         INNER JOIN tag
                         ON tag.claim_hash = claim.claim_hash
                         WHERE claim_id = ?;"""
-        for row in c2.execute(query, (result["claim_ids"][i], )):
+        for row in dbs["claims"].execute(query, (result["claim_ids"][i], )):
             if row[0].lower() in set(["mature", "porn", "xxx", "nsfw"]):
                 result["is_nsfw"][i] = True
                 break
@@ -228,9 +206,6 @@ def get_top(n=200):
     update_rss.update(result["human_time_utc"])
     f.write(json.dumps(result, indent=4))
     f.close()
-
-    conn.close()
-    conn2.close()
 
     print("Done.\n")
 
