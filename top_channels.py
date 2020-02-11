@@ -226,7 +226,7 @@ def get_top(n=200):
     conn.close()
     conn2.close()
 
-    print("Done.")
+    print("Done.\n")
 
     return result
 
