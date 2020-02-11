@@ -18,7 +18,7 @@ k = 0
 while True:
 
     # Make the measurement
-    result = measurement.make_measurement()
+    result = measurement.make_measurement(k)
 
     # Count recent activity and write to JSON
     recent.count_recent_all(result["time"])

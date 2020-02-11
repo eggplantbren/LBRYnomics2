@@ -9,7 +9,7 @@ import time
 
 
 
-def make_measurement():
+def make_measurement(k):
 
     # Get current timestamp
     now = time.time()
@@ -74,15 +74,17 @@ def make_measurement():
         measurement["ytsync_failed"] = None
 
     # Get circulating supply
+    measurement["circulating_supply"] = None
     url = "https://explorer.lbry.com/api/v1/supply"
-    try:
-        response = requests.get(url, timeout=5).json()
-    except:
-        response = { "success": False }
-    if response["success"]:
-        measurement["circulating_supply"] = response["utxosupply"]["circulating"]
-    else:
-        measurement["circulating_supply"] = None
+    if k % 10 == 0:
+
+        try:
+            response = requests.get(url, timeout=5).json()
+        except:
+            response = { "success": False }
+
+        if response["success"]:
+            measurement["circulating_supply"] = response["utxosupply"]["circulating"]
 
     # Open output DB and write to it
     lbrynomics_db = sqlite3.connect("db/lbrynomics.db")
