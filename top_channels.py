@@ -1,348 +1,238 @@
+import apsw
 import config
 import datetime
 import json
 import numpy as np
-import pandas as pd
 import requests
-import sqlite3
 import time
 import yaml
 
 
-# Special treatment for some claims
-
-# LBRY Inc channels
-inc = set(["f3da2196b5151570d980b34d311ee0973225a68e",
-           "70b8a88fc6e5ce9e4d6e8721536688484ecd79f4",
-           "3fda836a92faaceedfe398225fb9b2ee2ed1f01a",
-           "e48d2b50501159034f68d53321f67b8aa5b1d771",
-           "e8fed337dc4ee260f4bcfa6d24ae1e4dd75c2fb3",
-           "4c29f8b013adea4d5cca1861fb2161d5089613ea"])
-
-# LBRY Social channels
-ls = set(["5bd299a92e7b31865d2bb3e2313402edaca41a94",
-          "f8d6eccd887c9cebd36b1d42aa349279b7f5c3ed",
-          "e11e2fc3056137948d2cc83fb5ca2ce9b57025ec",
-          "1ba5acff747615510cf3f6089f54d5de669ad94f",
-          "4506db7fb52d3ec5d3a024c870bf86fc35f7b6a3",
-          "36b7bd81c1f975878da8cfe2960ed819a1c85bb5",
-          "e5f33f22ef656cb1595140409850a04d60aa474b",
-          "631ca9fce459f1116ae5317486c7f4af69554742",
-          "4caa1f92fb477caed1ce07cb7762a2249050a59c",
-          "56e86eb938c0b93beccde0fbaaead65755139a10",
-          "60ea26a907f25bcbbc8215007eef2bf0fb846f5c",
-          "d0174cf90b6ec4e26ee2fc013714b0803dec5dd1",
-          "3849a35ae6122e0b7a035c2ba66e97b9e4ab9efa" ])
-
-
-# Given mature tag by us
-manual_mature = set(["f24ab6f03d96aada87d4e14b2dac4aa1cee8d787",
-                 "fd4b56c7216c2f96db4b751af68aa2789c327d48",
-                 "ebe983567c5b64970d5dff2fe78dd1573f0d7b61"])
-
-# Grey list (quietly disable link)
-grey_list = set(["ca8cfeb5b6660a0b8874593058178b7ce6af5fed",
-              "6c1119f18fd7a15fc7535fcb9eec3aa22af66b6b",
-              "3097b755d3b8731e6103cc8752cb1b6c79da3b85",
-              "11c2f6bb38f69a25dea3d0fbef67e2e3a83a1263",
-              "7acf8b2fcd212afa2877afe289309a20642880c4",
-              "b01a44af8b71c0c2001a78303f319ca960d341cf",
-              "bc89d67d9f4d0124c347fd2c4a04e1696e8ba8b1",
-              "14fcd92ad24c1f1bc50f6cbc1e972df79387d05c",
-              "977cd1c90eefe4c9831f5c93b2359202733a9c2e",
-              "b3c6591b2f64c843fa66edda91ceab91d452f94f",
-              "67c1ce0d5754490cfa573ca27f8473ba793d1842",
-              "1713b1a9d2fd4e68bf3ff179cba246d527f67d56"])
-
-# DMCA'd channels + rewards scammers (do not appear)
-black_list = set([ "98c39de1c681139e43131e4b32c2a21272eef06e",
-                "9ced2a722e91f28e9d3aea9423d34e08fb11e3f4",
-                "d5557f4c61d6725f1a51141bbee43cdd2576e415",
-                "35100b76e32aeb2764d334186249fa1b90d6cd74",
-                "f2fe17fb1c62c22f8319c38d0018726928454112",
-                "17db8343914760ba509ed1f8c8e34dcc588614b7",
-                "06a31b83cd38723527861a1ca5349b0187f92193",
-                "9b7a749276c69f39a2d2d76ca4353c0d8f75217d",
-                "b1fa196661570de64ff92d031116a2985af6034c",
-                "4e5e34d0ab3cae6f379dad75afadb0c1f683d30f",
-                "86612188eea0bda3efc6d550a7ad9c96079facff",
-                "00aa9655c127cccb2602d069e1982e08e9f96636",
-                "4f2dba9827ae28a974fbc78f1b12e67b8e0a32c9",
-                "c133c44e9c6ee71177f571646d5b0000489e419f",
-                "eeb3c6452b240a9f6a17c06887547be54a90a4b9",
-                "f625ef83a3f34cac61b6b3bdef42be664fd827da",
-                "ed77d38da413377b8b3ee752675662369b7e0a49",
-                "481c95bd9865dc17770c277ae50f0cc306dfa8af",
-                "3c5aa133095f97bb44f13de7c85a2a4dd5b4fcbe",
-                "bd6abead1787fa94722bd7d064f847de76de5655",
-                "6114b2ce20b55c40506d4bd3f7d8f917b1c37a75",
-                "0c65674e28f2be555570c5a3be0c3ce2eda359d1",
-                "3395d03f379888ffa789f1fa45d6619c2037e3de",
-                "cd31c9ddea4ac4574df50a1f84ee86aa17910ea2",
-                "9d48c8ab0ad53c392d4d6052daf5f8a8e6b5a185",
-                "51fbdb73893c1b04a7d4c4465ffcd1138abc9e93",
-                "5183307ce562dad27367bdf94cdafde38756dca7",
-                "56dca125e775b2fe607d3d8d6c29e7ecfa3cbd96",
-                "a58926cb716c954bdab0187b455a63a2c592310e",
-                "aa83130864bf22c66934c1af36182c91219233aa",
-                "f3c1fda9bf1f54710b62ffe4b14be6990288d9ff",
-                "6291b3b53dde4160ce89067281300585bdf51905",
-                "eeef31480a14684a95898ecd3bcf3a5569e41a28",
-                "8b8b3c8cd3e8364c37067b80bd5a20c09a0a0094",
-                "725189cd101ff372edbce1c05ef04346864d3254",
-                "35100b76e32aeb2764d334186249fa1b90d6cd74",
-                "47beabb163e02e10f99838ffc10ebc57f3f13938",
-                "e0bb55d4d6aec9886858df8f1289974e673309c7",
-                "242734793097302d33b6a316c9db8d17b4beb18e",
-                "71d3256c267ccc875df366258b9eff4766d6cb57",
-                "dee09cad16900936d6af97154a6510a09587ad42",
-                "357ce885e22f2a7bd426ac36224722d64fc90ce6",
-                "c3ab2407e295cd267ced06d1fad2ed09b8d5643e",
-                "37b96ce8ae7a5564174111573105ee7efe4cd2fc" ])
-
-
-
-def subscriber_counts(num=200, preview=False):
+def channels_with_content():
     """
-    Get subscriber counts for all channels.
+    Return a list of all channels with content.
     """
-    now = time.time()
+    print("    Finding channels with content...", end="", flush=True)
+    result = []
 
-    # Open previous JSON
-    f = open("json/subscriber_counts.json")
-    old = json.load(f)
-    f.close()
+    # Open claims.db
+    conn = apsw.Connection(config.claims_db_file)
+    c = conn.cursor()
+    for row in c.execute("""
+    select c2.claim_id claim_ids, count(*) num_claims
+        from claim c1 inner join claim c2 on c2.claim_hash = c1.channel_hash
+        group by c2.claim_hash
+        having num_claims > 0;
+    """):
+        result.append(row[0])
+
+    conn.close()
+    print("done. Found {k} channels.".format(k=len(result)))
+
+    # Remove blacklisted channels
+    print("    Removing blacklisted channels...", flush=True, end="")
+    conn = apsw.Connection("db/lbrynomics.db")
+    c = conn.cursor()
+    black_list = c.execute("SELECT claim_id FROM special_channels WHERE black=1;")
+    black_list = black_list.fetchall()
+    black_list = set([x[0] for x in black_list])
+    conn.close()
+    result = [x for x in result if x not in black_list]
+
+    print("done. {n} channels remain.".format(n=len(result)))
+    return result
+
+
+def get_followers(channels, start, end):
+    """
+    Get follower numbers for channels[start:end]
+    """
+    result = []
+
+    # Elegantly handle end
+    if end > len(channels):
+        end = len(channels)
 
     # Get auth token
     f= open("secrets.yaml")
     auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
     f.close()
 
-    # Create a dict from the old JSON, where the claim_id can return
-    # the subscribers and the rank
-    old_dict = {}
-    for i in range(len(old["ranks"])):
-        old_dict[old["claim_ids"][i]] = (old["subscribers"][i], old["ranks"][i])
+    # Prepare the request to the LBRY API
+    url = "https://api.lbry.com/subscription/sub_count?auth_token=" +\
+                auth_token + "&claim_id="
+    for i in range(start, end):
+        url += channels[i]
+        if i != end-1:
+            url += ","
 
-    # Open claims.db
-    conn = sqlite3.connect(config.claims_db_file)
+    # JSON response from API
+    try:
+        response = requests.get(url).json()
+        for value in response["data"]:
+            result.append(value)
+    except:
+        result.append(None)
+
+    return result
+
+
+def time_since_last_epoch():
+    """
+    Get the number of seconds since the last epoch
+    """
+    conn = apsw.Connection("db/lbrynomics.db")
     c = conn.cursor()
-    query = "select claim_name, claim_id, claim_hash from claim where claim_type = 2;"
-    vanity_names = []
-    claim_ids = []
-    subscribers = []
 
-    # Iterate over query results
-    i = 0
-    for row in c.execute(query):
-        vanity_names.append(row[0])
-        claim_ids.append(row[1])
-        i = i + 1
-
-    vanity_names = np.array(vanity_names)
-    claim_ids = np.array(claim_ids)
-
-    # Now get number of claims in each channel
-    query = \
-"""
-select c2.claim_id claim_ids, count(*) num_claims
-    from claim c1 inner join claim c2 on c2.claim_hash = c1.channel_hash
-    group by c2.claim_hash
-    having num_claims > 0;
-"""
-
-    claims_with_content = {}
-    k = 0
-    for row in c.execute(query):
-        claims_with_content[row[0]] = None
-        k += 1
-        print("Getting channels with content...found {k} so far.".format(k=k))
-
-    start = time.time()
+    last = c.execute("""
+                     SELECT time FROM epochs
+                     WHERE id = (SELECT MAX(id) FROM epochs);""").fetchone()[0]
+    conn.close()
+    return time.time() - last
 
 
-    include = np.zeros(len(claim_ids), dtype=bool)
-    for i in range(len(claim_ids)):
-        include[i] = (claim_ids[i] in claims_with_content) and \
-                            claim_ids[i] not in black_list
+def check_and_run():
+    """
+    Check whether it's time to do the top channels table. If so, do it.
+    """
+    conn = apsw.Connection("db/lbrynomics.db")
+    c = conn.cursor()
+    rows = c.execute("SELECT COUNT(*) AS rows FROM epochs;").fetchone()[0]
+    conn.close()
 
-    vanity_names = vanity_names[include]
-    claim_ids = claim_ids[include]
-
-    k = 0
-    while True:
-        """
-        Go in batches of 100 with a pause in between
-        """
-        time.sleep(3.0)
-
-        # Cover a certain range of channels
-        start = 100*k
-        end = 100*(k+1)
-        final = end >= len(claim_ids)
-        if final:
-            end = len(claim_ids)
-
-        
-        # Attempt the request until it succeeds
-        while True:
-
-            # Prepare the request to the LBRY API
-            url = "https://api.lbry.com/subscription/sub_count?auth_token=" +\
-                        auth_token + "&claim_id="
-            for i in range(start, end):
-                url += claim_ids[i] + ","
-            url = url[0:-1] # No final comma
-
-            f = open("url.txt", "w")
-            f.write(url)
-            f.close()
-
-            try:
-                # Do the request
-                result = requests.get(url)
-                result = result.json()
-                break
-            except:
-                time.sleep(3.0)
-                pass
-
-        # Get sub counts from the result and put them in the subscribers list
-        for x in result["data"]:
-            subscribers.append(x)
-            i = len(subscribers)-1
-
-        print("Processed {end} channels.".format(end=end))
-        if final:
-            break
-        k += 1
-
-    # Sort by number of subscribers then by vanity name.
-    # Zip subs with name
-    s_n = []
-    indices = []
-    for i in range(len(vanity_names)):
-        s_n.append((subscribers[i], vanity_names[i]))
-        indices.append(i)
-    indices = sorted(indices, key=lambda x: (s_n[x][0], s_n[x][1]))[::-1]
-
-    vanity_names = np.array(vanity_names)[indices]
-    claim_ids = np.array(claim_ids)[indices]
-    subscribers = np.array(subscribers)[indices]
-
-    # Put the top 200 into the dict
-    my_dict = {}
-    my_dict["unix_time"] = now
-    my_dict["human_time_utc"] = str(datetime.datetime.utcfromtimestamp(int(now))) + " UTC"
-    my_dict["old_unix_time"] = old["unix_time"]
-    my_dict["old_human_time_utc"] = old["human_time_utc"]
-    my_dict["interval_days"] = np.round((my_dict["unix_time"]\
-                                        - my_dict["old_unix_time"])/86400.0, 2)
-    my_dict["ranks"] = []
-    my_dict["vanity_names"] = []
-    my_dict["claim_ids"] = []
-    my_dict["subscribers"] = []
-    my_dict["change"] = []
-    my_dict["rank_change"] = []
-    my_dict["is_nsfw"] = []
-    my_dict["grey"] = []
-    my_dict["ls"] = []
-    my_dict["inc"] = []
+    if rows == 0 or time_since_last_epoch() >= 86400.0:
+        get_top()
 
 
-    for i in range(num):
-        my_dict["ranks"].append(i+1)
-        my_dict["vanity_names"].append(vanity_names[i])
-        my_dict["claim_ids"].append(claim_ids[i])
-        my_dict["subscribers"].append(int(subscribers[i]))
-        my_dict["is_nsfw"].append(False)
+def get_top(n=200):
+    """
+    Compute the top n channels
+    """
+    print("Making top channels list.", flush=True)
+    channels = channels_with_content()
+    counts = []
+    for i in range(len(channels)//100 + 1):
+        counts += get_followers(channels, 100*i, 100*(i+1))
+        print("    Processed {a}/{b} channels."\
+                .format(a=len(counts), b=len(channels)), end="\r")
+    print("")
 
-        # Compute subscribers change
-        my_dict["change"].append(None)
-        my_dict["rank_change"].append(None)
-        try:
-            my_dict["change"][-1] = int(subscribers[i]) - \
-                                        old_dict[claim_ids[i]][0]
-            my_dict["rank_change"][-1] = old_dict[claim_ids[i]][1] - \
-                                            int(my_dict["ranks"][-1])
-        except:
-            pass
+    ii = np.argsort(counts)[::-1]
+    channels = np.array(channels)[ii]
+    counts = np.array(counts)[ii]
 
-        # Mark some channels NSFW manually
-        if my_dict["claim_ids"][-1] in manual_mature:
-            my_dict["is_nsfw"][-1] = True
-        else:         
-            # Do SQL queries to see if there's a mature tag
-            query = "SELECT tag.tag FROM claim INNER JOIN tag ON tag.claim_hash = claim.claim_hash WHERE claim_id = '"
-            query += claim_ids[i] + "';"
+    # Put into a dict
+    result = {"unix_time": time.time(),
+              "ranks": [],
+              "claim_ids": [],
+              "vanity_names": [],
+              "num_followers": []}
 
-            for row in c.execute(query):
-                if row[0].lower() == "mature":
-                    my_dict["is_nsfw"][-1] = True
-
-        # Grey list
-        my_dict["grey"].append(my_dict["claim_ids"][-1] in grey_list)
-
-        # LS list
-        my_dict["ls"].append(my_dict["claim_ids"][-1] in ls)
-        my_dict["inc"].append(my_dict["claim_ids"][-1] in inc)
-
-    if preview:
-        f = open("json/subscriber_counts_preview.csv", "w")
-        # Create data frame and make CSV
-        df = pd.DataFrame()
-        df["ranks"] = my_dict["ranks"]
-        df["vanity_names"] = my_dict["vanity_names"]
-        df["claim_ids"] = my_dict["claim_ids"]
-        df["is_nsfw"] = my_dict["is_nsfw"]
-        df["grey"] = my_dict["grey"]
-        df["ls"] = my_dict["ls"]
-        df["inc"] = my_dict["inc"]
-        df["followers"] = my_dict["subscribers"]
-        df["change"] = my_dict["change"]
-        df["rank_change"] = my_dict["rank_change"]
-        df.to_csv("json/subscriber_counts_preview.csv", index=False)
-
-
-    else:
-        f = open("json/subscriber_counts.json", "w")
-        import update_rss
-        update_rss.update(my_dict["human_time_utc"])
-        f.write(json.dumps(my_dict, indent=4))
-        f.close()
+    conn = apsw.Connection(config.claims_db_file)
+    c = conn.cursor()
+    for i in range(n):
+        result["ranks"].append(i+1)
+        result["claim_ids"].append(str(channels[i]))
+        name = c.execute("SELECT claim_name FROM claim WHERE claim_id=?",
+                         (str(channels[i]),)).fetchone()[0]
+        result["vanity_names"].append(name)
+        result["num_followers"].append(int(counts[i]))
 
     conn.close()
 
-# Main loop
-if __name__ == "__main__":
+    # Open lbrynomics.db for writing
+    conn = apsw.Connection("db/lbrynomics.db")
+    c = conn.cursor()
 
-    # Needs an initial JSON file to bootstrap from
-    hour = 3600.0
-    day = 24*hour
-    week = 7*day
+    # Epoch number
+    epoch = 1 + c.execute("SELECT COUNT(id) c FROM epochs").fetchone()[0]
+    now = time.time()
+    c.execute("INSERT INTO epochs VALUES (?, ?)", (epoch, now))
+
+    c.execute("BEGIN;")
+    for i in range(n):
+        values = (result["claim_ids"][i],\
+                 result["vanity_names"][i],\
+                 epoch,
+                 result["num_followers"][i],\
+                 result["ranks"][i])
+        c.execute("""
+                  INSERT INTO channel_measurements
+                      (claim_id, vanity_name, epoch, num_followers, rank)
+                  VALUES (?, ?, ?, ?, ?);
+                  """, values)
+
+    c.execute("COMMIT;")
 
 
-    f = open("json/subscriber_counts.json")
-    t = json.load(f)["unix_time"]
+    # Now create the JSON in the old format
+    result["human_time_utc"] = str(datetime.datetime.utcfromtimestamp(int(now))) + " UTC"
+    result["subscribers"] = result["num_followers"]
+    del result["num_followers"]
+
+    # Get change from 7 epochs ago
+    old_epoch = c.execute("""
+                          SELECT id, abs(id-(?-7)) difference FROM epochs
+                          ORDER BY difference ASC LIMIT 1;
+                          """, (epoch, )).fetchone()[0]
+    result["change"] = []
+    result["rank_change"] = []
+    result["is_nsfw"] = []
+    result["ls"] = []
+    result["inc"] = []
+    result["grey"] = []
+    conn2 = apsw.Connection(config.claims_db_file)
+    c2 = conn2.cursor()
+
+    for i in range(n):
+        response = c.execute("""
+                             SELECT num_followers, rank
+                             FROM channel_measurements
+                             WHERE claim_id = ? AND epoch = ?;
+                             """, (result["claim_ids"][i], old_epoch)).fetchone()
+
+        if response is not None:
+            result["change"].append(result["subscribers"][i] - response[0])
+            result["rank_change"].append(result["ranks"][i] - response[1])
+        else:
+            result["change"] = None
+            result["rank_change"] = None
+
+        result["is_nsfw"].append(False)
+        result["grey"].append(False)
+        result["ls"].append(False)
+        result["inc"].append(False)
+
+        # Check for NSFW and other flags
+        response = c.execute("SELECT * FROM special_channels WHERE claim_id=?;",
+                              (result["claim_ids"][i], ))
+        for row in response:
+            result["is_nsfw"][-1] = bool(row[0])
+            result["grey"][-1] = bool(row[1])
+            result["ls"][-1] = bool(row[2])
+            result["inc"][-1] = bool(row[3])
+
+        # Check for mature tags on protocol level
+        query = """SELECT tag.tag FROM claim
+                        INNER JOIN tag
+                        ON tag.claim_hash = claim.claim_hash
+                        WHERE claim_id = ?;"""
+        for row in c2.execute(query, (result["claim_ids"][i], )):
+            if row[0].lower() in set(["mature", "porn", "xxx", "nsfw"]):
+                result["is_nsfw"][i] = True
+                break
+
+    # Save to file
+    f = open("json/subscriber_counts.json", "w")
+    import update_rss
+    update_rss.update(result["human_time_utc"])
+    f.write(json.dumps(result, indent=4))
     f.close()
 
+    conn.close()
+    conn2.close()
 
-    # Update frequency
-    interval = 0.5*week
+    print("Done.\n")
 
-
-    while True:
-        gap = time.time() - t
-
-        msg = "{d} days until next update.".format(d=(interval - gap)/day)
-        print(msg + "        ", end="\r", flush=True)
-        time.sleep(1.0 - time.time()%1)
-
-        if gap >= interval:
-            subscriber_counts()
-
-            f = open("json/subscriber_counts.json")
-            t = json.load(f)["unix_time"]
-            f.close()
-
+    return result
 

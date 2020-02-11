@@ -1,3 +1,4 @@
+import apsw
 import config
 import datetime
 import matplotlib
@@ -5,7 +6,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from numba import njit
 import numpy as np
-import sqlite3
 import time
 
 @njit
@@ -132,7 +132,7 @@ def set_ylim(mode):
 def make_plot(mode, production=True):
 
     # Connect to database file
-    conn = sqlite3.connect("db/lbrynomics.db")
+    conn = apsw.Connection("db/lbrynomics.db")
     c = conn.cursor()
 
     # Plot channel history

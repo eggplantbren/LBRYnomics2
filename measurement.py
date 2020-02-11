@@ -1,9 +1,9 @@
+import apsw
 import collections
 import datetime
 import config
 import json
 import requests
-import sqlite3
 import time
 
 
@@ -19,7 +19,7 @@ def make_measurement(k):
                  + " UTC.", flush=True)
 
     # Connect to the wallet server DB and the output DB
-    claims_db = sqlite3.connect(config.claims_db_file)
+    claims_db = apsw.Connection(config.claims_db_file)
 
     # Measurement measurement
     measurement = collections.OrderedDict()
@@ -87,7 +87,7 @@ def make_measurement(k):
             measurement["circulating_supply"] = response["utxosupply"]["circulating"]
 
     # Open output DB and write to it
-    lbrynomics_db = sqlite3.connect("db/lbrynomics.db")
+    lbrynomics_db = apsw.Connection("db/lbrynomics.db")
     query = """
             INSERT INTO measurements (time, num_channels, num_streams,
                                       lbc_deposits, num_supports, lbc_supports,
@@ -96,6 +96,7 @@ def make_measurement(k):
                                       circulating_supply)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
+    lbrynomics_db.cursor().execute("BEGIN;")
     lbrynomics_db.cursor().execute(query, tuple(measurement.values()))
     lbrynomics_db.cursor().execute("COMMIT;")
     lbrynomics_db.close()

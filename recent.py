@@ -1,9 +1,9 @@
+import apsw
 import config
 import datetime
 from daemon_command import daemon_command
 import json
 import math
-import sqlite3
 
 
 def count_recent_all(now):
@@ -39,7 +39,7 @@ def count_recent(mode, now):
                                        utcfromtimestamp(int(now))) + " UTC"
 
     # Connect to the wallet server DB
-    conn = sqlite3.connect(config.claims_db_file)
+    conn = apsw.Connection(config.claims_db_file)
     c = conn.cursor()
 
     for i in range(len(cutoffs)):
@@ -100,7 +100,7 @@ def count_boosts(now):
     f.close()
     print("    Saved {filename}.".format(filename=filename), flush=True)
 
-    conn = sqlite3.connect(config.claims_db_file)
+    conn = apsw.Connection(config.claims_db_file)
     c = conn.cursor()
 
     for i in range(len(labels)):
