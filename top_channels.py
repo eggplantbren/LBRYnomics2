@@ -72,7 +72,7 @@ def get_followers(channels, start, end):
         for value in response["data"]:
             result.append(value)
     except:
-        print(response)
+        result.append(None)
 
     return result
 
