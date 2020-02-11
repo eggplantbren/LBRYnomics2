@@ -12,7 +12,7 @@ def channels_with_content():
     """
     Return a list of all channels with content.
     """
-    print("Finding channels with content...", end="", flush=True)
+    print("    Finding channels with content...", end="", flush=True)
     result = []
 
     # Open claims.db
@@ -30,7 +30,7 @@ def channels_with_content():
     print("done. Found {k} channels.".format(k=len(result)))
 
     # Remove blacklisted channels
-    print("Removing blacklisted channels...", flush=True, end="")
+    print("    Removing blacklisted channels...", flush=True, end="")
     conn = apsw.Connection("db/lbrynomics.db")
     c = conn.cursor()
     black_list = c.execute("SELECT claim_id FROM special_channels WHERE black=1;")
@@ -67,9 +67,12 @@ def get_followers(channels, start, end):
             url += ","
 
     # JSON response from API
-    response = requests.get(url).json()
-    for value in response["data"]:
-        result.append(value)
+    try:
+        response = requests.get(url).json()
+        for value in response["data"]:
+            result.append(value)
+    except:
+        print(response)
 
     return result
 
@@ -105,14 +108,13 @@ def get_top(n=200):
     """
     Compute the top n channels
     """
+    print("Making top channels list.", flush=True)
     channels = channels_with_content()
     counts = []
     for i in range(len(channels)//100 + 1):
         counts += get_followers(channels, 100*i, 100*(i+1))
-        if i > 0:
-            print("                                               ", end="\r")
-        print("Processed {a}/{b} channels."\
-                .format(a=len(counts), b=len(channels)), end="")
+        print("    Processed {a}/{b} channels."\
+                .format(a=len(counts), b=len(channels)), end="\r")
     print("")
 
     ii = np.argsort(counts)[::-1]
@@ -175,6 +177,13 @@ def get_top(n=200):
                           """, (epoch, )).fetchone()[0]
     result["change"] = []
     result["rank_change"] = []
+    result["is_nsfw"] = []
+    result["ls"] = []
+    result["inc"] = []
+    result["grey"] = []
+    conn2 = apsw.Connection(config.claims_db_file)
+    c2 = conn2.cursor()
+
     for i in range(n):
         response = c.execute("""
                              SELECT num_followers, rank
@@ -183,6 +192,29 @@ def get_top(n=200):
                              """, (result["claim_ids"][i], old_epoch)).fetchone()
         result["change"].append(result["subscribers"][i] - response[0])
         result["rank_change"].append(result["ranks"][i] - response[1])
+        result["is_nsfw"].append(False)
+        result["grey"].append(False)
+        result["ls"].append(False)
+        result["inc"].append(False)
+
+        # Check for NSFW and other flags
+        response = c.execute("SELECT * FROM special_channels WHERE claim_id=?;",
+                              (result["claim_ids"][i], ))
+        for row in response:
+            result["is_nsfw"][-1] = bool(row[0])
+            result["grey"][-1] = bool(row[1])
+            result["ls"][-1] = bool(row[2])
+            result["inc"][-1] = bool(row[3])
+
+        # Check for mature tags on protocol level
+        query = """SELECT tag.tag FROM claim
+                        INNER JOIN tag
+                        ON tag.claim_hash = claim.claim_hash
+                        WHERE claim_id = ?;"""
+        for row in c2.execute(query, (result["claim_ids"][i], )):
+            if row[0].lower() in set(["mature", "porn", "xxx", "nsfw"]):
+                result["is_nsfw"][i] = True
+                break
 
     # Save to file
     f = open("json/subscriber_counts.json", "w")
@@ -190,9 +222,11 @@ def get_top(n=200):
     update_rss.update(result["human_time_utc"])
     f.write(json.dumps(result, indent=4))
     f.close()
-    
 
     conn.close()
+    conn2.close()
+
+    print("Done.")
 
     return result
 
