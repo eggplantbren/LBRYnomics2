@@ -99,6 +99,8 @@ def title(mode, value):
     if mode == "ytsync_pending_update":
         string += "Channels with new videos awaiting sync = {num}"\
                 .format(num=value)
+    if mode == "circulating_supply":
+        string += "Circulating supply = {lbc:.2f} LBC".format(lbc=value)
     return string
 
 
@@ -118,6 +120,8 @@ def ylabel(mode):
         string += "New channels in queue to sync"
     if mode == "ytsync_pending_update":
         string += "Channels with new videos awaiting sync"
+    if mode == "circulating_supply":
+        string += "Circulating LBC supply"
     return string
 
 def set_ylim(mode):
@@ -267,6 +271,7 @@ def make_plots(production=True):
     make_plot("lbc_supports", production)
     make_plot("ytsync_new_pending", production)
     make_plot("ytsync_pending_update", production)
+    make_plot("circulating_supply", production)
     print("Done.\n")
 
 
