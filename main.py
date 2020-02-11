@@ -1,5 +1,6 @@
 import config
 import create_db
+import databases
 import measurement
 import plotter
 import recent
@@ -49,4 +50,7 @@ while True:
     print("\nDone.\n")
 
     k += 1
+
+
+databases.close()
 

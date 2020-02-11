@@ -1,4 +1,5 @@
 import config
+from databases import dbs
 import numpy as np
 import apsw
 import time
@@ -6,17 +7,13 @@ import time
 
 def create_db():
 
-    # Connect to database file
-    conn = apsw.Connection("db/lbrynomics.db")
-    c = conn.cursor()
-
     # Set pragmas
-    c.execute("""
+    dbs["lbrynomics"].execute("""
     PRAGMA journal_mode = WAL;
     """)
 
     # Create tables for measurements etc.
-    c.execute("""
+    dbs["lbrynomics"].execute("""
     CREATE TABLE IF NOT EXISTS measurements
         (id INTEGER PRIMARY KEY,
          time REAL NOT NULL,
@@ -57,7 +54,7 @@ def create_db():
     """)
 
     # Create indices
-    c.execute("""
+    dbs["lbrynomics"].execute("""
     CREATE INDEX IF NOT EXISTS time_idx ON measurements (time);
     CREATE INDEX IF NOT EXISTS channel_idx ON channel_measurements (claim_id, epoch);
     CREATE INDEX IF NOT EXISTS claim_id_idx ON special_channels (claim_id);
@@ -157,41 +154,40 @@ def create_db():
                     "c3ab2407e295cd267ced06d1fad2ed09b8d5643e",
                     "37b96ce8ae7a5564174111573105ee7efe4cd2fc" ])
 
-    c.execute("BEGIN;")
+    dbs["lbrynomics"].execute("BEGIN;")
 
     for claim_id in inc:
-        c.execute("""INSERT INTO special_channels (claim_id, inc)
+        dbs["lbrynomics"].execute("""INSERT INTO special_channels (claim_id, inc)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
                     DO UPDATE SET inc=1;""", (claim_id, ))
 
     for claim_id in ls:
-        c.execute("""INSERT INTO special_channels (claim_id, ls)
+        dbs["lbrynomics"].execute("""INSERT INTO special_channels (claim_id, ls)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
                     DO UPDATE SET ls=1;""", (claim_id, ))
 
     for claim_id in manual_mature:
-        c.execute("""INSERT INTO special_channels (claim_id, is_nsfw)
+        dbs["lbrynomics"].execute("""INSERT INTO special_channels (claim_id, is_nsfw)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
                     DO UPDATE SET is_nsfw=1;""", (claim_id, ))
 
     for claim_id in grey_list:
-        c.execute("""INSERT INTO special_channels (claim_id, grey)
+        dbs["lbrynomics"].execute("""INSERT INTO special_channels (claim_id, grey)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
                     DO UPDATE SET grey=1;""", (claim_id, ))
 
 
     for claim_id in black_list:
-        c.execute("""INSERT INTO special_channels (claim_id, black)
+        dbs["lbrynomics"].execute("""INSERT INTO special_channels (claim_id, black)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
                     DO UPDATE SET black=1;""", (claim_id, ))
 
-    c.execute("COMMIT;")
-    conn.close()
+    dbs["lbrynomics"].execute("COMMIT;")
 
 
     
@@ -204,32 +200,22 @@ def test_history():
 
     print("Generating approximate historical data.", flush=True)
 
-    # Connect to database file
-    conn = apsw.Connection("db/lbrynomics.db")
-    c = conn.cursor()
-
     # Count rows of history in table
-    rows = c.execute("""SELECT COUNT(*) FROM measurements
+    rows = dbs["lbrynomics"].execute("""SELECT COUNT(*) FROM measurements
                         WHERE lbc_deposits IS NULL;""").fetchone()[0]
     if rows > 0:
         # No need to do anything if history exists
-        conn.close()
         print("Done.\n")
         return
-
-    # Estimate history
-    conn = apsw.Connection(config.claims_db_file)
-    c = conn.cursor()
 
     # Obtain creation times from claims.db
     ts_channels = []
     ts_streams  = []
-    for row in c.execute("SELECT creation_timestamp, claim_type FROM claim;"):
+    for row in dbs["claims"].execute("SELECT creation_timestamp, claim_type FROM claim;"):
         if row[1] == 2:
             ts_channels.append(row[0])
         elif row[1] == 1:
             ts_streams.append(row[0])
-    conn.close()
 
     # Sort times
     ts_channels = np.sort(np.array(ts_channels))
@@ -258,19 +244,16 @@ def test_history():
 
     counts = np.cumsum(counts, axis=1)
 
-    conn = apsw.Connection("db/lbrynomics.db")
-    c = conn.cursor()
-    c.execute("BEGIN;")
+    dbs["lbrynomics"].execute("BEGIN;")
 
     for i in range(counts.shape[1]):
         t = start + i*config.interval
-        c.execute("""INSERT INTO measurements (time, num_channels, num_streams)
+        dbs["lbrynomics"].execute("""INSERT INTO measurements (time, num_channels, num_streams)
                      VALUES (?, ?, ?);""", (t, counts[0, i], counts[1, i]))
         print("    Inserted {rows} rows into database."\
                     .format(rows=i+1), end="\r", flush=True)
     print("")
 
-    c.execute("COMMIT;")
-    conn.close()
+    dbs["lbrynomics"].execute("COMMIT;")
     print("Done.\n")
 
