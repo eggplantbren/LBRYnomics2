@@ -172,7 +172,7 @@ def get_top(n=200):
 
     # Get change from 7 epochs ago
     old_epoch = c.execute("""
-                          SELECT id, abs(id-?-7) difference FROM epochs
+                          SELECT id, abs(id-(?-7)) difference FROM epochs
                           ORDER BY difference ASC LIMIT 1;
                           """, (epoch, )).fetchone()[0]
     result["change"] = []
@@ -188,10 +188,16 @@ def get_top(n=200):
         response = c.execute("""
                              SELECT num_followers, rank
                              FROM channel_measurements
-                             WHERE claim_id = ? AND EPOCH = ?;
+                             WHERE claim_id = ? AND epoch = ?;
                              """, (result["claim_ids"][i], old_epoch)).fetchone()
-        result["change"].append(result["subscribers"][i] - response[0])
-        result["rank_change"].append(result["ranks"][i] - response[1])
+
+        if response is not None:
+            result["change"].append(result["subscribers"][i] - response[0])
+            result["rank_change"].append(result["ranks"][i] - response[1])
+        else:
+            result["change"] = None
+            result["rank_change"] = None
+
         result["is_nsfw"].append(False)
         result["grey"].append(False)
         result["ls"].append(False)
