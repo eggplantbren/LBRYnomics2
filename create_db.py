@@ -28,7 +28,8 @@ def create_db():
          ytsync_new_pending INGEGER,
          ytsync_pending_update INTEGER,
          ytsync_pending_upgrade INTEGER,
-         ytsync_failed INTEGER);
+         ytsync_failed INTEGER,
+         circulating_supply REAL);
     """)
 
     # Create indices
