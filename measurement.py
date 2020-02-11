@@ -73,6 +73,16 @@ def make_measurement():
         measurement["ytsync_pending_upgrade"] = None
         measurement["ytsync_failed"] = None
 
+    # Get circulating supply
+    url = "https://explorer.lbry.com/api/v1/supply"
+    try:
+        response = requests.get(url, timeout=5).json()
+    except:
+        response = { "success": False }
+    if response["success"]:
+        measurement["circulating_supply"] = response["utxosupply"]["circulating"]
+    else:
+        measurement["circulating_supply"] = None
 
     # Open output DB and write to it
     lbrynomics_db = apsw.Connection("db/lbrynomics.db")
@@ -80,8 +90,9 @@ def make_measurement():
             INSERT INTO measurements (time, num_channels, num_streams,
                                       lbc_deposits, num_supports, lbc_supports,
                                       ytsync_new_pending, ytsync_pending_update,
-                                      ytsync_pending_upgrade, ytsync_failed)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                                      ytsync_pending_upgrade, ytsync_failed,
+                                      circulating_supply)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
     lbrynomics_db.cursor().execute("BEGIN;")
     lbrynomics_db.cursor().execute(query, tuple(measurement.values()))
