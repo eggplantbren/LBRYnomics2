@@ -5,6 +5,7 @@ import measurement
 import plotter
 import recent
 import subprocess
+import top_channels
 import time
 import upload
 
@@ -23,6 +24,9 @@ while True:
 
     # Count recent activity and write to JSON
     recent.count_recent_all(result["time"])
+
+    # Top channels
+    top_channels.check_and_run()
 
     # Make plots
     plotter.make_plots()
