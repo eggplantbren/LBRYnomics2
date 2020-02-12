@@ -16,6 +16,10 @@ def create_db():
     dbs["claims"].execute("""create index if not exists lbrynomics_cti_idx
                 on claim (claim_type, creation_timestamp);""")
 
+    # Add indices to claims.db
+    dbs["claims"].execute("""create index if not exists lbrynomics_sh_idx
+                on support (height);""")
+
 
     # Create tables for measurements etc.
     dbs["lbrynomics"].execute("""
