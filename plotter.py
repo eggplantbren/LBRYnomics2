@@ -134,14 +134,15 @@ def set_ylim(mode):
         plt.ylim(bottom=0)
 
 
-def make_plot(mode, production=True, ts=[], ys=[]):
+def make_plot(mode, production=True, ts=None, ys=None):
     """
     Plot quantity history. ts and ys may be presupplied. If not, it will
     try to get them from the measurements table.
     """
 
-    # Plot quantity history
-    assert len(ts) == len(ys)
+    if ts is None:
+        ts, ys = [], []
+
     if len(ts) == 0:
         for row in dbs["lbrynomics"].execute(f"SELECT time, {mode} FROM measurements;"):
             if row[1] is not None:
