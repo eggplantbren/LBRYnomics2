@@ -9,4 +9,4 @@ interval: 300.0
 lbrynet_bin: "/opt/LBRY/resources/static/daemon/lbrynet"
 
 # Directory to copy backups to
-backup_dir: "/keybase/public/brendonbrewer/lbrynomics/"
+backup_dir: "/keybase/public/brendonbrewer/"

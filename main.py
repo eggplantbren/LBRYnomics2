@@ -32,13 +32,10 @@ while True:
 
     # Backup db periodically
     if k % 250 == 0:
-        print("Backing up DB file and top channels JSON.")
+        print("Backing up DB file.")
         subprocess.run("zstd db/lbrynomics.db "\
                             + "-o ./lbrynomics.db.zst", shell=True)
-        subprocess.run("zstd json/subscriber_counts.json "\
-                            + "-o ./subscriber_counts.json.zst", shell=True)
         subprocess.run("mv lbrynomics.db.zst " + config.backup_dir, shell=True)
-        subprocess.run("mv subscriber_counts.json.zst " + config.backup_dir, shell=True)
         print("\nDone.\n")
 
     # Get the time and make another measurement in 5 minutes
