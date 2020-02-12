@@ -185,10 +185,10 @@ def get_top(n=200):
         response = dbs["lbrynomics"].execute("SELECT * FROM special_channels WHERE claim_id=?;",
                               (result["claim_ids"][i], ))
         for row in response:
-            result["is_nsfw"][-1] = bool(row[0])
-            result["grey"][-1] = bool(row[1])
-            result["ls"][-1] = bool(row[2])
-            result["inc"][-1] = bool(row[3])
+            result["is_nsfw"][-1] = bool(row[1])
+            result["grey"][-1] = bool(row[2])
+            result["ls"][-1] = bool(row[3])
+            result["inc"][-1] = bool(row[4])
 
         # Check for mature tags on protocol level
         query = """SELECT tag.tag FROM claim
