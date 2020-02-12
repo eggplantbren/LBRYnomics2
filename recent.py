@@ -1,5 +1,6 @@
 import apsw
 import config
+from databases import dbs
 import datetime
 from daemon_command import daemon_command
 import json
@@ -38,17 +39,13 @@ def count_recent(mode, now):
     result_dict["human_time_utc"] = str(datetime.datetime.\
                                        utcfromtimestamp(int(now))) + " UTC"
 
-    # Connect to the wallet server DB
-    conn = apsw.Connection(config.claims_db_file)
-    c = conn.cursor()
-
     for i in range(len(cutoffs)):
         query = """
                 SELECT COUNT(*) FROM claim
                 WHERE creation_timestamp >= ? AND creation_timestamp <= ?
                             AND claim_type = ?;
                 """
-        row = c.execute(query, (cutoffs[i], now, claim_type)).fetchone()
+        row = dbs["claims"].execute(query, (cutoffs[i], now, claim_type)).fetchone()
         if i==0:
             result_dict["total_{mode}".format(mode=mode)] = row[0]
         else:
@@ -72,9 +69,8 @@ def count_recent(mode, now):
             WHERE creation_timestamp >= ?
             AND claim_type = ?;
             """
-    new_today = c.execute(query, (start_of_today, claim_type)).fetchone()[0]
+    new_today = dbs["claims"].execute(query, (start_of_today, claim_type)).fetchone()[0]
     print("{new} so far this UTC day.".format(new=new_today))
-    conn.close()
 
 
 
@@ -124,7 +120,7 @@ def count_boosts(now):
             query += "WHERE height >= ?"
             data += (cutoff, )
 
-        for row in c.execute(query, data):
+        for row in dbs["claims"].execute(query, data):
             biggest = row[1]
             result["num_{label}".format(label=labels[i])] = row[0]
             result["biggest_{label}".format(label=labels[i])] = row[1]/1.0E8
@@ -146,7 +142,7 @@ def count_boosts(now):
                  ORDER BY num DESC
                  LIMIT 1;
                  """
-        for row in c.execute(query, data):
+        for row in dbs["claims"].execute(query, data):
             val = None
             try:
                 val = row[0]/1.0E8
@@ -170,7 +166,7 @@ def count_boosts(now):
             query += "AND support.height >= ?"
             data += (cutoff, )
 
-        for row in c.execute(query, data):
+        for row in dbs["claims"].execute(query, data):
             claim_name, claim_id = row[0:2]
 
         result["tv_url_{label}".format(label=labels[i])] = "https://lbry.tv/" \
@@ -193,7 +189,7 @@ def count_boosts(now):
             query += "AND support.height >= ?"
             data += (cutoff, )
 
-        for row in c.execute(query, data):
+        for row in dbs["claims"].execute(query, data):
             result["is_nsfw_{label}".format(label=labels[i])] = row[0] != 0
             break
 
@@ -201,7 +197,7 @@ def count_boosts(now):
     f = open(filename, "w")
     f.write(json.dumps(result, indent=4))
     f.close()
-    conn.close()
+
     print("    Saved {filename}.".format(filename=filename), flush=True)
 
 

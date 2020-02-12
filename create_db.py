@@ -12,6 +12,11 @@ def create_db():
     PRAGMA journal_mode = WAL;
     """)
 
+    # Add indices to claims.db
+    dbs["claims"].execute("""create index if not exists lbrynomics_cti_idx
+                on claim (claim_type, creation_timestamp);""")
+
+
     # Create tables for measurements etc.
     dbs["lbrynomics"].execute("""
     CREATE TABLE IF NOT EXISTS measurements
