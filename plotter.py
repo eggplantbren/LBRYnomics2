@@ -102,6 +102,8 @@ def title(mode, value):
                 .format(num=value)
     if mode == "circulating_supply":
         string += "Circulating supply = {lbc:.2f} LBC".format(lbc=value)
+    if mode == "followers":
+        string += f"Average followers of top 200 channels = {value:.1f}"
     return string
 
 
@@ -123,6 +125,8 @@ def ylabel(mode):
         string += "Channels with new videos awaiting sync"
     if mode == "circulating_supply":
         string += "Circulating LBC supply"
+    if mode == "followers":
+        string += "Avg. followers of top 200 channels"
     return string
 
 def set_ylim(mode):
@@ -130,14 +134,19 @@ def set_ylim(mode):
         plt.ylim(bottom=0)
 
 
-def make_plot(mode, production=True):
+def make_plot(mode, production=True, ts=[], ys=[]):
+    """
+    Plot quantity history. ts and ys may be presupplied. If not, it will
+    try to get them from the measurements table.
+    """
 
-    # Plot channel history
-    ts, ys = [], []
-    for row in dbs["lbrynomics"].execute("SELECT time, {y} FROM measurements;".format(y=mode)):
-        if row[1] is not None:
-            ts.append(row[0])
-            ys.append(row[1])
+    # Plot quantity history
+    assert len(ts) == len(ys)
+    if len(ts) == 0:
+        for row in dbs["lbrynomics"].execute(f"SELECT time, {mode} FROM measurements;"):
+            if row[1] is not None:
+                ts.append(row[0])
+                ys.append(row[1])
 
     # Numpy arrays
     ts = np.array(ts)
@@ -268,6 +277,21 @@ def make_plots(production=True):
     make_plot("ytsync_new_pending", production)
     make_plot("ytsync_pending_update", production)
     make_plot("circulating_supply", production)
+
+
+    # Followers data
+    query = """
+    SELECT time, AVG(num_followers) FROM channel_measurements INNER JOIN epochs
+            ON epochs.id = channel_measurements.epoch
+            WHERE rank <= 200
+            GROUP BY channel_measurements.epoch;
+    """
+    ts, ys = [], []
+    for row in dbs["lbrynomics"].execute(query):
+        ts.append(row[0])
+        ys.append(row[1])
+    make_plot("followers", production, ts, ys)
+
     print("Done.\n")
 
 
