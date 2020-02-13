@@ -87,7 +87,7 @@ def check_and_run():
     """
     rows = dbs["lbrynomics"].execute("SELECT COUNT(*) AS rows FROM epochs;").fetchone()[0]
 
-    if rows == 0 or time_since_last_epoch() >= 86400.0:
+    if rows == 0 or time_since_last_epoch() >= 86400.0 - 150.0:
         get_top()
 
 
