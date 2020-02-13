@@ -173,8 +173,8 @@ def get_top(n=200):
             result["change"].append(result["subscribers"][i] - response[0])
             result["rank_change"].append(result["ranks"][i] - response[1])
         else:
-            result["change"] = None
-            result["rank_change"] = None
+            result["change"].append(None)
+            result["rank_change"].append(None)
 
         result["is_nsfw"].append(False)
         result["grey"].append(False)
