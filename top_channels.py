@@ -171,7 +171,7 @@ def get_top(n=200):
 
         if response is not None:
             result["change"].append(result["subscribers"][i] - response[0])
-            result["rank_change"].append(result["ranks"][i] - response[1])
+            result["rank_change"].append(-(result["ranks"][i] - response[1]))
         else:
             result["change"].append(None)
             result["rank_change"].append(None)
