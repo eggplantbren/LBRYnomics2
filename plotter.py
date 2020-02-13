@@ -104,6 +104,9 @@ def title(mode, value):
         string += "Circulating supply = {lbc:.2f} LBC".format(lbc=value)
     if mode == "followers":
         string += f"Average followers of top 200 channels = {value:.1f}"
+    if mode == "num_reposts":
+        string += "Total number of reposts = {num}"\
+                .format(num=value)
     return string
 
 
@@ -127,6 +130,8 @@ def ylabel(mode):
         string += "Circulating LBC supply"
     if mode == "followers":
         string += "Avg. followers of top 200 channels"
+    if mode == "num_reposts":
+        string += "Total number of reposts"
     return string
 
 def set_ylim(mode):
@@ -292,6 +297,8 @@ def make_plots(production=True):
         ts.append(row[0])
         ys.append(row[1])
     make_plot("followers", production, ts, ys)
+
+    make_plot("num_reposts", production)
 
     print("Done.\n")
 
