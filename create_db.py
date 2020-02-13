@@ -35,7 +35,8 @@ def create_db():
          ytsync_pending_update INTEGER,
          ytsync_pending_upgrade INTEGER,
          ytsync_failed INTEGER,
-         circulating_supply REAL);
+         circulating_supply REAL,
+         num_reposts INTEGER);
 
     -- Create channel measurements table
     CREATE TABLE IF NOT EXISTS channel_measurements

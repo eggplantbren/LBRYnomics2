@@ -81,6 +81,14 @@ def make_measurement(k):
         if response["success"]:
             measurement["circulating_supply"] = response["utxosupply"]["circulating"]
 
+    # Count reposts
+    query = "SELECT SUM(reposted) FROM claim;"
+    measurement["num_resposts"] = None
+    try:
+        measurement["num_resposts"] = dbs["claims"].execute(query).fetchone()[0]
+    except:
+        pass
+
     # Open output DB and write to it
     lbrynomics_db = apsw.Connection("db/lbrynomics.db")
     query = """
@@ -88,8 +96,8 @@ def make_measurement(k):
                                       lbc_deposits, num_supports, lbc_supports,
                                       ytsync_new_pending, ytsync_pending_update,
                                       ytsync_pending_upgrade, ytsync_failed,
-                                      circulating_supply)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                                      circulating_supply, num_reposts)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
     dbs["lbrynomics"].execute("BEGIN;")
     dbs["lbrynomics"].execute(query, tuple(measurement.values()))
