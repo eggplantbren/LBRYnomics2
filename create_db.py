@@ -119,6 +119,7 @@ def create_db():
                   "1713b1a9d2fd4e68bf3ff179cba246d527f67d56"])
 
     # DMCA'd channels + rewards scammers (do not appear)
+    # Also those who appear to be faking their following
     black_list = set([ "98c39de1c681139e43131e4b32c2a21272eef06e",
                     "9ced2a722e91f28e9d3aea9423d34e08fb11e3f4",
                     "d5557f4c61d6725f1a51141bbee43cdd2576e415",
@@ -152,6 +153,7 @@ def create_db():
                     "f3c1fda9bf1f54710b62ffe4b14be6990288d9ff",
                     "6291b3b53dde4160ce89067281300585bdf51905",
                     "eeef31480a14684a95898ecd3bcf3a5569e41a28",
+                    "9530d1af1b9f9982149ecf5785f74695b96a1c32",
                     "8b8b3c8cd3e8364c37067b80bd5a20c09a0a0094",
                     "725189cd101ff372edbce1c05ef04346864d3254",
                     "35100b76e32aeb2764d334186249fa1b90d6cd74",
