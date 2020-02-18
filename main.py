@@ -35,7 +35,7 @@ while True:
     upload.upload()
 
     # Backup db periodically
-    if k % 250 == 0:
+    if k % 72 == 0:
         print("Backing up DB file.")
         subprocess.run("zstd db/lbrynomics.db "\
                             + "-o ./lbrynomics.db.zst", shell=True)
