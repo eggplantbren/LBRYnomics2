@@ -101,7 +101,7 @@ def title(mode, value):
         string += "Channels with new videos awaiting sync = {num}"\
                 .format(num=value)
     if mode == "circulating_supply":
-        string += "Circulating supply = {lbc:.2f} LBC".format(lbc=value)
+        string += "Circulating supply = {lbc} LBC (max supply=1.083202 billion)".format(lbc=int(value))
     if mode == "followers":
         string += f"Average followers of top 200 channels = {value:.1f}"
     if mode == "num_reposts":
