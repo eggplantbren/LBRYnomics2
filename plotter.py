@@ -235,7 +235,6 @@ def make_plot(mode, production=True, ts=None, ys=None):
         interval = np.mean(np.diff(ts))
         thin = int(86400.0/interval)
         thin = max(thin, 1)
-        print(interval, thin)
 
     t = mdates.epoch2num(ts[0::thin])
     y = derivative(t, ys[0::thin])
