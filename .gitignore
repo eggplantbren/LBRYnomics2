@@ -9,3 +9,4 @@ __pycache__
 url.txt
 json/subscriber_counts_preview.csv
 secrets.yaml
+json/rss.xml
