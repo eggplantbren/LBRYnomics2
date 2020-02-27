@@ -83,9 +83,9 @@ def make_measurement(k):
 
     # Count reposts
     query = "SELECT SUM(reposted) FROM claim;"
-    measurement["num_resposts"] = None
+    measurement["num_reposts"] = None
     try:
-        measurement["num_resposts"] = dbs["claims"].execute(query).fetchone()[0]
+        measurement["num_reposts"] = dbs["claims"].execute(query).fetchone()[0]
     except:
         pass
 
