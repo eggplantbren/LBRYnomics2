@@ -15,7 +15,9 @@ def make_measurement(k):
     # Get current timestamp
     now = time.time()
 
-    print("Making measurement. ", end="")
+    m = 1 + dbs["lbrynomics"].execute("SELECT COUNT(*) FROM measurements;")\
+                .fetchone()[0]
+    print(f"Making measurement {m}. ", end="")
     print("The time is " + str(datetime.datetime.utcfromtimestamp(int(now)))\
                  + " UTC.", flush=True)
 
