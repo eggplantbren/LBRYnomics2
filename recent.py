@@ -11,6 +11,7 @@ def count_recent_all(now):
     print("Counting recent activity.", flush=True)
     count_recent("channels", now)
     count_recent("streams",  now)  # Gets called claims for ease for Electron
+    count_recent("reposts",  now)  # Gets called claims for ease for Electron
     count_boosts(now)
     print("done.\n")
 
@@ -28,6 +29,8 @@ def count_recent(mode, now):
         claim_type = 1
     elif mode == "channels":
         claim_type = 2
+    elif mode == "reposts":
+        claim_type = 3
         
     # Time cutoffs
     cutoffs = [0.0, now - 30*86400.0, now-7*86400.0, now-86400.0, now-3600.0]
