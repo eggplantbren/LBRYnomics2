@@ -91,10 +91,12 @@ def check_and_run():
         get_top()
 
 
-def get_top(n=200):
+def get_top(n=250, publish=200):
     """
     Compute the top n channels
     """
+    assert n >= publish
+
     print("Making top channels list.", flush=True)
     channels = channels_with_content()
     counts = []
@@ -199,6 +201,14 @@ def get_top(n=200):
             if row[0].lower() in set(["mature", "porn", "xxx", "nsfw"]):
                 result["is_nsfw"][i] = True
                 break
+
+    # Truncate dict to publish
+    for key in result.keys():
+        try:
+            if len(result[key]) == n:
+                result[key] = result[key][0:publish]
+        except:
+            pass
 
     # Save to file
     f = open("json/subscriber_counts.json", "w")
