@@ -9,6 +9,9 @@ import top_channels
 import time
 import upload
 
+# Measure the time
+started_at = time.time()
+
 # Create the database
 create_db.create_db()
 
@@ -18,6 +21,9 @@ create_db.test_history()
 # Enter main loop
 k = 0
 while True:
+
+    d = (time.time() - started_at)/86400.0
+    print(f"This process has been running for {d:.3f} days.")
 
     # Make the measurement
     result = measurement.make_measurement(k)
