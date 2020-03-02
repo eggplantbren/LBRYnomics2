@@ -65,8 +65,8 @@ def make_measurement(k):
         measurement["ytsync_pending_upgrade"] = data["PendingUpgrade"]
         measurement["ytsync_failed"] = data["Failed"]
     else:
-        measurement["ytsyc_new_pending"] = None
-        measurement["ytsyc_pending_update"] = None
+        measurement["ytsync_new_pending"] = None
+        measurement["ytsync_pending_update"] = None
         measurement["ytsync_pending_upgrade"] = None
         measurement["ytsync_failed"] = None
 
