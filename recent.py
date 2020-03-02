@@ -90,6 +90,7 @@ def count_boosts(now):
     block = daemon_command("status")["wallet"]["blocks"]
 
     # Save next trending block
+    """
     blocks = {}
     blocks["current"] = block
     blocks["next_trending_cycle"] = (int(block / 134) + 1)*134
@@ -98,7 +99,7 @@ def count_boosts(now):
     f.write(json.dumps(blocks, indent=4))
     f.close()
     print("    Saved {filename}.".format(filename=filename), flush=True)
-
+    """
     conn = apsw.Connection(config.claims_db_file)
     c = conn.cursor()
 
