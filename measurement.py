@@ -60,8 +60,8 @@ def make_measurement(k):
         response = { "success": False }
     if response["success"]:
         data = response["data"]
-        measurement["ytsyc_new_pending"] = data["NewPending"]
-        measurement["ytsyc_pending_update"] = data["PendingUpdate"]
+        measurement["ytsync_new_pending"] = data["NewPending"]
+        measurement["ytsync_pending_update"] = data["PendingUpdate"]
         measurement["ytsync_pending_upgrade"] = data["PendingUpgrade"]
         measurement["ytsync_failed"] = data["Failed"]
     else:
