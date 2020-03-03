@@ -82,6 +82,8 @@ def make_measurement(k):
 
         if response["success"]:
             measurement["circulating_supply"] = response["utxosupply"]["circulating"]
+            if measurement["circulating_supply"] <= 0.0:
+                measurement["circulating_supply"] = None
 
     # Count reposts
     query = "SELECT SUM(reposted) FROM claim;"
