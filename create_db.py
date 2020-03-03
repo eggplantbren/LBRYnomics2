@@ -10,6 +10,7 @@ def create_db():
     # Set pragmas
     dbs["lbrynomics"].execute("""
     PRAGMA journal_mode = WAL;
+    PRAGMA synchronous = 1;
     """)
 
     # Add indices to claims.db
@@ -166,7 +167,8 @@ def create_db():
                     "357ce885e22f2a7bd426ac36224722d64fc90ce6",
                     "c3ab2407e295cd267ced06d1fad2ed09b8d5643e",
                     "37b96ce8ae7a5564174111573105ee7efe4cd2fc",
-                    "2849e111e747ce5883d2409046fefa03029daaec" ])
+                    "2849e111e747ce5883d2409046fefa03029daaec",
+                    "29531246ce976d00a41741555edae4028c668205" ])
 
     dbs["lbrynomics"].execute("BEGIN;")
 
