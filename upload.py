@@ -14,9 +14,9 @@ def upload():
     secrets = yaml.load(f, Loader=yaml.SafeLoader)
     f.close()
 
-    cmd = "sshpass -p \"{p}\" scp -P 21098 upload/* {user}@{dest}"\
+    cmd = "sshpass -p \"{p}\" scp -P {port} upload/* {user}@{dest}"\
             .format(p=secrets["password"], user=secrets["user"],
-                    dest=secrets["destination"])
+                    dest=secrets["destination"], port=secrets["port"])
     subprocess.run(cmd, shell=True)
     print("Done.\n")
 
