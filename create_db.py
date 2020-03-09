@@ -77,28 +77,30 @@ def create_db():
     # Special treatment for some claims
 
     # LBRY Inc channels
-    inc = set(["f3da2196b5151570d980b34d311ee0973225a68e",
-               "70b8a88fc6e5ce9e4d6e8721536688484ecd79f4",
-               "3fda836a92faaceedfe398225fb9b2ee2ed1f01a",
-               "e48d2b50501159034f68d53321f67b8aa5b1d771",
-               "e8fed337dc4ee260f4bcfa6d24ae1e4dd75c2fb3",
-               "4c29f8b013adea4d5cca1861fb2161d5089613ea"])
+    inc = set()
+#    inc = set(["f3da2196b5151570d980b34d311ee0973225a68e",
+#               "70b8a88fc6e5ce9e4d6e8721536688484ecd79f4",
+#               "3fda836a92faaceedfe398225fb9b2ee2ed1f01a",
+#               "e48d2b50501159034f68d53321f67b8aa5b1d771",
+#               "e8fed337dc4ee260f4bcfa6d24ae1e4dd75c2fb3",
+#               "4c29f8b013adea4d5cca1861fb2161d5089613ea"])
 
     # LBRY Social channels
-    ls = set(["5bd299a92e7b31865d2bb3e2313402edaca41a94",
-              "f8d6eccd887c9cebd36b1d42aa349279b7f5c3ed",
-              "e11e2fc3056137948d2cc83fb5ca2ce9b57025ec",
-              "1ba5acff747615510cf3f6089f54d5de669ad94f",
-              "4506db7fb52d3ec5d3a024c870bf86fc35f7b6a3",
-              "0f3a709eac3c531a68c97c7a48b2e37a532edb03",
-              "36b7bd81c1f975878da8cfe2960ed819a1c85bb5",
-              "e5f33f22ef656cb1595140409850a04d60aa474b",
-              "631ca9fce459f1116ae5317486c7f4af69554742",
-              "4caa1f92fb477caed1ce07cb7762a2249050a59c",
-              "56e86eb938c0b93beccde0fbaaead65755139a10",
-              "60ea26a907f25bcbbc8215007eef2bf0fb846f5c",
-              "d0174cf90b6ec4e26ee2fc013714b0803dec5dd1",
-              "3849a35ae6122e0b7a035c2ba66e97b9e4ab9efa" ])
+    ls = set()
+#    ls = set(["5bd299a92e7b31865d2bb3e2313402edaca41a94",
+#              "f8d6eccd887c9cebd36b1d42aa349279b7f5c3ed",
+#              "e11e2fc3056137948d2cc83fb5ca2ce9b57025ec",
+#              "1ba5acff747615510cf3f6089f54d5de669ad94f",
+#              "4506db7fb52d3ec5d3a024c870bf86fc35f7b6a3",
+#              "0f3a709eac3c531a68c97c7a48b2e37a532edb03",
+#              "36b7bd81c1f975878da8cfe2960ed819a1c85bb5",
+#              "e5f33f22ef656cb1595140409850a04d60aa474b",
+#              "631ca9fce459f1116ae5317486c7f4af69554742",
+#              "4caa1f92fb477caed1ce07cb7762a2249050a59c",
+#              "56e86eb938c0b93beccde0fbaaead65755139a10",
+#              "60ea26a907f25bcbbc8215007eef2bf0fb846f5c",
+#              "d0174cf90b6ec4e26ee2fc013714b0803dec5dd1",
+#              "3849a35ae6122e0b7a035c2ba66e97b9e4ab9efa" ])
 
 
     # Given mature tag by us
