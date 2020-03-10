@@ -1,5 +1,6 @@
 import apsw
 import config
+from daemon_command import daemon_command
 from databases import dbs
 import datetime
 import json
@@ -36,6 +37,31 @@ def channels_with_content():
     print("done. {n} channels remain.".format(n=len(result)))
     return result
 
+
+def estimate_revenue(channel_hash):
+    block = daemon_command("status")["wallet"]["blocks"] - 7*576
+
+    query = """
+    SELECT
+        SUM(support.amount)/1E8 tot
+    FROM
+        claim post
+            INNER JOIN
+        claim channel
+            ON post.channel_hash = channel.claim_hash AND
+            post.channel_hash = ?
+        INNER JOIN
+        support ON
+            support.claim_hash = post.claim_hash AND
+        support.height >= ? AND
+        support.amount <= 500000000;
+    """
+
+    result = dbs["claims"].execute(query, (channel_hash, block))
+    result = result.fetchone()[0]
+    if result is None:
+        result = 0.0
+    return result
 
 def get_followers(channels, start, end):
     """
@@ -115,15 +141,18 @@ def get_top(n=250, publish=200):
               "ranks": [],
               "claim_ids": [],
               "vanity_names": [],
-              "num_followers": []}
+              "num_followers": [],
+              "revenue": []}
 
     for i in range(n):
         result["ranks"].append(i+1)
         result["claim_ids"].append(str(channels[i]))
-        name = dbs["claims"].execute("SELECT claim_name FROM claim WHERE claim_id=?",
-                         (str(channels[i]),)).fetchone()[0]
+        row = dbs["claims"].execute("SELECT claim_name, claim_hash FROM claim WHERE claim_id=?",
+                         (str(channels[i]),)).fetchone()
+        name, claim_hash = row
         result["vanity_names"].append(name)
         result["num_followers"].append(int(counts[i]))
+        result["revenue"].append(estimate_revenue(claim_hash))
 
 
     # Epoch number
@@ -137,11 +166,12 @@ def get_top(n=250, publish=200):
                  result["vanity_names"][i],\
                  epoch,
                  result["num_followers"][i],\
-                 result["ranks"][i])
+                 result["ranks"][i],\
+                 result["revenue"][i])
         dbs["lbrynomics"].execute("""
                   INSERT INTO channel_measurements
-                      (claim_id, vanity_name, epoch, num_followers, rank)
-                  VALUES (?, ?, ?, ?, ?);
+                      (claim_id, vanity_name, epoch, num_followers, rank, revenue)
+                  VALUES (?, ?, ?, ?, ?, ?);
                   """, values)
 
     dbs["lbrynomics"].execute("COMMIT;")
