@@ -48,6 +48,7 @@ def create_db():
          num_followers INTEGER NOT NULL,
          rank INTEGER NOT NULL,
          revenue REAL,
+         views INTEGER,
          FOREIGN KEY (epoch) REFERENCES epochs (id));
 
     -- Create epochs channel

@@ -63,6 +63,48 @@ def estimate_revenue(channel_hash):
         result = 0.0
     return result
 
+
+def get_view_counts(claim_ids, start, end):
+    result = []
+
+    # Elegantly handle end
+    if end > len(claim_ids):
+        end = len(claim_ids)
+
+    # Get auth token
+    f= open("secrets.yaml")
+    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
+    f.close()
+
+    # Prepare the request to the LBRY API
+    url = "https://api.lbry.com/file/view_count?auth_token=" +\
+                auth_token + "&claim_id="
+    for i in range(start, end):
+        url += claim_ids[i]
+        if i != end-1:
+            url += ","
+
+    # JSON response from API
+    try:
+        response = requests.get(url).json()
+        for value in response["data"]:
+            result.append(value)
+    except:
+        result.append(None)
+
+    return result
+
+def view_counts_channel(channel_hash):
+    claim_ids = []
+    for row in dbs["claims"].execute("SELECT claim_id FROM claim WHERE channel_hash = ?;",
+                                     (channel_hash, )):
+        claim_ids.append(row[0])
+
+    counts = 0
+    for i in range(len(claim_ids)//100 + 1):
+        counts += sum(get_view_counts(claim_ids, 100*i, 100*(i+1)))
+    return counts
+
 def get_followers(channels, start, end):
     """
     Get follower numbers for channels[start:end]
@@ -134,7 +176,7 @@ def get_top(n=250, publish=200):
     counts = []
     for i in range(len(channels)//100 + 1):
         counts += get_followers(channels, 100*i, 100*(i+1))
-        print("    Processed {a}/{b} channels."\
+        print("    Got follower counts for {a}/{b} channels."\
                 .format(a=len(counts), b=len(channels)), end="\r")
     print("")
 
@@ -148,18 +190,22 @@ def get_top(n=250, publish=200):
               "claim_ids": [],
               "vanity_names": [],
               "num_followers": [],
-              "revenue": []}
+              "revenue": [],
+              "views": []}
 
     for i in range(n):
         result["ranks"].append(i+1)
         result["claim_ids"].append(str(channels[i]))
         row = dbs["claims"].execute("SELECT claim_name, claim_hash FROM claim WHERE claim_id=?",
                          (str(channels[i]),)).fetchone()
-        name, claim_hash = row
+        name, channel_hash = row
         result["vanity_names"].append(name)
         result["num_followers"].append(int(counts[i]))
-        result["revenue"].append(estimate_revenue(claim_hash))
-
+        print(f"    Getting view counts & revenue for {name}.            " \
+                        + "                                         ", end="\r")
+        result["revenue"].append(estimate_revenue(channel_hash))
+        result["views"].append(view_counts_channel(channel_hash))
+    print("done.")
 
     # Epoch number
     epoch = 1 + dbs["lbrynomics"].execute("SELECT COUNT(id) c FROM epochs").fetchone()[0]
@@ -256,4 +302,12 @@ def get_top(n=250, publish=200):
     print("Done.\n")
 
     return result
+
+
+#if __name__ == "__main__":
+#    channel_hash = dbs["claims"].execute("SELECT claim_hash FROM claim WHERE claim_id='760da3ba3dd85830a843beaaed543a89b7a367e7';").fetchone()[0]
+
+#    start = time.time()
+#    print(view_counts_channel(channel_hash))
+#    print(time.time() - start)
 
