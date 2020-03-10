@@ -113,8 +113,14 @@ def check_and_run():
     """
     rows = dbs["lbrynomics"].execute("SELECT COUNT(*) AS rows FROM epochs;").fetchone()[0]
 
-    if rows == 0 or time_since_last_epoch() >= 86400.0 - 150.0:
+    if rows == 0:
         get_top()
+    elif time_since_last_epoch() >= 12*3600.0 and datetime.datetime.utcnow().hour == 0:
+        get_top()
+    elif time_since_last_epoch() >= 25*3600:
+        get_top()
+
+    return
 
 
 def get_top(n=250, publish=200):
