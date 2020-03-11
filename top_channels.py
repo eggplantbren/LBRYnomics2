@@ -222,11 +222,12 @@ def get_top(n=250, publish=200):
                  epoch,
                  result["num_followers"][i],\
                  result["ranks"][i],\
-                 result["revenue"][i])
+                 result["revenue"][i],\
+                 result["views"][i])
         dbs["lbrynomics"].execute("""
                   INSERT INTO channel_measurements
-                      (claim_id, vanity_name, epoch, num_followers, rank, revenue)
-                  VALUES (?, ?, ?, ?, ?, ?);
+                      (claim_id, vanity_name, epoch, num_followers, rank, revenue, views)
+                  VALUES (?, ?, ?, ?, ?, ?, ?);
                   """, values)
 
     dbs["lbrynomics"].execute("COMMIT;")
