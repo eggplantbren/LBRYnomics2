@@ -102,7 +102,10 @@ def view_counts_channel(channel_hash):
 
     counts = 0
     for i in range(len(claim_ids)//100 + 1):
-        counts += sum(get_view_counts(claim_ids, 100*i, 100*(i+1)))
+        result = get_view_counts(claim_ids, 100*i, 100*(i+1))
+        for x in result:
+            if x is not None:
+                counts += x
     return counts
 
 def get_followers(channels, start, end):
@@ -202,7 +205,7 @@ def get_top(n=250, publish=200):
         result["vanity_names"].append(name)
         result["num_followers"].append(int(counts[i]))
         print(f"    Getting view counts & revenue for {name}.            " \
-                        + "                                         ", end="\r")
+                        + "                                         \r", end="")
         result["revenue"].append(estimate_revenue(channel_hash))
         result["views"].append(view_counts_channel(channel_hash))
     print("done.")
