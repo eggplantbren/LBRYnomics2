@@ -1,9 +1,9 @@
 # LBRYnomics2
-New cleaner backend for https://lbry.social/lbrynomics
+New cleaner backend for LBRYnomics
 
 ## Usage
 
-coming soon
+This code is intended to be run on a wallet server.
 
 ## Running from Source
 
@@ -14,13 +14,12 @@ In order to get all dependencies needed just type
 pip3 install -r requirements.txt
 ```
 
-## Contributing
-
-coming soon
-
+To run, execute `main.py` using Python 3.
+Configuration is in `config.yaml` and `secrets.yaml`.
+ 
 ## License
 
-All *code* is released under the MIT License - see the LICENSE file for details. The contents of the `assets` folder are proprietary.
+GNU GPL version 3. See the LICENSE file for details.
 
 
 (c) 2019, 2020 Brendon J. Brewer.
