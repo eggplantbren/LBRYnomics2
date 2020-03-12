@@ -256,14 +256,24 @@ def get_top(n=250, publish=200):
                              WHERE claim_id = ? AND epoch = ?;
                              """, (result["claim_ids"][i], old_epoch)).fetchone()
 
-        if response is not None:
-            result["change"].append(result["subscribers"][i] - response[0])
-            result["rank_change"].append(-(result["ranks"][i] - response[1]))
-            result["views_change"].append(result["views"][i] - response[2])
+        if response[0] is None:
+            change = None
         else:
-            result["change"].append(None)
-            result["rank_change"].append(None)
-            result["views_change"].append(None)
+            change = result["subscribers"][i] - response[0]
+
+        if response[1] is None:
+            rank_change = None
+        else:
+            rank_change = result["ranks"][i] - response[1]
+
+        if response[2] is None:
+            views_change = None
+        else:
+            views_change = result["views"][i] - response[2]
+
+        result["change"].append(change)
+        result["rank_change"].append(rank_change)
+        result["views_change"].append(views_change)
 
         result["is_nsfw"].append(False)
         result["grey"].append(False)
