@@ -61,7 +61,7 @@ def create_db():
         (claim_id STRING PRIMARY KEY,
          is_nsfw INTEGER NOT NULL DEFAULT 0,
          grey  INTEGER NOT NULL DEFAULT 0,
-         ls    INTEGER NOT NULL DEFAULT 0,
+         lbryf INTEGER NOT NULL DEFAULT 0,
          inc   INTEGER NOT NULL DEFAULT 0,
          black INTEGER NOT NULL DEFAULT 0) WITHOUT ROWID;
     """)
@@ -76,10 +76,9 @@ def create_db():
     """)
 
 
-     Special treatment for some claims
+   #  Special treatment for some claims
 
    #  LBRY Inc channels
-    inc = set()
     inc = set(["f3da2196b5151570d980b34d311ee0973225a68e",
                "70b8a88fc6e5ce9e4d6e8721536688484ecd79f4",
                "3fda836a92faaceedfe398225fb9b2ee2ed1f01a",
@@ -88,7 +87,6 @@ def create_db():
                "4c29f8b013adea4d5cca1861fb2161d5089613ea"])
 
     # LBRY Foundation Channels
-    lbryf = set()
     lbryf = set(["5bd299a92e7b31865d2bb3e2313402edaca41a94",
               "f8d6eccd887c9cebd36b1d42aa349279b7f5c3ed",
               "e11e2fc3056137948d2cc83fb5ca2ce9b57025ec",
@@ -185,11 +183,11 @@ def create_db():
                     ON CONFLICT (claim_id)
                     DO UPDATE SET inc=1;""", (claim_id, ))
 
-    for claim_id in ls:
-        dbs["lbrynomics"].execute("""INSERT INTO special_channels (claim_id, ls)
+    for claim_id in lbryf:
+        dbs["lbrynomics"].execute("""INSERT INTO special_channels (claim_id, lbryf)
                     VALUES (?, 1)
                     ON CONFLICT (claim_id)
-                    DO UPDATE SET ls=1;""", (claim_id, ))
+                    DO UPDATE SET lbryf=1;""", (claim_id, ))
 
     for claim_id in manual_mature:
         dbs["lbrynomics"].execute("""INSERT INTO special_channels (claim_id, is_nsfw)

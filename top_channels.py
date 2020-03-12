@@ -246,7 +246,7 @@ def get_top(n=250, publish=200):
     result["change"] = []
     result["rank_change"] = []
     result["is_nsfw"] = []
-    result["ls"] = []
+    result["lbryf"] = []
     result["inc"] = []
     result["grey"] = []
 
@@ -266,7 +266,7 @@ def get_top(n=250, publish=200):
 
         result["is_nsfw"].append(False)
         result["grey"].append(False)
-        result["ls"].append(False)
+        result["lbryf"].append(False)
         result["inc"].append(False)
 
         # Check for NSFW and other flags
@@ -275,7 +275,7 @@ def get_top(n=250, publish=200):
         for row in response:
             result["is_nsfw"][-1] = bool(row[1])
             result["grey"][-1] = bool(row[2])
-            result["ls"][-1] = bool(row[3])
+            result["lbryf"][-1] = bool(row[3])
             result["inc"][-1] = bool(row[4])
 
         # Check for mature tags on protocol level
