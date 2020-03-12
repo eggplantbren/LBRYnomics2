@@ -3,7 +3,19 @@ New cleaner backend for LBRYnomics
 
 ## Usage
 
-This code is intended to be run on a wallet server.
+This code is intended to be run on a wallet server. You'll need to edit `config.yaml` to point it to the wallet server's `claims.db` database, and change other directories there to something sensible.
+
+The `secrets.yaml` config file should have the following fields. All but one of these fields are used to transfer the files to a web server that lets you use `scp` to copy files over. The `auth_token` is from your LBRY app.
+
+```
+destination: mywebserver.com:public_html/lbrynomics/
+user: myusername
+password: mypassword
+port: 22
+auth_token: xyz123abc456
+```
+
+To launch LBRYnomics2, run `main.py` with Python 3.
 
 ## Running from Source
 
