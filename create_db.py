@@ -47,7 +47,7 @@ def create_db():
          epoch INTEGER NOT NULL,
          num_followers INTEGER NOT NULL,
          rank INTEGER NOT NULL,
-         revenue REAL,
+--         revenue REAL,
          views INTEGER,
          FOREIGN KEY (epoch) REFERENCES epochs (id));
 

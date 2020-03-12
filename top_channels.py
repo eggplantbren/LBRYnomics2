@@ -192,8 +192,7 @@ def get_top(n=250, publish=200):
               "ranks": [],
               "claim_ids": [],
               "vanity_names": [],
-              "num_followers": [],
-              "revenue": [],
+              "num_followers": [],#              "revenue": [],
               "views": []}
 
     for i in range(n):
@@ -204,9 +203,9 @@ def get_top(n=250, publish=200):
         name, channel_hash = row
         result["vanity_names"].append(name)
         result["num_followers"].append(int(counts[i]))
-        print(f"    Getting view counts & revenue for {name}.            " \
+        print(f"    Getting view counts for {name}.            " \
                         + "                                         \r", end="")
-        result["revenue"].append(estimate_revenue(channel_hash))
+#        result["revenue"].append(estimate_revenue(channel_hash))
         result["views"].append(view_counts_channel(channel_hash))
     print("done.")
 
@@ -217,17 +216,16 @@ def get_top(n=250, publish=200):
 
     dbs["lbrynomics"].execute("BEGIN;")
     for i in range(n):
-        values = (result["claim_ids"][i],\
-                 result["vanity_names"][i],\
+        values = (result["claim_ids"][i],
+                 result["vanity_names"][i],
                  epoch,
-                 result["num_followers"][i],\
-                 result["ranks"][i],\
-                 result["revenue"][i],\
+                 result["num_followers"][i],
+                 result["ranks"][i], #                 result["revenue"][i],\
                  result["views"][i])
         dbs["lbrynomics"].execute("""
                   INSERT INTO channel_measurements
-                      (claim_id, vanity_name, epoch, num_followers, rank, revenue, views)
-                  VALUES (?, ?, ?, ?, ?, ?, ?);
+                      (claim_id, vanity_name, epoch, num_followers, rank, views)
+                  VALUES (?, ?, ?, ?, ?, ?);
                   """, values)
 
     dbs["lbrynomics"].execute("COMMIT;")
@@ -245,6 +243,7 @@ def get_top(n=250, publish=200):
                           """, (epoch, )).fetchone()[0]
     result["change"] = []
     result["rank_change"] = []
+    result["views_change"] = []
     result["is_nsfw"] = []
     result["lbryf"] = []
     result["inc"] = []
@@ -252,7 +251,7 @@ def get_top(n=250, publish=200):
 
     for i in range(n):
         response = dbs["lbrynomics"].execute("""
-                             SELECT num_followers, rank
+                             SELECT num_followers, rank, views
                              FROM channel_measurements
                              WHERE claim_id = ? AND epoch = ?;
                              """, (result["claim_ids"][i], old_epoch)).fetchone()
@@ -260,9 +259,11 @@ def get_top(n=250, publish=200):
         if response is not None:
             result["change"].append(result["subscribers"][i] - response[0])
             result["rank_change"].append(-(result["ranks"][i] - response[1]))
+            result["views_change"].append(result["views"][i] - response[2])
         else:
             result["change"].append(None)
             result["rank_change"].append(None)
+            result["views_change"].append(None)
 
         result["is_nsfw"].append(False)
         result["grey"].append(False)
