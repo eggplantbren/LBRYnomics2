@@ -256,6 +256,9 @@ def get_top(n=250, publish=200):
                              WHERE claim_id = ? AND epoch = ?;
                              """, (result["claim_ids"][i], old_epoch)).fetchone()
 
+        if response is None:
+            response = [None, None, None]
+
         if response[0] is None:
             change = None
         else:
