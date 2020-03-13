@@ -267,7 +267,7 @@ def get_top(n=250, publish=200):
         if response[1] is None:
             rank_change = None
         else:
-            rank_change = result["ranks"][i] - response[1]
+            rank_change = response[1] - result["ranks"][i]
 
         if response[2] is None:
             views_change = None
