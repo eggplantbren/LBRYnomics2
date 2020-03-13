@@ -25,10 +25,13 @@ auth_token: xyz123abc456
 
 To launch LBRYnomics2, run `main.py` with Python 3.
 
-## Data Snapshots
+## Outputs
 
-These are published a few times a day to https://keybase.pub/brendonbrewer/lbrynomics.db.zst
-That's a zstandard-compressed SQLite3 database file.
+If my instance is running (it usually is), the outputs at
+https://brendonbrewer.com/lbrynomics will be updated every five minutes.
+A full snapshot of the data is
+backed up to https://keybase.pub/brendonbrewer/lbrynomics.db.zst
+as a zstandard-compressed SQLite3 database file.
  
 ## License
 
