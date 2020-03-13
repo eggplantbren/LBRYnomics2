@@ -203,10 +203,10 @@ def get_top(n=250, publish=200):
         name, channel_hash = row
         result["vanity_names"].append(name)
         result["num_followers"].append(int(counts[i]))
-        print(f"    Getting view counts for {name}.            " \
-                        + "                                         \r", end="")
+        print(f"    Getting view counts for {name}.", end="", flush=True)
 #        result["revenue"].append(estimate_revenue(channel_hash))
         result["views"].append(view_counts_channel(channel_hash))
+        print("")
     print("done.")
 
     # Epoch number
