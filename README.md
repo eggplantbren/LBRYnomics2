@@ -1,5 +1,6 @@
 # LBRYnomics2
-New cleaner backend for LBRYnomics
+
+This is a program which runs on a LBRY wallet server. It measures various quantities from both the wallet server's claim database and LBRY Inc's APIs, saving the measurements to its own database. It also generates plots of the history of the quantities it measures, and JSON files containing figures that can be presented on websites.
 
 ## Usage
 
@@ -27,11 +28,11 @@ To launch LBRYnomics2, run `main.py` with Python 3.
 
 ## Outputs
 
-If my instance is running (it usually is), the outputs at
-https://brendonbrewer.com/lbrynomics will be updated every five minutes.
+If my instance is running (it usually is, and I intend to keep it running), the outputs at
+https://brendonbrewer.com/lbrynomics will be updated every five minutes. These provide the raw information for presentation by other sites such as Electron's https://lbrynomics.com.
+
 A full snapshot of the data is
-backed up to https://keybase.pub/brendonbrewer/lbrynomics.db.zst
-as a zstandard-compressed SQLite3 database file.
+backed up to https://keybase.pub/brendonbrewer/lbrynomics.db.zst approximately every 6 hours. It is an SQLite3 database which has been compressed with zstandard.
  
 ## License
 
