@@ -10,8 +10,8 @@ import math
 def count_recent_all(now):
     print("Counting recent activity.", flush=True)
     count_recent("channels", now)
-    count_recent("streams",  now)  # Gets called claims for ease for Electron
-    count_recent("reposts",  now)  # Gets called claims for ease for Electron
+    count_recent("streams",  now)
+    count_recent("reposts",  now)
     count_boosts(now)
     print("done.\n")
 
@@ -21,11 +21,7 @@ def count_recent(mode, now):
     Count recent things. Output JSON.
     """
 
-    # Claim type
     if mode == "streams":
-        mode = "claims" # Backwards compatibility
-
-    if mode == "claims":
         claim_type = 1
     elif mode == "channels":
         claim_type = 2
@@ -100,8 +96,6 @@ def count_boosts(now):
     f.close()
     print("    Saved {filename}.".format(filename=filename), flush=True)
     """
-    conn = apsw.Connection(config.claims_db_file)
-    c = conn.cursor()
 
     for i in range(len(labels)):
 
