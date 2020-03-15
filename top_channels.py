@@ -310,6 +310,13 @@ def get_top(n=250, publish=200):
         except:
             pass
 
+    # Make versions with null replaced by 0
+    for key in result.keys():
+        if "change" in key:
+            for i in range(len(result[key])):
+                if result[key][i] is None:
+                    result[key][i] = "00"
+
     # Save to file
     f = open("json/subscriber_counts.json", "w")
     import update_rss
