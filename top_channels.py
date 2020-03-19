@@ -244,7 +244,7 @@ def get_top(n=250, publish=200):
                  result["num_followers"][i],
                  result["ranks"][i], #                 result["revenue"][i],\
                  result["views"][i],
-                 result["times_reposted"])
+                 result["times_reposted"][i])
         dbs["lbrynomics"].execute("""
                   INSERT INTO channel_measurements
                       (claim_id, vanity_name, epoch, num_followers, rank, views, times_reposted)
