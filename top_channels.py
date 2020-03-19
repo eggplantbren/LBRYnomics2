@@ -187,27 +187,49 @@ def get_top(n=250, publish=200):
     channels = np.array(channels)[ii]
     counts = np.array(counts)[ii]
 
+    # Vanity names and channel hashes from claim IDs
+    vanity_names = []
+    channel_hashes = []
+    for row in dbs["claims"].executemany("""
+            SELECT claim_name, claim_hash FROM claim WHERE claim_id=?;""",
+                [(claim_id, ) for claim_id in channels]):
+        vanity_names.append(row[0])
+        channel_hashes.append(row[1])
+
+
+
+    # Get repost counts for the channels
+    query = """
+    SELECT SUM(reposted) r
+        FROM claim WHERE channel_hash = ?;
+    """
+    times_reposted = []
+    for row in dbs["claims"].executemany(query,
+                            [(ch, ) for ch in channel_hashes]):
+        times_reposted.append(row[0])
+
     # Put into a dict
     result = {"unix_time": time.time(),
               "ranks": [],
               "claim_ids": [],
-              "vanity_names": [],
+              "vanity_names": vanity_names,
               "num_followers": [],#              "revenue": [],
-              "views": []}
+              "views": [],
+              "times_reposted": times_reposted}
 
     for i in range(n):
         result["ranks"].append(i+1)
         result["claim_ids"].append(str(channels[i]))
-        row = dbs["claims"].execute("SELECT claim_name, claim_hash FROM claim WHERE claim_id=?",
-                         (str(channels[i]),)).fetchone()
-        name, channel_hash = row
-        result["vanity_names"].append(name)
         result["num_followers"].append(int(counts[i]))
-        print(f"    Getting view counts for {name}.", end="", flush=True)
+        print("    Getting view counts for {name}.".format(name=vanity_names[i]),
+              end="", flush=True)
 #        result["revenue"].append(estimate_revenue(channel_hash))
-        result["views"].append(view_counts_channel(channel_hash))
+        result["views"].append(view_counts_channel(channel_hashes[i]))
         print("")
     print("done.")
+
+    
+
 
     # Epoch number
     epoch = 1 + dbs["lbrynomics"].execute("SELECT COUNT(id) c FROM epochs").fetchone()[0]
@@ -221,11 +243,12 @@ def get_top(n=250, publish=200):
                  epoch,
                  result["num_followers"][i],
                  result["ranks"][i], #                 result["revenue"][i],\
-                 result["views"][i])
+                 result["views"][i],
+                 result["times_reposted"])
         dbs["lbrynomics"].execute("""
                   INSERT INTO channel_measurements
-                      (claim_id, vanity_name, epoch, num_followers, rank, views)
-                  VALUES (?, ?, ?, ?, ?, ?);
+                      (claim_id, vanity_name, epoch, num_followers, rank, views, times_reposted)
+                  VALUES (?, ?, ?, ?, ?, ?, ?);
                   """, values)
 
     dbs["lbrynomics"].execute("COMMIT;")
@@ -244,6 +267,8 @@ def get_top(n=250, publish=200):
     result["change"] = []
     result["rank_change"] = []
     result["views_change"] = []
+    result["times_reposted_change"] = []
+
     result["is_nsfw"] = []
     result["lbryf"] = []
     result["inc"] = []
@@ -251,13 +276,13 @@ def get_top(n=250, publish=200):
 
     for i in range(n):
         response = dbs["lbrynomics"].execute("""
-                             SELECT num_followers, rank, views
+                             SELECT num_followers, rank, views, times_reposted
                              FROM channel_measurements
                              WHERE claim_id = ? AND epoch = ?;
                              """, (result["claim_ids"][i], old_epoch)).fetchone()
 
         if response is None:
-            response = [None, None, None]
+            response = [None, None, None, None]
 
         if response[0] is None:
             change = None
@@ -274,9 +299,15 @@ def get_top(n=250, publish=200):
         else:
             views_change = result["views"][i] - response[2]
 
+        if response[3] is None:
+            times_reposted_change = None
+        else:
+            times_reposted_change = result["times_reposted"][i] - response[3]
+
         result["change"].append(change)
         result["rank_change"].append(rank_change)
         result["views_change"].append(views_change)
+        result["times_reposted_change"].append(times_reposted_change)
 
         result["is_nsfw"].append(False)
         result["grey"].append(False)
