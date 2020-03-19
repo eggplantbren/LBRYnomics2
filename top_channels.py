@@ -96,7 +96,7 @@ def get_view_counts(claim_ids, start, end):
 
 def view_counts_channel(channel_hash):
     claim_ids = []
-    for row in dbs["claims"].execute("SELECT claim_id FROM claim WHERE channel_hash = ?;",
+    for row in dbs["claims"].execute("SELECT claim_id FROM claim WHERE channel_hash = ? AND claim_type=1;",
                                      (channel_hash, )):
         claim_ids.append(row[0])
 
