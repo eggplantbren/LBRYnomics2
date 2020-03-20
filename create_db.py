@@ -85,7 +85,8 @@ def create_db():
                "3fda836a92faaceedfe398225fb9b2ee2ed1f01a",
                "e48d2b50501159034f68d53321f67b8aa5b1d771",
                "e8fed337dc4ee260f4bcfa6d24ae1e4dd75c2fb3",
-               "4c29f8b013adea4d5cca1861fb2161d5089613ea"])
+               "4c29f8b013adea4d5cca1861fb2161d5089613ea",
+               "19e7d3104e12fe3eeaef05933af033242eeb42c3"])
 
     # LBRY Foundation Channels
     lbryf = set(["5bd299a92e7b31865d2bb3e2313402edaca41a94",
