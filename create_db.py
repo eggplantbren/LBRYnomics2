@@ -103,7 +103,9 @@ def create_db():
               "60ea26a907f25bcbbc8215007eef2bf0fb846f5c",
               "d0174cf90b6ec4e26ee2fc013714b0803dec5dd1",
               "3849a35ae6122e0b7a035c2ba66e97b9e4ab9efa",
-              "c62ee910262e0a126181dc454b0556a174bfb120" ])
+              "c62ee910262e0a126181dc454b0556a174bfb120",
+              "aaeda15cc0cafe689793a00d5e6c5a231e3b6ee8",
+              "2bfe6cdb24a21bdc1b76fb7c416edd50e9e85945" ])
 
     # Channels to be promoted
     # promo = set()
