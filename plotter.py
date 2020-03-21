@@ -86,13 +86,13 @@ def title(mode, value):
     if mode == "num_streams":
         string += "Total number of publications = {num}".format(num=value)
     if mode == "lbc_deposits":
-        string += "Total staked in deposits = {lbc:.2f} LBC"\
+        string += "Total staked in deposits = {lbc:.0f} LBC"\
                 .format(lbc=value)
     if mode == "num_supports":
         string += "Total number of active supports+tips = {num}"\
                 .format(num=value)
     if mode == "lbc_supports":
-        string += "Total locked in active supports+tips = {lbc:.2f} LBC"\
+        string += "Total locked in active supports+tips = {lbc:.0f} LBC"\
                 .format(lbc=value)
     if mode == "ytsync_new_pending":
         string += "New channels in queue to sync = {num}"\
@@ -135,7 +135,7 @@ def ylabel(mode):
     return string
 
 def set_ylim(mode):
-    if mode == "num_channels" or mode == "num_streams":
+    if mode in ["num_streams", "num_channels", "followers", "reposts"]:
         plt.ylim(bottom=0)
 
 
