@@ -80,35 +80,34 @@ def annotate_all(mode, subplot=1):
 
 
 def title(mode, value):
-    value = round(value)
+    if type(value) == np.int64:
+        value = int(value)
+    elif type(value) == np.float64:
+        value = float(value)
+
+    num = round(value)
 
     string = ""
     if mode == "num_channels":
-        string += "Total number of channels = {num}".format(num=value)
+        string += f"Total number of channels = {num}"
     if mode == "num_streams":
-        string += "Total number of publications = {num}".format(num=value)
+        string += f"Total number of publications = {num}"
     if mode == "lbc_deposits":
-        string += "Total staked in deposits = {lbc} LBC"\
-                .format(lbc=value)
+        string += f"Total staked in deposits = {num} LBC"
     if mode == "num_supports":
-        string += "Total number of active supports+tips = {num}"\
-                .format(num=value)
+        string += f"Total number of active supports+tips = {num}"
     if mode == "lbc_supports":
-        string += "Total locked in active supports+tips = {lbc} LBC"\
-                .format(lbc=value)
+        string += f"Total locked in active supports+tips = {num} LBC"
     if mode == "ytsync_new_pending":
-        string += "New channels in queue to sync = {num}"\
-                .format(num=value)
+        string += f"New channels in queue to sync = {num}"
     if mode == "ytsync_pending_update":
-        string += "Channels with new videos awaiting sync = {num}"\
-                .format(num=value)
+        string += f"Channels with new videos awaiting sync = {num}"
     if mode == "circulating_supply":
-        string += "Circulating supply = {lbc} LBC (max supply=1.083202 billion)".format(lbc=value)
+        string += f"Circulating supply = {num} LBC (max supply=1.083202 billion)"
     if mode == "followers":
-        string += f"Average followers of top 200 channels = {value}"
+        string += f"Average followers of top 200 channels = {num}"
     if mode == "num_reposts":
-        string += "Total number of reposts = {num}"\
-                .format(num=value)
+        string += f"Total number of reposts = {num}"
     return string
 
 
@@ -255,7 +254,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
     if run == 0.0:
         run = 1.0
     plt.title("Recent average daily change (last 30 days) = {value}"\
-                .format(value=int(rise/(run/86400.0))))
+                .format(value=round(float(rise/(run/86400.0)))))
 
     plt.xticks(mdates.date2num(ticks), ticks, rotation=70)
     plt.xlim(xlim)
@@ -272,7 +271,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
         fname = "plots/" + fname
     plt.savefig(fname.format(mode=mode), bbox_inches="tight")
     plt.close("all")
-    print("    Figure saved to {mode}.svg.".format(mode=mode))
+    print(f"    Figure saved to {mode}.svg.")
 
 
     # Make bokeh plot
