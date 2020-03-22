@@ -40,24 +40,19 @@ def annotate_all(mode, subplot=1):
         plt.axvline(mdates.date2num(datetime.date(year, 1, 1)),
                     color="r", linewidth=1.5, linestyle="--")
 
-    # Text vertical position depends on whether we're in the upper or
-    # lower subplot.
-    text_pos = 0.04*plt.gca().get_ylim()[1]
-    if subplot == 2:
-        text_pos = 0.55*plt.gca().get_ylim()[1]
+
+    text_pos = 0.97*plt.gca().get_ylim()[1]
 
     # MH
     if mode == "num_channels" or mode == "num_streams":
         loc = mdates.date2num(datetime.date(2019, 6, 9))
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
-        if mode == "num_streams":
-            tp = 0.55*plt.gca().get_ylim()[1]
-        else:
-            tp = text_pos
+
+        tp = text_pos
         plt.text(loc - 40.0,
                  tp,
                  "@MH video 'Why I Quit\nYouTube\' published",
-                 fontsize=12, rotation=90)
+                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
     # Crypto purge
     if mode == "num_channels" or mode == "num_streams":
@@ -66,7 +61,7 @@ def annotate_all(mode, subplot=1):
         plt.text(loc - 40.0,
                  text_pos,
                  "YouTube purges\ncrypto channels",
-                 fontsize=12, rotation=90)
+                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
     # Onboarding
     if mode == "num_channels":
@@ -74,8 +69,8 @@ def annotate_all(mode, subplot=1):
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
         plt.text(loc - 40.0,
                  text_pos,
-                 "New users prompted to\ncreate a channel",
-                 fontsize=12, rotation=90)
+                 "New users prompted\n to create a channel",
+                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
 
 
@@ -220,7 +215,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
     ax = plt.gca()
     ins = inset_axes(ax, width="100%", height="100%",
-                       bbox_to_anchor=(0.01, 0.72, 0.16, 0.35),
+                       bbox_to_anchor=(0.01, 0.68, 0.20, 0.40),
                        bbox_transform=ax.transAxes,
                        borderpad=0)
     ins.imshow(logo)
