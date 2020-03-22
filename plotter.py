@@ -215,7 +215,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
     ax = plt.gca()
     ins = inset_axes(ax, width="100%", height="100%",
-                       bbox_to_anchor=(0.01, 0.68, 0.20, 0.40),
+                       bbox_to_anchor=(0.01, 0.69, 0.20, 0.40),
                        bbox_transform=ax.transAxes,
                        borderpad=0)
     ins.imshow(logo)
