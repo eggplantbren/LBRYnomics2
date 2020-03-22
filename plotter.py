@@ -80,19 +80,21 @@ def annotate_all(mode, subplot=1):
 
 
 def title(mode, value):
+    value = round(value)
+
     string = ""
     if mode == "num_channels":
         string += "Total number of channels = {num}".format(num=value)
     if mode == "num_streams":
         string += "Total number of publications = {num}".format(num=value)
     if mode == "lbc_deposits":
-        string += "Total staked in deposits = {lbc:.0f} LBC"\
+        string += "Total staked in deposits = {lbc} LBC"\
                 .format(lbc=value)
     if mode == "num_supports":
         string += "Total number of active supports+tips = {num}"\
                 .format(num=value)
     if mode == "lbc_supports":
-        string += "Total locked in active supports+tips = {lbc:.0f} LBC"\
+        string += "Total locked in active supports+tips = {lbc} LBC"\
                 .format(lbc=value)
     if mode == "ytsync_new_pending":
         string += "New channels in queue to sync = {num}"\
@@ -101,9 +103,9 @@ def title(mode, value):
         string += "Channels with new videos awaiting sync = {num}"\
                 .format(num=value)
     if mode == "circulating_supply":
-        string += "Circulating supply = {lbc} LBC (max supply=1.083202 billion)".format(lbc=int(value))
+        string += "Circulating supply = {lbc} LBC (max supply=1.083202 billion)".format(lbc=value)
     if mode == "followers":
-        string += f"Average followers of top 200 channels = {value:.1f}"
+        string += f"Average followers of top 200 channels = {value}"
     if mode == "num_reposts":
         string += "Total number of reposts = {num}"\
                 .format(num=value)
@@ -252,7 +254,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
     run =  ts[-1] - ts[index]
     if run == 0.0:
         run = 1.0
-    plt.title("Recent average daily change (last 30 days) = {value}."\
+    plt.title("Recent average daily change (last 30 days) = {value}"\
                 .format(value=int(rise/(run/86400.0))))
 
     plt.xticks(mdates.date2num(ticks), ticks, rotation=70)
