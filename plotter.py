@@ -130,9 +130,14 @@ def ylabel(mode):
         string += "Total number of reposts"
     return string
 
-def set_ylim(mode):
+def set_ylim(mode, subplot=1):
     if mode in ["num_streams", "num_channels", "followers", "reposts"]:
-        plt.ylim(bottom=0)
+        plt.ylim(bottom=-0.5)
+    if mode in ["ytsync_new_pending", "ytsync_pending_update"] and\
+            subplot==1:
+        plt.ylim(bottom=-0.5)
+    if mode == "circulating_supply" and subplot==2:
+        plt.ylim(bottom=-0.5)
 
 
 def make_plot(mode, production=True, ts=None, ys=None):
@@ -253,7 +258,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
 
     plt.xticks(mdates.date2num(ticks), ticks, rotation=70)
     plt.xlim(xlim)
-    set_ylim(mode)
+    set_ylim(mode, 2)
     plt.ylabel(ylabel(mode) + " daily change")
     plt.gca().tick_params(labelright=True)
 
