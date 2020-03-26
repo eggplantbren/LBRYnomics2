@@ -186,6 +186,8 @@ def get_top(n=250, publish=200):
     ii = np.argsort(counts)[::-1]
     channels = np.array(channels)[ii]
     counts = np.array(counts)[ii]
+    channels = channels[0:n]
+    counts = counts[0:n]
 
     # Vanity names and channel hashes from claim IDs
     vanity_names = []
@@ -333,11 +335,19 @@ def get_top(n=250, publish=200):
                 result["is_nsfw"][i] = True
                 break
 
-    # Truncate dict to publish
+    # Create is_new field
+    result["is_new"] = []
+    for i in range(n):
+        result["is_new"].append(result["change"] is None)
+
+    # Truncate for publication, also replacing null values with 0
     for key in result.keys():
         try:
             if len(result[key]) == n:
                 result[key] = result[key][0:publish]
+                for i in range(len(result[key])):
+                    if result[key][i] is None:
+                        result[key][i] = 0
         except:
             pass
 
@@ -345,7 +355,7 @@ def get_top(n=250, publish=200):
     f = open("json/subscriber_counts.json", "w")
     import update_rss
     update_rss.update(result["human_time_utc"])
-    f.write(json.dumps(result, indent=4))
+    f.write(json.dumps(result))
     f.close()
 
     print("Done.\n")
