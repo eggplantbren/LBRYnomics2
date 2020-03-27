@@ -131,7 +131,7 @@ def create_db():
                   "1713b1a9d2fd4e68bf3ff179cba246d527f67d56"])
 
     # DMCA'd channels + rewards scammers (do not appear)
-    # Also those who appear to be faking their following
+    # Also those who appear to be faking their following, or other things
     black_list = set([ "98c39de1c681139e43131e4b32c2a21272eef06e",
                     "9ced2a722e91f28e9d3aea9423d34e08fb11e3f4",
                     "d5557f4c61d6725f1a51141bbee43cdd2576e415",
@@ -178,7 +178,8 @@ def create_db():
                     "c3ab2407e295cd267ced06d1fad2ed09b8d5643e",
                     "37b96ce8ae7a5564174111573105ee7efe4cd2fc",
                     "2849e111e747ce5883d2409046fefa03029daaec",
-                    "29531246ce976d00a41741555edae4028c668205" ])
+                    "29531246ce976d00a41741555edae4028c668205",
+                    "477b11086e2d5065d2dcbc0d9389ab31f75a5f5a" ])
 
     dbs["lbrynomics"].execute("BEGIN;")
 
