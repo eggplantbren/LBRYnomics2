@@ -133,6 +133,7 @@ def create_db():
     # DMCA'd channels + rewards scammers (do not appear)
     # Also those who appear to be faking their following, or other things
     black_list = set([ "98c39de1c681139e43131e4b32c2a21272eef06e",
+                    "321b33d22c8e24ef207e3f357a4573f6a56611f3",
                     "9ced2a722e91f28e9d3aea9423d34e08fb11e3f4",
                     "d5557f4c61d6725f1a51141bbee43cdd2576e415",
                     "35100b76e32aeb2764d334186249fa1b90d6cd74",
