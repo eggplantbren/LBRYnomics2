@@ -353,8 +353,8 @@ def get_top(n=250, publish=200):
 
     # Save to file
     f = open("json/subscriber_counts.json", "w")
-    import update_rss
-    update_rss.update(result["human_time_utc"])
+#    import update_rss
+#    update_rss.update(result["human_time_utc"])
     f.write(json.dumps(result))
     f.close()
 
