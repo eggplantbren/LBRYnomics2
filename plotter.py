@@ -219,14 +219,10 @@ def make_plot(mode, production=True, ts=None, ys=None):
     annotate_all(mode)
 
     # Add logo and tweak its position
-    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
     ax = plt.gca()
-    ins = inset_axes(ax, width="100%", height="100%",
-                       bbox_to_anchor=(0.01, 0.69, 0.20, 0.40),
-                       bbox_transform=ax.transAxes,
-                       borderpad=0)
-    ins.imshow(logo)
-    ins.axis("off")
+    axins = ax.inset_axes([-0.01, 0.79, 0.26, 0.18])
+    axins.imshow(logo)
+    axins.axis("off")
 
     plt.subplot(2, 1, 2)
 
@@ -271,7 +267,9 @@ def make_plot(mode, production=True, ts=None, ys=None):
     fname = "{mode}.svg"
     if production:
         fname = "plots/" + fname
-    plt.savefig(fname.format(mode=mode), bbox_inches="tight")
+    plt.savefig(fname.format(mode=mode),
+                bbox_inches=matplotlib.transforms.Bbox\
+                    (np.array([[0.5, -0.0], [14.5, 11.0]])))
     plt.close("all")
     print(f"    Figure saved to {mode}.svg.")
 
