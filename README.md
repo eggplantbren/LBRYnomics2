@@ -1,6 +1,6 @@
 # LBRYnomics2
 
-This is a program which runs on a LBRY wallet server. It measures various quantities from both the wallet server's claim database and LBRY Inc's APIs, saving the measurements to its own database. It also generates plots of the history of the quantities it measures, and JSON files containing figures that can be presented on websites.
+This is a program which runs on a LBRY wallet server. It measures various quantities from both the wallet server's claim database and LBRY Inc's APIs, saving the measurements to its own database. It also generates plots of the history of the quantities it measures, and JSON files containing numbers that can be presented on websites.
 
 ## Usage
 
