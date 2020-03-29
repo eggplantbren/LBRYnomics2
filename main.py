@@ -43,9 +43,10 @@ while True:
     # Backup db periodically
     if k % 72 == 0:
         print("Backing up DB file.")
-        subprocess.run("zstd db/lbrynomics.db "\
-                            + "-o ./lbrynomics.db.zst", shell=True)
-        subprocess.run("mv lbrynomics.db.zst " + config.backup_dir, shell=True)
+        upload.backup()
+#        subprocess.run("zstd db/lbrynomics.db "\
+#                           + "-o ./lbrynomics.db.zst", shell=True)
+#        subprocess.run("mv lbrynomics.db.zst " + config.backup_dir, shell=True)
         print("\nDone.\n")
 
     # Get the time and make another measurement in 5 minutes

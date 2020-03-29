@@ -1,6 +1,20 @@
 import subprocess
 import yaml
 
+def backup():
+    f = open("secrets.yaml")
+    secrets = yaml.load(f, Loader=yaml.SafeLoader)
+    f.close()
+
+    subprocess.run("zstd db/lbrynomics.db -o ./lbrynomics.db.zst", shell=True)
+    cmd = "sshpass -p \"{p}\" scp -P {port} lbrynomics.db.zst {user}@{dest}"\
+            .format(p=secrets["password"], user=secrets["user"],
+                    dest=secrets["destination"], port=secrets["port"])
+    subprocess.run(cmd, shell=True)
+#    print(cmd)
+    subprocess.run("rm lbrynomics.db.zst", shell=True)
+
+
 def upload():
     print("Uploading files.", flush=True)
     subprocess.run("cp plots/* upload", shell=True)
