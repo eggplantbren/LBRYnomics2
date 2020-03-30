@@ -1,13 +1,16 @@
 import config
 import json
-import subprocess
+import os
 
 def daemon_command(command):
     """
     Run a daemon command and return its output.
     """
     command = config.lbrynet_bin + " " + command
-    parts = command.split(" ")
-    output = subprocess.run(parts, capture_output=True)
-    return json.loads(output.stdout)
+    os.system(command + " > daemon.out")
+    f = open("daemon.out")
+    result = json.load(f)
+    f.close()
+    os.system("rm daemon.out")
+    return result
 
