@@ -1,8 +1,8 @@
 import os
 import yaml
 
-def backup():
-    f = open("secrets.yaml")
+def backup(secrets_file="secrets.yaml"):
+    f = open(secrets_file)
     secrets = yaml.load(f, Loader=yaml.SafeLoader)
     f.close()
 
@@ -14,12 +14,12 @@ def backup():
     os.system("rm lbrynomics.db.zst")
 
 
-def upload():
+def upload(secrets_file="secrets.yaml"):
     print("Uploading files.", flush=True)
     os.system("cp plots/* upload")
     os.system("cp json/*.json upload")
 
-    f = open("secrets.yaml")
+    f = open(secrets_file)
     secrets = yaml.load(f, Loader=yaml.SafeLoader)
     f.close()
 
