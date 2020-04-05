@@ -23,9 +23,15 @@ def upload(secrets_file="secrets.yaml"):
     secrets = yaml.load(f, Loader=yaml.SafeLoader)
     f.close()
 
-    cmd = "sshpass -p \"{p}\" scp -P {port} upload/* {user}@{dest}"\
-            .format(p=secrets["password"], user=secrets["user"],
+    cmd = "sshpass -e scp -P {port} upload/* {user}@{dest}"\
+            .format(user=secrets["user"],
                     dest=secrets["destination"], port=secrets["port"])
-    os.system(cmd)
+    env = os.environ.copy()
+    env["SSHPASS"] = secrets["password"]
+    import subprocess
+    subprocess.Popen(cmd, env=env, shell=True)
+
+#    print(cmd)
+#    os.system(cmd)
     print("Done.\n")
 
