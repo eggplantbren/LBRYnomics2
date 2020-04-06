@@ -230,9 +230,6 @@ def get_top(n=250, publish=200):
         print("")
     print("done.")
 
-    
-
-
     # Epoch number
     epoch = 1 + dbs["lbrynomics"].execute("SELECT COUNT(id) c FROM epochs").fetchone()[0]
     now = time.time()
@@ -275,6 +272,7 @@ def get_top(n=250, publish=200):
     result["lbryf"] = []
     result["inc"] = []
     result["grey"] = []
+    result["lbrynomics"] = []
 
     for i in range(n):
         response = dbs["lbrynomics"].execute("""
@@ -315,6 +313,7 @@ def get_top(n=250, publish=200):
         result["grey"].append(False)
         result["lbryf"].append(False)
         result["inc"].append(False)
+        result["lbrynomics"].append(result["claim_ids"][i] == "2d09719c8e06ab54ca5c1b4e44ddf3ee9d30241f")
 
         # Check for NSFW and other flags
         response = dbs["lbrynomics"].execute("SELECT * FROM special_channels WHERE claim_id=?;",
