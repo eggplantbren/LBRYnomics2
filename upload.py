@@ -15,7 +15,7 @@ def backup(secrets_file="secrets.yaml"):
 
 
 def upload(secrets_file="secrets.yaml"):
-    print("Uploading files...", end=" ", flush=True)
+    print("Uploading files...", end="", flush=True)
     os.system("cp plots/* upload")
     os.system("cp json/*.json upload")
 
@@ -33,5 +33,5 @@ def upload(secrets_file="secrets.yaml"):
 
 #    print(cmd)
 #    os.system(cmd)
-    print("done.\n")
+    print("done.\n", flush=True)
 

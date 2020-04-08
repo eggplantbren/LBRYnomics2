@@ -27,7 +27,7 @@ def count_recent(mode, now):
         claim_type = 2
     elif mode == "reposts":
         claim_type = 3
-        
+
     # Time cutoffs
     cutoffs = [0.0, now - 30*86400.0, now-7*86400.0, now-86400.0, now-3600.0]
     names = [None, "30_days", "7_days", "24_hours", "1_hour"]
@@ -62,7 +62,6 @@ def count_recent(mode, now):
             """
     new_today = dbs["claims"].execute(query, (start_of_today, claim_type)).fetchone()[0]
     result_dict["new_{mode}_today_utc"] = new_today
-    print("{new} so far this UTC day.".format(new=new_today), end=" ", flush=True)
 
     # Save some stats to JSON for Electron
     filename = "json/{mode}_stats.json".format(mode=mode)
@@ -70,7 +69,8 @@ def count_recent(mode, now):
     f.write(json.dumps(result_dict, indent=4))
     f.close()
 
-    print(f"Saved {filename}.", flush=True)
+    print("    Saved {filename}. {new} so far this UTC day."\
+		.format(new=new_today, filename=filename), flush=True)
 
 
 
