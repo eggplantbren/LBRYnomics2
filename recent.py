@@ -51,14 +51,6 @@ def count_recent(mode, now):
             result_dict["new_{mode}_{name}".format(mode=mode, name=names[i])]\
                              = row[0]
 
-    # Save some stats to JSON for Electron
-    filename = "json/{mode}_stats.json".format(mode=mode)
-    f = open(filename.format(mode=mode), "w")
-    f.write(json.dumps(result_dict, indent=4))
-    f.close()
-
-    print("    Saved {filename}.".format(filename=filename), end=" ")
-
     # When did today start?
     start_of_today = datetime.datetime.fromtimestamp(now, datetime.timezone.utc)\
                         .replace(hour=0, minute=0, second=0, microsecond=0)
@@ -69,7 +61,16 @@ def count_recent(mode, now):
             AND claim_type = ?;
             """
     new_today = dbs["claims"].execute(query, (start_of_today, claim_type)).fetchone()[0]
-    print("{new} so far this UTC day.".format(new=new_today))
+    result_dict["new_{mode}_today_utc"] = new_today
+    print("{new} so far this UTC day.".format(new=new_today), end=" ", flush=True)
+
+    # Save some stats to JSON for Electron
+    filename = "json/{mode}_stats.json".format(mode=mode)
+    f = open(filename.format(mode=mode), "w")
+    f.write(json.dumps(result_dict, indent=4))
+    f.close()
+
+    print(f"Saved {filename}.", flush=True)
 
 
 
