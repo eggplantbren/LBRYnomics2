@@ -197,6 +197,6 @@ def count_boosts(now):
     f.write(json.dumps(result, indent=4))
     f.close()
 
-    print("    Saved {filename}.".format(filename=filename), flush=True)
+    print(f"Saved {filename}.", flush=True)
 
 
