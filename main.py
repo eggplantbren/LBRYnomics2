@@ -23,7 +23,7 @@ k = 0
 while True:
 
     d = (time.time() - started_at)/86400.0
-    print(f"This process has been running for {d:.3f} days.")
+    print(f"This process has been running for {d:.3f} days.", flush=True)
 
     # Make the measurement
     result = measurement.make_measurement(k)
@@ -39,15 +39,16 @@ while True:
 
     # Upload
     upload.upload()
+    upload.upload("secrets2.yaml")
 
     # Backup db periodically
     if k % 72 == 0:
-        print("Backing up DB file.")
+        print("Backing up DB file...", flush=True)
         upload.backup()
 #        subprocess.run("zstd db/lbrynomics.db "\
 #                           + "-o ./lbrynomics.db.zst", shell=True)
 #        subprocess.run("mv lbrynomics.db.zst " + config.backup_dir, shell=True)
-        print("\nDone.\n")
+        print("done.\n", flush=True)
 
     # Get the time and make another measurement in 5 minutes
     wait = config.interval - (time.time() - result["time"])

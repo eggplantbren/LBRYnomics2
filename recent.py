@@ -52,19 +52,17 @@ def count_recent(mode, now):
                              = row[0]
 
     # When did today start?
-    start_of_today = datetime.datetime.fromtimestamp(now, datetime.timezone.utc)\
-                        .replace(hour=0, minute=0, second=0, microsecond=0)
-    start_of_today = start_of_today.timestamp()
+    start_of_today = get_start_of_today(now)
     query = """
             SELECT COUNT(*) FROM claim
             WHERE creation_timestamp >= ?
             AND claim_type = ?;
             """
     new_today = dbs["claims"].execute(query, (start_of_today, claim_type)).fetchone()[0]
-    result_dict["new_{mode}_today_utc"] = new_today
+    result_dict[f"new_{mode}_today_utc"] = new_today
 
     # Save some stats to JSON for Electron
-    filename = "json/{mode}_stats.json".format(mode=mode)
+    filename = f"json/{mode}_stats.json"
     f = open(filename.format(mode=mode), "w")
     f.write(json.dumps(result_dict, indent=4))
     f.close()
@@ -72,6 +70,15 @@ def count_recent(mode, now):
     print("    Saved {filename}. {new} so far this UTC day."\
 		.format(new=new_today, filename=filename), flush=True)
 
+
+def get_start_of_today(now):
+    """
+    Returns unix epoch of the start of the day, based on input 'now'
+    """
+    start_of_today = datetime.datetime.fromtimestamp(now, datetime.timezone.utc)\
+                        .replace(hour=0, minute=0, second=0, microsecond=0)
+    start_of_today = start_of_today.timestamp()
+    return start_of_today
 
 
 def count_boosts(now):
@@ -192,11 +199,19 @@ def count_boosts(now):
             result["is_nsfw_{label}".format(label=labels[i])] = row[0] != 0
             break
 
+"""
+    # Use chainquery to get number of boosts today
+    url = "https://chainquery.lbry.com/api/sql?query="
+    url += "SELECT COUNT(id) FROM support WHERE UNIX_TIMESTAMP(created_at) >= "
+    url += str(int(get_start_of_today(now))) + ";"
+    response = requests.get(url)
+"""
+
     filename = "json/supports_and_tips.json"
     f = open(filename, "w")
     f.write(json.dumps(result, indent=4))
     f.close()
 
-    print(f"Saved {filename}.", flush=True)
+    print(f"    Saved {filename}.", flush=True)
 
 
