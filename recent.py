@@ -199,13 +199,13 @@ def count_boosts(now):
             result["is_nsfw_{label}".format(label=labels[i])] = row[0] != 0
             break
 
-"""
+    """
     # Use chainquery to get number of boosts today
     url = "https://chainquery.lbry.com/api/sql?query="
     url += "SELECT COUNT(id) FROM support WHERE UNIX_TIMESTAMP(created_at) >= "
     url += str(int(get_start_of_today(now))) + ";"
     response = requests.get(url)
-"""
+    """
 
     filename = "json/supports_and_tips.json"
     f = open(filename, "w")
