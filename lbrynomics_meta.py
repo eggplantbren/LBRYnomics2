@@ -25,7 +25,7 @@ def lbrynomics_meta(uptime):
     result["days_actively_measuring"] = db.execute("""
         select count(*) from (select cast(time/86400.0 as INTEGER) t, COUNT(lbc_deposits)
         c from measurements GROUP BY t HAVING c > 0);""").fetchone()[0]
-    result["uptime_days"] = uptime
+    result["uptime_days"] = round(uptime, 3)
 
     # Write to file
     f = open("json/lbrynomics.json", "w")
