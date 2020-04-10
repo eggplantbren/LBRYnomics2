@@ -1,7 +1,7 @@
 from databases import dbs
 import json
 
-def lbrynomics_meta():
+def lbrynomics_meta(uptime):
     """
     Measure some things about LBRYnomics itself.
     """
@@ -25,6 +25,7 @@ def lbrynomics_meta():
     result["days_actively_measuring"] = db.execute("""
         select count(*) from (select cast(time/86400.0 as INTEGER) t, COUNT(lbc_deposits)
         c from measurements GROUP BY t HAVING c > 0);""").fetchone()[0]
+    result["uptime_days"] = uptime
 
     # Write to file
     f = open("json/lbrynomics.json", "w")

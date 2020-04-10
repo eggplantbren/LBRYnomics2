@@ -36,7 +36,7 @@ while True:
     top_channels.check_and_run()
 
     # Data about LBRYnomics itself
-    lbrynomics_meta.lbrynomics_meta()
+    lbrynomics_meta.lbrynomics_meta(d)
 
     # Make plots
     plotter.make_plots()
