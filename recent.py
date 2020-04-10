@@ -131,9 +131,7 @@ def count_boosts(now):
         for row in dbs["claims"].execute(query, data):
             biggest = row[1]
             result["num_{label}".format(label=labels[i])] = row[0]
-            if biggest is not None:
-                biggest = biggest/1E8
-            result["biggest_{label}".format(label=labels[i])] = biggest
+            result["biggest_{label}".format(label=labels[i])] = biggest/1E8
             break
 
 
@@ -179,11 +177,14 @@ def count_boosts(now):
         claim_name, claim_id = None, None
         for row in dbs["claims"].execute(query, data):
             claim_name, claim_id = row[0:2]
+#        print(query, data, claim_name, claim_id)
 
         tv_url = None
         if claim_name is not None:
             tv_url = "https://lbry.tv/" + claim_name + ":" + claim_id
         result["tv_url_{label}".format(label=labels[i])] = tv_url
+#        print(tv_url)
+
 
 
         # Get NSFW status of max boosted claim
