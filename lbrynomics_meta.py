@@ -23,11 +23,11 @@ def lbrynomics_meta(now, uptime):
     result["days_with_active_measurements"] = db.execute("""
         select count(*) from (select cast(time/86400.0 as INTEGER) t, COUNT(lbc_deposits)
         c from measurements GROUP BY t HAVING c > 0);""").fetchone()[0]
-    result["top_channel_days_in_db"] = db.execute("""
-        SELECT count(id) FROM epochs;
-        """).fetchone()[0]
     result["historical_estimates_in_db"] = db.execute("""
         SELECT COUNT(id) FROM measurements WHERE lbc_deposits IS NULL;
+        """).fetchone()[0]
+    result["top_channel_days_in_db"] = db.execute("""
+        SELECT count(id) FROM epochs;
         """).fetchone()[0]
 
     # Write to file
