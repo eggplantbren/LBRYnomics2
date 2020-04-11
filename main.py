@@ -36,7 +36,7 @@ while True:
     top_channels.check_and_run()
 
     # Data about LBRYnomics itself
-    lbrynomics_meta.lbrynomics_meta(d)
+    lbrynomics_meta.lbrynomics_meta(result["time"], d)
 
     # Make plots
     plotter.make_plots()
@@ -49,9 +49,6 @@ while True:
     if k % 72 == 0:
         print("Backing up DB file...", flush=True)
         upload.backup()
-#        subprocess.run("zstd db/lbrynomics.db "\
-#                           + "-o ./lbrynomics.db.zst", shell=True)
-#        subprocess.run("mv lbrynomics.db.zst " + config.backup_dir, shell=True)
         print("done.\n", flush=True)
 
     # Get the time and make another measurement in 5 minutes
