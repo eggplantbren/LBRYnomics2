@@ -106,12 +106,13 @@ def create_db():
               "3849a35ae6122e0b7a035c2ba66e97b9e4ab9efa",
               "c62ee910262e0a126181dc454b0556a174bfb120",
               "aaeda15cc0cafe689793a00d5e6c5a231e3b6ee8",
-              "2bfe6cdb24a21bdc1b76fb7c416edd50e9e85945" ])
+              "2bfe6cdb24a21bdc1b76fb7c416edd50e9e85945",
+              "3b807b82be6fadc0db4a057955766cea230839b9" ])
 
     # Channels to be promoted
     # promo = set()
     # promo = set([""])
-    
+
     # Given mature tag by us
     manual_mature = set(["f24ab6f03d96aada87d4e14b2dac4aa1cee8d787",
                      "fd4b56c7216c2f96db4b751af68aa2789c327d48",
