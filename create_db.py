@@ -20,7 +20,8 @@ def create_db():
     # Add indices to claims.db
     dbs["claims"].execute("""create index if not exists lbrynomics_sh_idx
                 on support (height);""")
-
+    dbs["claims"].execute("""create index if not exists lbrynomics_test
+                on claim (claim_type, channel_hash, claim_id)""")
 
     # Create tables for measurements etc.
     dbs["lbrynomics"].execute("""
