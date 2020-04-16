@@ -35,6 +35,7 @@ def make_measurement(k):
     output = dbs["claims"].execute(query)
     measurement["num_channels"] = output.fetchone()[0]
     measurement["num_streams"]  = output.fetchone()[0]
+#    measurement["num_reposts"] = output.fetchone()[0]
 
     # Query claims.db to get some measurement info
     query = """
@@ -86,7 +87,7 @@ def make_measurement(k):
                 measurement["circulating_supply"] = None
 
     # Count reposts
-    query = "SELECT SUM(reposted) FROM claim;"
+    query = "SELECT COUNT(claim_hash) FROM claim WHERE claim_type=3;"
     measurement["num_reposts"] = None
     try:
         measurement["num_reposts"] = dbs["claims"].execute(query).fetchone()[0]
