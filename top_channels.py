@@ -71,6 +71,9 @@ def get_view_counts(claim_ids, start, end):
     if end > len(claim_ids):
         end = len(claim_ids)
 
+    if start == end:
+        return [0]
+
     # Get auth token
     f= open("secrets.yaml")
     auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
@@ -102,10 +105,12 @@ def view_counts_channel(channel_hash):
 
     counts = 0
     for i in range(len(claim_ids)//100 + 1):
-        result = get_view_counts(claim_ids, 100*i, 100*(i+1))
-        for x in result:
-            if x is not None:
-                counts += x
+        while True:
+            result = get_view_counts(claim_ids, 100*i, 100*(i+1))
+            if sum([x is None for x in result]) == 0:
+                break
+        counts += sum(result)
+        print(result, flush=True)
     return counts
 
 def get_followers(channels, start, end):
