@@ -72,7 +72,7 @@ def get_view_counts(claim_ids, start, end):
         end = len(claim_ids)
 
     if start == end:
-        return [0]
+        print("Start equalled end!")
 
     # Get auth token
     f= open("secrets.yaml")
@@ -104,13 +104,12 @@ def view_counts_channel(channel_hash):
         claim_ids.append(row[0])
 
     counts = 0
-    for i in range(len(claim_ids)//100 + 1):
-        while True:
-            result = get_view_counts(claim_ids, 100*i, 100*(i+1))
-            if sum([x is None for x in result]) == 0:
-                break
+    for i in range((len(claim_ids) - 1)//100 + 1):
+        result = get_view_counts(claim_ids, 100*i, 100*(i+1))
+        if sum([x is None for x in result]) != 0:
+            print("None found.", flush=True)
         counts += sum(result)
-        print(result, flush=True)
+        #print(result, flush=True)
     return counts
 
 def get_followers(channels, start, end):
@@ -122,6 +121,9 @@ def get_followers(channels, start, end):
     # Elegantly handle end
     if end > len(channels):
         end = len(channels)
+
+    if start == end:
+        print("Start equalled end!")
 
     # Get auth token
     f= open("secrets.yaml")
@@ -182,7 +184,7 @@ def get_top(n=250, publish=200):
     print("Making top channels list.", flush=True)
     channels = channels_with_content()
     counts = []
-    for i in range(len(channels)//100 + 1):
+    for i in range((len(channels) - 1)//100 + 1):
         counts += get_followers(channels, 100*i, 100*(i+1))
         print("    Got follower counts for {a}/{b} channels."\
                 .format(a=len(counts), b=len(channels)), end="\r")
