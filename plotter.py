@@ -170,7 +170,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
     tick_gap_months = 3
 
     # Shorter datasets, use one month
-    if (ts[-1] - ts[0]) < 90*86400.0:
+    if (ts[-1] - ts[0]) < 220*86400.0:
         tick_gap_months = 1
 
     # Generate ticks as dates on the first of each quarter
