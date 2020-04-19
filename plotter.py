@@ -73,6 +73,13 @@ def annotate_all(mode, subplot=1):
                  fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
 
+    # Zero lines on some lower panels
+    if subplot == 2:
+        if mode in ["num_supports", "followers", "lbc_deposits",
+                    "lbc_supports", "num_reposts", "ytsync_new_pending",
+                    "ytsync_pending_update"]:
+            plt.axhline(0.0, color="w", linestyle="--", alpha=0.3)
+
 
 def title(mode, value):
     if type(value) == np.int64:
