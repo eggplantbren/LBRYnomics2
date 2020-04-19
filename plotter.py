@@ -201,7 +201,8 @@ def make_plot(mode, production=True, ts=None, ys=None):
 
     # Compute xlim
     xlim = [mdates.epoch2num(ts[0])  - 1.0,
-            mdates.epoch2num(ts[-1]) + 10.0]
+            mdates.epoch2num(ts[-1]) + 1.0]
+    xlim[1] += 0.07*(xlim[1] - xlim[0])
 
     # Plotting stuff
     plt.rcParams["font.family"] = "Liberation Sans"
