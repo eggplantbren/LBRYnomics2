@@ -177,7 +177,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
     tick_gap_months = 3
 
     # Shorter datasets, use one month
-    if (ts[-1] - ts[0]) < 220*86400.0:
+    if (ts[-1] - ts[0]) < 250*86400.0:
         tick_gap_months = 1
 
     # Generate ticks as dates on the first of each quarter
@@ -200,8 +200,8 @@ def make_plot(mode, production=True, ts=None, ys=None):
         ticks = np.unique([dt.date() for dt in datetimes])
 
     # Compute xlim
-    xlim = [mdates.date2num(ticks[0]) - 1.0,
-            mdates.date2num(ticks[-1]) + 1.0]
+    xlim = [mdates.epoch2num(ts[0])  - 1.0,
+            mdates.epoch2num(ts[-1]) + 1.0]
 
     # Plotting stuff
     plt.rcParams["font.family"] = "Liberation Sans"
