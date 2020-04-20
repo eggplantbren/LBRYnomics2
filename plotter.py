@@ -128,7 +128,7 @@ def ylabel(mode):
     if mode == "ytsync_new_pending":
         string += "New channels in queue to sync"
     if mode == "ytsync_pending_update":
-        string += "Channels with new videos awaiting sync"
+        string += "Channels with new vids awaiting sync"
     if mode == "circulating_supply":
         string += "Circulating LBC supply"
     if mode == "followers":
@@ -218,7 +218,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
     plt.xticks([])
     plt.xlim(xlim)
 
-    plt.ylabel(ylabel(mode))
+    plt.ylabel(ylabel(mode), fontsize=16)
     plt.title(title(mode, ys[-1]))
     set_ylim(mode)
     plt.gca().tick_params(labelright=True)
@@ -265,8 +265,9 @@ def make_plot(mode, production=True, ts=None, ys=None):
     plt.xticks(mdates.date2num(ticks), ticks, rotation=70)
     plt.xlim(xlim)
     set_ylim(mode, 2)
-    plt.ylabel(ylabel(mode) + " daily change")
+    plt.ylabel(ylabel(mode) + " daily change", fontsize=16)
     plt.gca().tick_params(labelright=True)
+    plt.gcf().align_ylabels()
 
     # Add annotations
     annotate_all(mode, 2)
