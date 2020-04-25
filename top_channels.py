@@ -187,7 +187,7 @@ def get_top(n=250, publish=200):
     for i in range((len(channels) - 1)//100 + 1):
         counts += get_followers(channels, 100*i, 100*(i+1))
         print("    Got follower counts for {a}/{b} channels."\
-                .format(a=len(counts), b=len(channels)), end="\r")
+                .format(a=len(counts), b=len(channels)), end="\r", flush=True)
     print("")
 
     ii = np.argsort(counts)[::-1]
