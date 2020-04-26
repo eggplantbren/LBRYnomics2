@@ -344,7 +344,7 @@ def get_top(n=250, publish=200):
     # Create is_new field
     result["is_new"] = []
     for i in range(n):
-        result["is_new"].append(result["change"] is None)
+        result["is_new"].append(result["change"][i] is None)
 
     # Truncate for publication, also replacing null values with 0
     for key in result.keys():
