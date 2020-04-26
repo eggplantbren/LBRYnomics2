@@ -366,6 +366,10 @@ def get_top(n=250, publish=200):
 
     print("Done.\n")
 
+    print("Backing up DB file...", flush=True)
+    upload.backup()
+    print("done.\n", flush=True)
+
     return result
 
 
