@@ -51,6 +51,7 @@ def create_db():
 --         revenue REAL,
          views INTEGER,
          times_reposted INTEGER,
+         lbc REAL,
          FOREIGN KEY (epoch) REFERENCES epochs (id));
 
     -- Create epochs channel

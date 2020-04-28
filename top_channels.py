@@ -200,13 +200,23 @@ def get_top(n=250, publish=200):
     # Vanity names and channel hashes from claim IDs
     vanity_names = []
     channel_hashes = []
+    lbc = []
     for row in dbs["claims"].executemany("""
-            SELECT claim_name, claim_hash FROM claim WHERE claim_id=?;""",
+            SELECT claim_name, claim_hash, (amount + support_amount)/1E8
+                FROM claim WHERE claim_id=?;""",
                 [(claim_id, ) for claim_id in channels]):
         vanity_names.append(row[0])
         channel_hashes.append(row[1])
+        lbc.append(row[2])
 
-
+    # Add LBC amounts of claims to lbc
+    k = 0
+    for row in dbs["claims"].executemany("""
+            SELECT SUM(amount)/1E8 + SUM(support_amount)/1E8
+                FROM claim WHERE channel_hash = ?;""",
+                [(channel_hash, ) for channel_hash in channel_hashes]):
+        lbc[k] += row[0]
+        k += 1
 
     # Get repost counts for the channels
     query = """
@@ -225,7 +235,8 @@ def get_top(n=250, publish=200):
               "vanity_names": vanity_names,
               "num_followers": [],#              "revenue": [],
               "views": [],
-              "times_reposted": times_reposted}
+              "times_reposted": times_reposted,
+              "lbc": lbc}
 
     for i in range(n):
         result["ranks"].append(i+1)
@@ -241,7 +252,7 @@ def get_top(n=250, publish=200):
     # Epoch number
     epoch = 1 + dbs["lbrynomics"].execute("SELECT COUNT(id) c FROM epochs").fetchone()[0]
     now = time.time()
-    dbs["lbrynomics"].execute("INSERT INTO epochs VALUES (?, ?)", (epoch, now))
+#    dbs["lbrynomics"].execute("INSERT INTO epochs VALUES (?, ?)", (epoch, now))
 
     dbs["lbrynomics"].execute("BEGIN;")
     for i in range(n):
@@ -251,11 +262,11 @@ def get_top(n=250, publish=200):
                  result["num_followers"][i],
                  result["ranks"][i], #                 result["revenue"][i],\
                  result["views"][i],
-                 result["times_reposted"][i])
+                 result["times_reposted"][i], result["lbc"][i])
         dbs["lbrynomics"].execute("""
                   INSERT INTO channel_measurements
-                      (claim_id, vanity_name, epoch, num_followers, rank, views, times_reposted)
-                  VALUES (?, ?, ?, ?, ?, ?, ?);
+                      (claim_id, vanity_name, epoch, num_followers, rank, views, times_reposted, lbc)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                   """, values)
 
     dbs["lbrynomics"].execute("COMMIT;")
