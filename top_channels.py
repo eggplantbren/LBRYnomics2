@@ -108,7 +108,7 @@ def view_counts_channel(channel_hash):
     for i in range((len(claim_ids) - 1)//100 + 1):
         result = get_view_counts(claim_ids, 100*i, 100*(i+1))
         if sum([x is None for x in result]) != 0:
-            print("None found.", flush=True)
+            raise ValueError("Error getting view counts.")
         counts += sum(result)
         #print(result, flush=True)
     return counts
@@ -242,17 +242,26 @@ def get_top(n=250, publish=200):
         result["ranks"].append(i+1)
         result["claim_ids"].append(str(channels[i]))
         result["num_followers"].append(int(counts[i]))
-        print("    Getting view counts for {name}.".format(name=vanity_names[i]),
-              end="", flush=True)
+
 #        result["revenue"].append(estimate_revenue(channel_hash))
-        result["views"].append(view_counts_channel(channel_hashes[i]))
+        attempts = 5
+        while attempts > 0:
+            try:
+                print("    Getting view counts for {name}.".format(name=vanity_names[i]),
+                      end="", flush=True)
+                v = view_counts_channel(channel_hashes[i])
+                break
+            except:
+                attempts -= 1         
+
+        result["views"].append(v)
         print("")
     print("done.")
 
     # Epoch number
     epoch = 1 + dbs["lbrynomics"].execute("SELECT COUNT(id) c FROM epochs").fetchone()[0]
     now = time.time()
-#    dbs["lbrynomics"].execute("INSERT INTO epochs VALUES (?, ?)", (epoch, now))
+    dbs["lbrynomics"].execute("INSERT INTO epochs VALUES (?, ?)", (epoch, now))
 
     dbs["lbrynomics"].execute("BEGIN;")
     for i in range(n):
