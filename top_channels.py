@@ -194,29 +194,29 @@ def get_top(n=250, publish=200):
     ii = np.argsort(counts)[::-1]
     channels = np.array(channels)[ii]
     counts = np.array(counts)[ii]
-    channels = channels[0:n]
-    counts = counts[0:n]
+    passed = []
 
     # Vanity names and channel hashes from claim IDs
     vanity_names = []
     channel_hashes = []
     lbc = []
-    for row in dbs["claims"].executemany("""
-            SELECT claim_name, claim_hash, (amount + support_amount)/1E8
-                FROM claim WHERE claim_id=?;""",
-                [(claim_id, ) for claim_id in channels]):
-        vanity_names.append(row[0])
-        channel_hashes.append(row[1])
-        lbc.append(row[2])
+    for i in range(len(channels)):
+        result1 = dbs["claims"].execute("""
+                SELECT claim_name, claim_hash, (amount + support_amount)/1E8
+                FROM claim WHERE claim_id=?""", (channels[i], )).fetchone()
 
-    # Add LBC amounts of claims to lbc
-    k = 0
-    for row in dbs["claims"].executemany("""
-            SELECT SUM(amount)/1E8 + SUM(support_amount)/1E8
-                FROM claim WHERE channel_hash = ?;""",
-                [(channel_hash, ) for channel_hash in channel_hashes]):
-        lbc[k] += row[0]
-        k += 1
+        # Add LBC amounts of claims to lbc
+        result2 = dbs["claims"].execute("""SELECT SUM(amount)/1E8 + SUM(support_amount)/1E8
+                FROM claim WHERE channel_hash = ?;""", (result1[1], )).fetchone()
+
+        if result1[2] + result2[0] >= 100.0:
+            vanity_names.append(result1[0])
+            channel_hashes.append(result1[1])
+            lbc.append(result1[2] + result2[0])
+
+        if len(vanity_names) >= n:
+            break
+
 
     # Get repost counts for the channels
     query = """
