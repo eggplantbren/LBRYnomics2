@@ -140,12 +140,14 @@ def get_followers(channels, start, end):
             url += ","
 
     # JSON response from API
-    try:
-        response = requests.get(url).json()
-        for value in response["data"]:
-            result.append(value)
-    except:
-        result.append(None)
+    while attempts > 0:
+        try:
+            response = requests.get(url).json()
+            for value in response["data"]:
+                result.append(value)
+            break
+        except:
+            attempts -= 1  
 
     return result
 
