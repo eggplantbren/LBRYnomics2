@@ -131,7 +131,8 @@ def create_db():
                   "977cd1c90eefe4c9831f5c93b2359202733a9c2e",
                   "b3c6591b2f64c843fa66edda91ceab91d452f94f",
                   "67c1ce0d5754490cfa573ca27f8473ba793d1842",
-                  "1713b1a9d2fd4e68bf3ff179cba246d527f67d56"])
+                  "1713b1a9d2fd4e68bf3ff179cba246d527f67d56",
+                  "37e533eca2d0477f7123532144568fa3f7fe7ad7"])
 
     # DMCA'd channels + rewards scammers (do not appear)
     # Also those who appear to be faking their following, or other things
