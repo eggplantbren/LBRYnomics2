@@ -75,7 +75,7 @@ def annotate_all(mode, subplot=1):
 
     # Zero lines on some lower panels
     if subplot == 2:
-        if mode in ["num_supports", "followers", "lbc_deposits",
+        if mode in ["num_supports", "followers", "views", "lbc_deposits",
                     "lbc_supports", "num_reposts", "ytsync_new_pending",
                     "ytsync_pending_update"]:
             plt.axhline(0.0, color="w", linestyle="--", alpha=0.3)
@@ -108,6 +108,8 @@ def title(mode, value):
         string += f"Circulating supply = {num} LBC (max supply=1.083202 billion)"
     if mode == "followers":
         string += f"Average followers of top 200 channels = {num}"
+    if mode == "views":
+        string += f"Average views of top 200 channels = {num}"
     if mode == "num_reposts":
         string += f"Total number of reposts = {num}"
     return string
@@ -133,6 +135,8 @@ def ylabel(mode):
         string += "Circulating LBC supply"
     if mode == "followers":
         string += "Avg. followers of top 200 channels"
+    if mode == "views":
+        string += "Avg. views of top 200 channels"
     if mode == "num_reposts":
         string += "Total number of reposts"
     return string
@@ -141,6 +145,8 @@ def set_ylim(mode, subplot=1):
     if mode in ["num_streams", "num_channels", "reposts"]:
         plt.ylim(bottom=-0.5)
     if mode == "followers" and subplot==1:
+        plt.ylim(bottom=-0.5)
+    if mode == "views" and subplot==1:
         plt.ylim(bottom=-0.5)
     if mode in ["ytsync_new_pending", "ytsync_pending_update"] and\
             subplot==1:
@@ -312,6 +318,19 @@ def make_plots(production=True):
         ts.append(row[0])
         ys.append(row[1])
     make_plot("followers", production, ts, ys)
+
+    # Views data
+    query = """
+    SELECT time, AVG(views) FROM channel_measurements INNER JOIN epochs
+            ON epochs.id = channel_measurements.epoch
+            WHERE rank <= 200 AND lbc IS NOT NULL
+            GROUP BY channel_measurements.epoch;
+    """
+    ts, ys = [], []
+    for row in dbs["lbrynomics"].execute(query):
+        ts.append(row[0])
+        ys.append(row[1])
+    make_plot("views", production, ts, ys)
 
     make_plot("num_reposts", production)
 
