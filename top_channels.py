@@ -204,6 +204,7 @@ def get_top(n=250, publish=200):
     channel_hashes = []
     lbc = []
     channels_truncated = []
+    counts_truncated = []
     for i in range(len(channels)):
         result1 = dbs["claims"].execute("""
                 SELECT claim_name, claim_hash, (amount + support_amount)/1E8
@@ -218,10 +219,12 @@ def get_top(n=250, publish=200):
             channel_hashes.append(result1[1])
             lbc.append(result1[2] + result2[0])
             channels_truncated.append(channels[i])
+            counts_truncated.append(counts[i])
 
         if len(vanity_names) >= n:
             break
     channels = channels_truncated
+    counts = counts_truncated
 
 
     # Get repost counts for the channels
