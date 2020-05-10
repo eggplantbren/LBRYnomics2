@@ -203,6 +203,7 @@ def get_top(n=250, publish=200):
     vanity_names = []
     channel_hashes = []
     lbc = []
+    views = []
     channels_truncated = []
     counts_truncated = []
     for i in range(len(channels)):
@@ -214,12 +215,43 @@ def get_top(n=250, publish=200):
         result2 = dbs["claims"].execute("""SELECT SUM(amount)/1E8 + SUM(support_amount)/1E8
                 FROM claim WHERE channel_hash = ?;""", (result1[1], )).fetchone()
 
-        if result1[2] + result2[0] >= 100.0:
+        attempts = 5
+        while attempts > 0:
+            try:
+                print("    Getting view counts for {name}. ".format(name=result1[0]),
+                      end="", flush=True)
+                v = view_counts_channel(result1[1])
+                break
+            except:
+                attempts -= 1
+
+
+        # Quality filter
+        lbc_amount = result1[2] + result2[0]
+        lbc_ratio = lbc_amount/counts[i]
+        views_ratio = v/counts[i]
+        passes = False
+
+        if lbc_amount >= 20000.0:
+            passes = True
+        if lbc_ratio >= 1.0:
+            passes = views_ratio >= 0.25
+        if lbc_ratio >= 0.25:
+            passes = views_ratio >= 1.0
+
+        print(f"\n(lbc_ratio, views_ratio) = ({lbc_ratio, views_ratio})")
+
+        if passes:
+            print("Passed quality filter.", flush=True)
             vanity_names.append(result1[0])
             channel_hashes.append(result1[1])
-            lbc.append(result1[2] + result2[0])
+            lbc.append(lbc_amount)
+            views.append(v)
             channels_truncated.append(channels[i])
             counts_truncated.append(counts[i])
+        else:
+            print("Did not pass quality filter.", flush=True)
+        print("")
 
         if len(vanity_names) >= n:
             break
@@ -251,19 +283,8 @@ def get_top(n=250, publish=200):
         result["ranks"].append(i+1)
         result["claim_ids"].append(str(channels[i]))
         result["num_followers"].append(int(counts[i]))
-
+        result["views"].append(int(views[i]))
 #        result["revenue"].append(estimate_revenue(channel_hash))
-        attempts = 5
-        while attempts > 0:
-            try:
-                print("    Getting view counts for {name}.".format(name=vanity_names[i]),
-                      end="", flush=True)
-                v = view_counts_channel(channel_hashes[i])
-                break
-            except:
-                attempts -= 1         
-
-        result["views"].append(v)
         print("")
     print("done.")
 
