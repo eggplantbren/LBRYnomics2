@@ -232,9 +232,9 @@ def get_top(n=250, publish=200):
 
         if lbc_amount >= 20000.0:
             passes = True
-        if lbc_ratio >= 1.0:
+        elif lbc_ratio >= 1.0:
             passes = views_ratio >= 0.25
-        if lbc_ratio >= 0.25:
+        elif lbc_ratio >= 0.25:
             passes = views_ratio >= 1.0
 
         print(f"\n(lbc_ratio, views_ratio) = ({lbc_ratio, views_ratio})")
