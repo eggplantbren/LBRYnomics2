@@ -4,6 +4,7 @@ from daemon_command import daemon_command
 from databases import dbs
 import datetime
 import json
+from lists import *
 import numpy as np
 import requests
 import time
@@ -30,12 +31,9 @@ def channels_with_content():
 
     # Remove blacklisted channels
     print("    Removing blacklisted channels...", flush=True, end="")
-    black_list = dbs["lbrynomics"].execute("SELECT claim_id FROM special_channels WHERE black=1;")
-    black_list = black_list.fetchall()
-    black_list = set([x[0] for x in black_list])
     result = [x for x in result if x not in black_list]
 
-    print("done. {n} channels remain.".format(n=len(result)))
+    print("done. {n} channels remain.".format(n=len(result)), flush=True)
     return result
 
 
@@ -346,20 +344,11 @@ def get_top(n=250, publish=200):
         result["views_change"].append(views_change)
         result["times_reposted_change"].append(times_reposted_change)
 
-        result["is_nsfw"].append(False)
-        result["grey"].append(False)
-        result["lbryf"].append(False)
-        result["inc"].append(False)
-        result["lbrynomics"].append(result["claim_ids"][i] == "2d09719c8e06ab54ca5c1b4e44ddf3ee9d30241f")
-
-        # Check for NSFW and other flags
-        response = dbs["lbrynomics"].execute("SELECT * FROM special_channels WHERE claim_id=?;",
-                              (result["claim_ids"][i], ))
-        for row in response:
-            result["is_nsfw"][-1] = bool(row[1])
-            result["grey"][-1] = bool(row[2])
-            result["lbryf"][-1] = bool(row[3])
-            result["inc"][-1] = bool(row[4])
+        result["is_nsfw"].append(result["claim_ids"][i] in manual_mature)
+        result["grey"].append(result["claim_ids"][i] in grey_list)
+        result["lbryf"].append(result["claim_ids"][i] in lbryf)
+        result["inc"].append(result["claim_ids"][i] in inc)
+        result["lbrynomics"].append(result["claim_ids"][i] in lbrynomics)
 
         # Check for mature tags on protocol level
         query = """SELECT tag.tag FROM claim
