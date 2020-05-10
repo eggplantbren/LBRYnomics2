@@ -72,6 +72,14 @@ def annotate_all(mode, subplot=1):
                  "New users prompted\n to create a channel",
                  fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
+    if mode in ["views", "followers"]:
+        loc = mdates.date2num(datetime.date(2020, 5, 11))
+        plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
+        plt.text(loc - 3.0,
+                 text_pos,
+                 "Introduced filters to prevent\nchannels faking popularity",
+                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
+
 
     # Zero lines on some lower panels
     if subplot == 2:
