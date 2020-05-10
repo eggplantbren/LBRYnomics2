@@ -185,6 +185,7 @@ def create_db():
                     "2849e111e747ce5883d2409046fefa03029daaec",
                     "29531246ce976d00a41741555edae4028c668205",
                     "477b11086e2d5065d2dcbc0d9389ab31f75a5f5a",
+                    "82360163ab15de0fbe9c87c1f9b630e66c5c332b",
                     "0d4078fe826733fc19808115dec71c530b482c95" ])
 
     dbs["lbrynomics"].execute("BEGIN;")
