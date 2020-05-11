@@ -239,10 +239,10 @@ def get_top(n=250, publish=200):
         elif channels[i] in white_list:
             passes = True
 
-        print(f"\n(lbc_ratio, views_ratio) = {lbc_ratio, views_ratio}")
+        print(f"\n    (lbc_ratio, views_ratio) = {lbc_ratio, views_ratio}")
 
         if passes:
-            print("Passed quality filter.", flush=True)
+            print("    Passed quality filter.", flush=True)
             vanity_names.append(result1[0])
             channel_hashes.append(result1[1])
             lbc.append(lbc_amount)
@@ -250,7 +250,7 @@ def get_top(n=250, publish=200):
             channels_truncated.append(channels[i])
             counts_truncated.append(counts[i])
         else:
-            print("Did not pass quality filter.", flush=True)
+            print("    Did not pass quality filter.", flush=True)
         print("")
 
         if len(vanity_names) >= n:
