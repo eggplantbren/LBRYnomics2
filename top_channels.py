@@ -236,6 +236,8 @@ def get_top(n=250, publish=200):
             passes = views_ratio >= 0.25
         elif lbc_ratio >= 0.25:
             passes = views_ratio >= 1.0
+        elif channels[i] in white_list:
+            passes = True
 
         print(f"\n(lbc_ratio, views_ratio) = ({lbc_ratio, views_ratio})")
 
