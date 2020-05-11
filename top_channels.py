@@ -239,7 +239,7 @@ def get_top(n=250, publish=200):
         elif channels[i] in white_list:
             passes = True
 
-        print(f"\n(lbc_ratio, views_ratio) = ({lbc_ratio, views_ratio})")
+        print(f"\n(lbc_ratio, views_ratio) = {lbc_ratio, views_ratio}")
 
         if passes:
             print("Passed quality filter.", flush=True)
