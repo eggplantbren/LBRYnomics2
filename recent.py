@@ -106,7 +106,6 @@ def count_boosts(now):
     """
 
     for i in range(len(labels)):
-
         if i==0:
             cutoff = 0.0
         else:
@@ -130,6 +129,8 @@ def count_boosts(now):
 
         for row in dbs["claims"].execute(query, data):
             biggest = row[1]
+            if biggest is None:
+                biggest = 0.0
             result["num_{label}".format(label=labels[i])] = row[0]
             result["biggest_{label}".format(label=labels[i])] = biggest/1E8
             break
