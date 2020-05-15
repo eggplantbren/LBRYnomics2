@@ -31,7 +31,7 @@ app.layout = html.Div(style={"background-color": "#222222",
                                 html.P(children="This is just a test!"),
                                 graph, dcc.Interval(
                                    id='interval-component',
-                                   interval=10*1000, # in milliseconds
+                                   interval=60*1000, # in milliseconds
                                    n_intervals=0
                                   )])
 
