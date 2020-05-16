@@ -5,6 +5,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import datetime
 import numpy as np
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import time
 from dash.dependencies import Input, Output
 
@@ -26,7 +28,7 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 graph = dcc.Graph(id="num_streams")
 
 app.layout = html.Div(style={"background-color": "#222222",
-                             "color": "#EEEEEE"},
+                             "color": "#EEEEEE", "width": 1400},
                       children=[html.H1(children="LBRYnomics Interactive"),
                                 html.P(children="This is just a test!"),
                                 graph, dcc.Interval(
@@ -68,24 +70,36 @@ def update_data(n):
 
     print("Refreshed data.", flush=True)
 
-    figure = {
-              "layout": {
+    fig = make_subplots(rows=2, cols=1)
+    fig.update_layout(
+                        {
                             "title": "Publications on LBRY today",
                             "plot_bgcolor":  "#222222",
                             "paper_bgcolor": "#222222",
                             "xaxis": {"title": "Hours since UTC midnight"},
                             "yaxis": {"title": "Number of publications"},
-                            "font": {"color": "#EEEEEE"}
-                        },
-
-              "data": [{"x": data["ts"], "y": data["ys"], "type": "line",
+                            "font": {"color": "#EEEEEE"},
+                            "width": 1400, "height": 1400
+                        }
+                     )
+    line = go.Scatter(x=data["ts"], y=data["ys"], mode="lines+markers",
+                      marker_color="blue", name="Cumulative")
+    fig.add_trace(line, row=1, col=1)
+    bar = go.Bar(x=data["ts"][1:], y=data["changes"],
+                 marker_color="orange", name="5 minute change")
+    fig.add_trace(bar, row=2, col=1)
+#    fig.update_layout(data=[{"type": "line", "x": data["ts"], "y": data["ys"]}],
+#                      row=1, col=1)
+    """
+                       "data": [{"x": data["ts"], "y": data["ys"], "type": "line",
                         "mode": "lines+markers",
                         "name": "Cumulative"},
                       {"x": data["ts"][1:], "y": data["changes"],
                        "type": "bar",
                        "name": "5 minute change"}]
-            }
-    return figure
+            })
+    """
+    return fig
 
 
 if __name__ == '__main__':
