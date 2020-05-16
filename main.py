@@ -43,10 +43,10 @@ while True:
 
     # Upload
     upload.upload()
-#    upload.upload("secrets2.yaml")
+    # upload.upload("secrets2.yaml")
 
     # Backup db periodically
-    if k % 72 == 0:
+    if k % 36 == 0:
         print("Backing up DB file...", flush=True)
         upload.backup()
         print("done.\n", flush=True)

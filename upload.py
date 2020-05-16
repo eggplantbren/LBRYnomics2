@@ -6,7 +6,7 @@ def backup(secrets_file="secrets.yaml"):
     secrets = yaml.load(f, Loader=yaml.SafeLoader)
     f.close()
 
-    os.system("zstd db/lbrynomics.db -o ./lbrynomics.db.zst")
+    os.system("zstd -19 db/lbrynomics.db -o ./lbrynomics.db.zst")
     cmd = "sshpass -p \"{p}\" scp -P {port} lbrynomics.db.zst {user}@{dest}"\
             .format(p=secrets["password"], user=secrets["user"],
                     dest=secrets["destination"], port=secrets["port"])
