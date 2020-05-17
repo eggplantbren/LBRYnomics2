@@ -37,6 +37,24 @@ def channels_with_content():
     return result
 
 
+def get_thumbnail_urls(claim_ids):
+    """
+    Get thumbnail URLs from claim IDs.
+    """
+    LBRY_RPC = "http://localhost:5279"
+    response = requests.post(LBRY_RPC, json={"method": "claim_search",
+                                             "params": {"claim_ids": claim_ids,
+                                                        "page_size": 500}})
+    result = []
+    try:
+        for item in response.json()["result"]["items"]:
+            result.append(item["value"]["thumbnail"]["url"])
+    except:
+        result = None
+    return result
+
+
+
 def estimate_revenue(channel_hash):
     block = daemon_command("status")["wallet"]["blocks"] - 7*576
 
@@ -398,6 +416,9 @@ def get_top(n=250, publish=200):
                         result[key][i] = 0
         except:
             pass
+
+    # Get thumbnail URLs
+    result["thumbnail_urls"] = get_thumbnail_urls(result["claim_ids"])
 
     # Save to file
     f = open("json/subscriber_counts.json", "w")
