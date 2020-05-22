@@ -54,9 +54,9 @@ def html_plot(top=20):
     # Plotly figure
     fig = go.Figure()
     fig.update_layout(height=800, width=1500,
-                      title="Growth of the Top 10 LBRY channels",
-                      plot_bgcolor="rgb(20, 20, 20)",
-                      paper_bgcolor="rgb(20, 20, 20)",
+                      title="Growth of the Top 20 LBRY channels",
+                      plot_bgcolor="rgb(32, 32, 32)",
+                      paper_bgcolor="rgb(32, 32, 32)",
                       font=dict(color="rgb(230, 230, 230)", size=14),
                       xaxis=dict(title="Date", color="rgb(230, 230, 230)"),
                       yaxis=dict(title="Number of Followers",
