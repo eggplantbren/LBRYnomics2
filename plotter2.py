@@ -20,7 +20,7 @@ HTML = \
 </html>
 """
 
-def html_plot(top=10):
+def html_plot(top=20):
 
     # Get data and put it in a nice dictionary
     conn = apsw.Connection("db/lbrynomics.db")
@@ -86,7 +86,7 @@ def html_plot(top=10):
 
     div = plotly.offline.plot(fig, output_type="div", auto_open=False,                 
                               include_plotlyjs=True)
-    f = open("plots.html", "w")
+    f = open("plots/interactive.html", "w")
     f.write(HTML.replace("%%CONTENT%%", div))
     f.close()
 

@@ -14,10 +14,12 @@ def backup(secrets_file="secrets.yaml"):
     os.system("rm lbrynomics.db.zst")
 
 
-def upload(secrets_file="secrets.yaml"):
+def upload(secrets_file="secrets.yaml", with_html_plot=False):
     print("Uploading files...", end="", flush=True)
-    os.system("cp plots/* upload")
+    os.system("cp plots/*.svg upload")
     os.system("cp json/*.json upload")
+    if with_html_plot:
+        os.system("cp plots/interactive.html upload")
 
     f = open(secrets_file)
     secrets = yaml.load(f, Loader=yaml.SafeLoader)
@@ -30,6 +32,9 @@ def upload(secrets_file="secrets.yaml"):
     env["SSHPASS"] = secrets["password"]
     import subprocess
     subprocess.Popen(cmd, env=env, shell=True)
+
+    if with_html_plot:
+        os.system("rm upload/interactive.html")
 
 #    print(cmd)
 #    os.system(cmd)

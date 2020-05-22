@@ -6,6 +6,7 @@ import datetime
 import json
 from lists import *
 import numpy as np
+import plotter2
 import requests
 import time
 import upload
@@ -432,6 +433,11 @@ def get_top(n=250, publish=200):
     print("Backing up DB file...", flush=True)
     upload.backup()
     print("done.\n", flush=True)
+
+    print("Making and uploading daily interactive graph...", flush=True, end="")
+    plotter2.html_plot()
+    upload.upload(with_html_plot=True)
+    print("done.", flush=True)
 
     return result
 
