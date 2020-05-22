@@ -1,43 +1,77 @@
 import apsw
+from collections import OrderedDict
 import datetime
 import numpy as np
 import plotly
 import plotly.graph_objects as go
 
-def html_plot():
+HTML = \
+"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <style>body { background-color: #222222; }</style>
+    <title>LBRY Top Channels Interactive Graph</title>
+</head>
+<body>
+    %%CONTENT%%
+</body>
+</html>
+"""
+
+def html_plot(top=10):
 
     # Get data and put it in a nice dictionary
     conn = apsw.Connection("db/lbrynomics.db")
     db = conn.cursor()
 
-    data = dict()
-    for row in db.execute("""SELECT cm.claim_id, cm.vanity_name,
-                                    e.time, cm.num_followers, views, lbc
+    # Get current top channels
+    channels = OrderedDict()
+    for row in db.execute("""SELECT claim_id, vanity_name, rank
+                             FROM channel_measurements
+                             WHERE epoch = (SELECT MAX(id) FROM epochs)
+                             AND rank <= ?
+                             ORDER BY rank ASC;""", (top, )):
+        claim_id, vanity_name, rank = row
+        channels[claim_id] = dict(vanity_name=vanity_name, rank=rank,
+                                  data={"ts": [], "ys": []})
+
+    # Question marks
+    qms = "?, ".join(["" for i in range(top+1)])
+    qms = "(" + qms[0:-2] + ")"
+
+    for row in db.execute(f"""SELECT claim_id, vanity_name,
+                                    time, num_followers, views, lbc
                              FROM epochs e INNER JOIN channel_measurements cm
                              ON e.id = cm.epoch
-                             WHERE cm.claim_id IN
-                                    (SELECT claim_id FROM channel_measurements
-                                     WHERE rank <= 10 ORDER BY epoch DESC,
-                                     rank ASC LIMIT 10);"""):
+                             WHERE claim_id IN {qms};""", # No injection risk
+                             channels.keys()):
         claim_id, vanity_name, time, num_followers, views, lbc = row
-        if claim_id not in data:
-            data[claim_id] = dict(vanity_name=vanity_name, ts=[], ys=[])
-        data[claim_id]["ts"].append(time)
-        data[claim_id]["ys"].append(num_followers)
+        channels[claim_id]["data"]["ts"].append(time)
+        channels[claim_id]["data"]["ys"].append(num_followers)
 
     # Plotly figure
     fig = go.Figure()
-    fig.update_layout(title="Growth of the Top 10 LBRY channels")
+    fig.update_layout(height=800, width=1500,
+                      title="Growth of the Top 10 LBRY channels",
+                      plot_bgcolor="rgb(20, 20, 20)",
+                      paper_bgcolor="rgb(20, 20, 20)",
+                      font=dict(color="rgb(230, 230, 230)", size=14),
+                      xaxis=dict(title="Date", color="rgb(230, 230, 230)"),
+                      yaxis=dict(title="Number of Followers",
+                                 color="rgb(230, 230, 230)"))
 
     # Loop over channels
-    for claim_id in data:
+    for claim_id in channels:
         datetimes = [datetime.datetime.fromtimestamp(t)\
-                            for t in data[claim_id]["ts"]]
+                            for t in channels[claim_id]["data"]["ts"]]
         fig.add_trace(go.Scatter(x=datetimes,
-                                 y=data[claim_id]["ys"],
+                                 y=channels[claim_id]["data"]["ys"],
                                  showlegend=True,
                                  mode="lines+markers",
-                                 name=data[claim_id]["vanity_name"]))
+                                 name=channels[claim_id]["vanity_name"],
+                                 ))
 
     # Add year lines
     shapes = []
@@ -49,7 +83,12 @@ def html_plot():
 #                           y1=ys.max(),
 #                           line=dict(dash="dash", width=2, color="red")))
     fig.update_layout(shapes=shapes)
-    plotly.offline.plot(fig, filename="plots.html", auto_open=False)
+
+    div = plotly.offline.plot(fig, output_type="div", auto_open=False,                 
+                              include_plotlyjs=True)
+    f = open("plots.html", "w")
+    f.write(HTML.replace("%%CONTENT%%", div))
+    f.close()
 
     db.close()
 
