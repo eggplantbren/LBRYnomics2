@@ -13,6 +13,7 @@ HTML = \
     <meta charset="utf-8">
     <style>body { background-color: #222222; color: #E6E6E6; }</style>
     <title>LBRY Top Channels Interactive Graphs</title>
+    %%PLOTLYJS%%
 </head>
 <body>
     <h2>Growth of the Top %%TOP%% LBRY Channels</h2>
@@ -20,6 +21,10 @@ HTML = \
 </body>
 </html>
 """
+f = open("plotlyjs.txt")
+s = "".join(f.readlines())
+HTML = HTML.replace("%%PLOTLYJS%%", s)
+f.close()
 
 def make_fig(channels, quantity="num_followers"):
     assert quantity in ["num_followers", "views", "reposts", "lbc"]
@@ -66,7 +71,7 @@ def make_fig(channels, quantity="num_followers"):
 #    fig.update_layout(shapes=shapes)
 
     div = plotly.offline.plot(fig, output_type="div", auto_open=False,                 
-                              include_plotlyjs=True)
+                              include_plotlyjs=False)
     return div
 
 def html_plot(top=20):
