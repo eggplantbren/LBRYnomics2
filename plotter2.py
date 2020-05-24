@@ -1,5 +1,6 @@
 import apsw
 from collections import OrderedDict
+import databases
 import datetime
 import numpy as np
 import plotly
@@ -53,6 +54,7 @@ def make_fig(channels, quantity="num_followers"):
     for claim_id in channels:
         datetimes = [datetime.datetime.fromtimestamp(t)\
                             for t in channels[claim_id]["data"]["ts"]]
+        #print(channels[claim_id]["vanity_name"], datetimes[-1])
         fig.add_trace(go.Scatter(x=datetimes,
                                  y=channels[claim_id]["data"][quantity],
                                  showlegend=True,
@@ -76,9 +78,8 @@ def make_fig(channels, quantity="num_followers"):
 
 def html_plot(top=20):
 
-    # Get data and put it in a nice dictionary
-    conn = apsw.Connection("db/lbrynomics.db")
-    db = conn.cursor()
+    db = databases.dbs["lbrynomics"]
+    # print(db.execute("SELECT MAX(id) FROM epochs;").fetchall())
 
     # Get current top channels
     channels = OrderedDict()
@@ -108,6 +109,7 @@ def html_plot(top=20):
         channels[claim_id]["data"]["views"].append(views)
         channels[claim_id]["data"]["reposts"].append(reposts)
         channels[claim_id]["data"]["lbc"].append(lbc)
+#        print(time)
 
     div1 = make_fig(channels, "num_followers")
     div2 = make_fig(channels, "views")
