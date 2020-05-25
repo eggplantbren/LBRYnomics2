@@ -122,10 +122,6 @@ def html_plot(top=20):
     f.write(html)
     f.close()
 
-
-
-    db.close()
-
 if __name__ == "__main__":
     html_plot()
 
