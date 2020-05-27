@@ -7,37 +7,37 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   inkscape:export-ydpi="89.536308"
-   inkscape:export-xdpi="89.536308"
-   inkscape:export-filename="/home/brewer/Projects/LBRYnomics2/assets/logo_and_url.png"
-   sodipodi:docname="logo_and_url.svg"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
-   id="svg8"
-   version="1.1"
-   viewBox="0 0 210 297"
+   width="210mm"
    height="297mm"
-   width="210mm">
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   sodipodi:docname="logo_and_url.svg"
+   inkscape:export-filename="/home/brewer/Projects/LBRYnomics2/assets/logo_and_url.png"
+   inkscape:export-xdpi="89.536308"
+   inkscape:export-ydpi="89.536308">
   <defs
      id="defs2" />
   <sodipodi:namedview
-     inkscape:document-rotation="0"
-     inkscape:window-maximized="1"
-     inkscape:window-y="36"
-     inkscape:window-x="0"
-     inkscape:window-height="1020"
-     inkscape:window-width="1920"
-     showgrid="false"
-     inkscape:current-layer="layer1"
-     inkscape:document-units="mm"
-     inkscape:cy="323.23684"
-     inkscape:cx="114.95759"
-     inkscape:zoom="0.90021329"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0.0"
-     borderopacity="1.0"
-     bordercolor="#666666"
+     id="base"
      pagecolor="#ffffff"
-     id="base" />
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.90021329"
+     inkscape:cx="114.95759"
+     inkscape:cy="323.23684"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1020"
+     inkscape:window-x="0"
+     inkscape:window-y="36"
+     inkscape:window-maximized="1"
+     inkscape:document-rotation="0" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -51,32 +51,32 @@
     </rdf:RDF>
   </metadata>
   <g
-     id="layer1"
+     inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     inkscape:label="Layer 1">
+     id="layer1">
     <text
-       transform="scale(0.96556925,1.0356585)"
-       inkscape:export-ydpi="60.762569"
-       inkscape:export-xdpi="60.762569"
-       id="text3796"
-       y="10.348598"
-       x="1.1635305"
+       xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:11.1279px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#6391fb;fill-opacity:1;stroke:none;stroke-width:0.278197"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.7px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197"
-         y="10.348598"
-         x="1.1635305"
+       x="1.1635305"
+       y="10.348598"
+       id="text3796"
+       inkscape:export-xdpi="60.762569"
+       inkscape:export-ydpi="60.762569"
+       transform="scale(0.96556925,1.0356585)"><tspan
+         sodipodi:role="line"
          id="tspan3794"
-         sodipodi:role="line">Data collection and graphs</tspan><tspan
-         id="tspan815"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.7px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197"
+         x="1.1635305"
+         y="10.348598"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.7px;font-family:Roboto;-inkscape-font-specification:Roboto;text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197">Data collection and graphs</tspan><tspan
+         sodipodi:role="line"
+         x="1.1635305"
          y="26.223597"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.7px;font-family:Roboto;-inkscape-font-specification:Roboto;text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197"
+         id="tspan815">by Brendon J. Brewer</tspan><tspan
+         sodipodi:role="line"
          x="1.1635305"
-         sodipodi:role="line">by Brendon J. Brewer</tspan><tspan
-         id="tspan814"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.7px;font-family:'Liberation Sans';-inkscape-font-specification:'Liberation Sans';text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197"
          y="42.098598"
-         x="1.1635305"
-         sodipodi:role="line">https://brendonbrewer.com</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.7px;font-family:Roboto;-inkscape-font-specification:Roboto;text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197"
+         id="tspan814">https://brendonbrewer.com</tspan></text>
   </g>
 </svg>
