@@ -72,8 +72,13 @@ def make_fig(channels, quantity="num_followers"):
 #                           line=dict(dash="dash", width=2, color="red")))
 #    fig.update_layout(shapes=shapes)
 
-    div = plotly.offline.plot(fig, output_type="div", auto_open=False,                 
+    div = plotly.offline.plot(fig, output_type="div",
+                              auto_open=False,
                               include_plotlyjs=False)
+
+    # Give the div a sensible ID
+    div = div.replace("<div>\n", f"<div id=\"{quantity}\">\n")
+
     return div
 
 def html_plot(top=20):
