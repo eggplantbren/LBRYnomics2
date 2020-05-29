@@ -7,37 +7,37 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   inkscape:export-ydpi="107.64"
-   inkscape:export-xdpi="107.64"
-   inkscape:export-filename="/home/brewer/Projects/LBRYnomics2/assets/logo_and_url.png"
-   sodipodi:docname="logo_and_url.svg"
-   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
-   id="svg8"
-   version="1.1"
-   viewBox="0 0 210 297"
+   width="210mm"
    height="297mm"
-   width="210mm">
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
+   sodipodi:docname="logo_and_url.svg"
+   inkscape:export-filename="/home/brewer/Projects/LBRYnomics2/assets/logo_and_url.png"
+   inkscape:export-xdpi="150.03999"
+   inkscape:export-ydpi="150.03999">
   <defs
      id="defs2" />
   <sodipodi:namedview
-     inkscape:document-rotation="0"
-     inkscape:window-maximized="1"
-     inkscape:window-y="36"
-     inkscape:window-x="0"
-     inkscape:window-height="1020"
-     inkscape:window-width="1920"
-     showgrid="false"
-     inkscape:current-layer="layer1"
-     inkscape:document-units="mm"
-     inkscape:cy="323.23684"
-     inkscape:cx="351.01276"
-     inkscape:zoom="0.90021329"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0.0"
-     borderopacity="1.0"
-     bordercolor="#666666"
+     id="base"
      pagecolor="#ffffff"
-     id="base" />
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.90021329"
+     inkscape:cx="110.5142"
+     inkscape:cy="323.23684"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1020"
+     inkscape:window-x="0"
+     inkscape:window-y="36"
+     inkscape:window-maximized="1"
+     inkscape:document-rotation="0" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -51,32 +51,32 @@
     </rdf:RDF>
   </metadata>
   <g
-     id="layer1"
+     inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     inkscape:label="Layer 1">
+     id="layer1">
     <text
-       transform="scale(0.96556922,1.0356585)"
-       inkscape:export-ydpi="134.16"
-       inkscape:export-xdpi="134.16"
-       id="text3796"
-       y="12.970447"
-       x="0.98379111"
+       xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:14.5516px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#6391fb;fill-opacity:1;stroke:none;stroke-width:0.278197"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.6074px;font-family:Inconsolata;-inkscape-font-specification:'Inconsolata Semi-Bold';text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197"
-         y="12.970447"
-         x="0.98379111"
+       x="0.98379111"
+       y="12.970447"
+       id="text3796"
+       inkscape:export-xdpi="134.16"
+       inkscape:export-ydpi="134.16"
+       transform="scale(0.96556922,1.0356585)"><tspan
+         sodipodi:role="line"
          id="tspan3794"
-         sodipodi:role="line">Data collection and graphs</tspan><tspan
-         id="tspan815"
-         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.6074px;font-family:Inconsolata;-inkscape-font-specification:'Inconsolata Semi-Bold';text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197"
-         y="33.960503"
          x="0.98379111"
-         sodipodi:role="line">by Brendon J. Brewer</tspan><tspan
-         id="tspan814"
-         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:16.6074px;font-family:Inconsolata;-inkscape-font-specification:'Inconsolata Semi-Bold';text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197"
-         y="54.950562"
+         y="12.970447"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.6074px;font-family:'Open Sans';-inkscape-font-specification:'Open Sans';text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197">Data collection and graphs</tspan><tspan
+         sodipodi:role="line"
          x="0.98379111"
-         sodipodi:role="line">https://brendonbrewer.com</tspan></text>
+         y="33.729698"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.6074px;font-family:'Open Sans';-inkscape-font-specification:'Open Sans';text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197"
+         id="tspan815">by Brendon J. Brewer</tspan><tspan
+         sodipodi:role="line"
+         x="0.98379111"
+         y="54.488949"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.6074px;font-family:'Open Sans';-inkscape-font-specification:'Open Sans';text-align:start;text-anchor:start;fill:#6391fb;fill-opacity:1;stroke-width:0.278197"
+         id="tspan814">https://brendonbrewer.com</tspan></text>
   </g>
 </svg>
