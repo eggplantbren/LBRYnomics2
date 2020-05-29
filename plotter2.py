@@ -12,7 +12,8 @@ HTML = \
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <style>body { background-color: #222222; color: #E6E6E6; }</style>
+    <style>body { background-color: #222222; color: #E6E6E6;
+                  font-family: 'Open Sans', Arial, sans-serif; }</style>
     <title>LBRY Top Channels Interactive Graphs</title>
     %%PLOTLYJS%%
 </head>
@@ -45,7 +46,8 @@ def make_fig(channels, quantity="num_followers"):
                       title=f"{yaxis_title}",
                       plot_bgcolor="rgb(32, 32, 32)",
                       paper_bgcolor="rgb(32, 32, 32)",
-                      font=dict(color="rgb(230, 230, 230)", size=14),
+                      font=dict(color="rgb(230, 230, 230)", size=14,
+                                family="'Open Sans', Arial, sans-serif"),
                       xaxis=dict(title="Date", color="rgb(230, 230, 230)"),
                       yaxis=dict(title=yaxis_title,
                                  color="rgb(230, 230, 230)"))
