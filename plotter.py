@@ -29,7 +29,7 @@ def moving_average(ys, length=10):
 # Load LBRY Social logo
 logo = plt.imread("assets/logo_and_url.png")
 matplotlib.rcParams["figure.dpi"] = 500
-
+matplotlib.rcParams["font.family"] = "'Open Sans', Arial, sans-serif;"
 
 
 def annotate_all(mode, subplot=1):
