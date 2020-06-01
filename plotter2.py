@@ -24,8 +24,8 @@ HTML = \
 </html>
 """
 f = open("plotlyjs.txt")
-s = "".join(f.readlines())
-HTML = HTML.replace("%%PLOTLYJS%%", s)
+plotlyjs = "".join(f.readlines())
+HTML = HTML.replace("%%PLOTLYJS%%", plotlyjs)
 f.close()
 
 def make_fig(channels, quantity="num_followers"):
@@ -42,7 +42,7 @@ def make_fig(channels, quantity="num_followers"):
 
     # Plotly figure
     fig = go.Figure()
-    fig.update_layout(height=800, width=1500,
+    fig.update_layout(height=700, width=1200,
                       title=f"{yaxis_title}",
                       plot_bgcolor="rgb(32, 32, 32)",
                       paper_bgcolor="rgb(32, 32, 32)",
@@ -128,6 +128,22 @@ def html_plot(top=20):
     html = html.replace("%%CONTENT%%", "\n".join([div1, div2, div3, div4]))
     f.write(html)
     f.close()
+
+    # Version without HTML surrounding it
+    f = open("plots/interactive_parts.html", "w")
+    f.write("<!-- JavaScript for Plotly -->\n\n")
+    f.write(plotlyjs + "\n")
+    f.write("<!-- num_followers plot -->\n")
+    f.write(div1 + "\n")
+    f.write("<!-- views plot -->\n")
+    f.write(div2 + "\n")
+    f.write("<!-- reposts plot -->\n")
+    f.write(div3 + "\n")
+    f.write("<!-- lbc plot -->\n")
+    f.write(div4 + "\n")
+    f.close()
+
+
 
 if __name__ == "__main__":
     html_plot()
