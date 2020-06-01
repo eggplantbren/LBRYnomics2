@@ -42,7 +42,7 @@ def make_fig(channels, quantity="num_followers"):
 
     # Plotly figure
     fig = go.Figure()
-    fig.update_layout(height=700, width=1200,
+    fig.update_layout(height=800, width=1500,
                       title=f"{yaxis_title}",
                       plot_bgcolor="rgb(32, 32, 32)",
                       paper_bgcolor="rgb(32, 32, 32)",
