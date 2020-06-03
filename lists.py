@@ -11,8 +11,7 @@ inc = set(["f3da2196b5151570d980b34d311ee0973225a68e",
            "19e7d3104e12fe3eeaef05933af033242eeb42c3"])
 
 # LBRY Foundation Channels
-lbryf = set(["5bd299a92e7b31865d2bb3e2313402edaca41a94",
-          "f8d6eccd887c9cebd36b1d42aa349279b7f5c3ed",
+lbryf = set(["f8d6eccd887c9cebd36b1d42aa349279b7f5c3ed",
           "e11e2fc3056137948d2cc83fb5ca2ce9b57025ec",
           "1ba5acff747615510cf3f6089f54d5de669ad94f",
           "4506db7fb52d3ec5d3a024c870bf86fc35f7b6a3",
