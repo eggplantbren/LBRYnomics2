@@ -433,7 +433,7 @@ def get_top(n=250, publish=200):
     print("Making and uploading daily interactive graph...", flush=True, end="")
     plotter2.html_plot()
     upload.upload(with_html_plot=True)
-    upload.upload("secrets2.yaml", with_html_plot=True)
+#    upload.upload("secrets2.yaml", with_html_plot=True)
     print("done.", flush=True)
 
     print("Backing up DB file...", flush=True)

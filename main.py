@@ -43,7 +43,7 @@ while True:
 
     # Upload
     upload.upload()
-    upload.upload("secrets2.yaml")
+#    upload.upload("secrets2.yaml")
 
     # Backup db periodically
     if k % 36 == 0:
