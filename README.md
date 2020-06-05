@@ -46,6 +46,11 @@ re-launch your wallet server. This is because LBRYnomics2 will add some
 new indexes to `claims.db` and it is risky to try doing this while the 
 wallet server is running.
 
+## Static databases
+If you just want to experiment without having a wallet server running, you can
+find a static snapshot of `claims.db` (and `lbrynomics.db`) at
+https://brendonbrewer.com/lbrynomics.
+
 ## Testing of Plots
 If you're working on `plotter.py` (which makes static Matplotlib plots) or 
 `plotter2.py` (which makes interactive Plotly plots), you can run these 
