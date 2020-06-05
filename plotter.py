@@ -243,7 +243,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
 
     # Add logo and tweak its position
     ax = plt.gca()
-    axins = ax.inset_axes([0.01, 0.77, 0.25, 0.22])
+    axins = ax.inset_axes([0.01, 0.80, 0.20, 0.18])
     axins.imshow(logo)
     axins.axis("off")
 
