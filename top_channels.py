@@ -232,20 +232,25 @@ def get_top(n=250, publish=200):
         result2 = dbs["claims"].execute("""SELECT SUM(amount)/1E8 + SUM(support_amount)/1E8
                 FROM claim WHERE channel_hash = ?;""", (result1[1], )).fetchone()
 
-        attempts = 5
-        while attempts > 0:
-            try:
-                print("    Getting view counts for {name}. ".format(name=result1[0]),
-                      end="", flush=True)
-                v = view_counts_channel(result1[1])
-                break
-            except:
-                attempts -= 1
-
-
         # Quality filter
         lbc_amount = result1[2] + result2[0]
         lbc_ratio = lbc_amount/counts[i]
+
+        # Get view counts if LBC is sufficient
+        v = 0
+        if lbc_ratio >= 0.25 or lbc_amount >= 20000.0:
+            attempts = 10
+            while attempts > 0:
+                try:
+                    print("    Getting view counts for {name}. ".format(name=result1[0]),
+                          end="", flush=True)
+                    v = view_counts_channel(result1[1])
+                    break
+                except:
+                    attempts -= 1
+        else:
+            print(f"    Skipping view counts for {result1[0]}.")
+
         views_ratio = v/counts[i]
         passes = False
 
