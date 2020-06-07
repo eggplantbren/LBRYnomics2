@@ -109,6 +109,6 @@ def make_measurement(k):
     dbs["lbrynomics"].execute("COMMIT;")
 
     print("    " + json.dumps(measurement, indent=4).replace("\n", "\n    "))
-    print("Done.\n")
+    print("Done.\n", flush=True)
     return measurement
 

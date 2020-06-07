@@ -13,7 +13,7 @@ def count_recent_all(now):
     count_recent("streams",  now)
     count_recent("reposts",  now)
     count_boosts(now)
-    print("done.\n")
+    print("done.\n", flush=True)
 
 
 def count_recent(mode, now):
