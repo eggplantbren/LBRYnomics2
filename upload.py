@@ -11,10 +11,12 @@ def backup(secrets_file="secrets.yaml"):
     dbs["lbrynomics"].execute("PRAGMA main.wal_checkpoint(FULL);")
 
     os.system("zstd -19 db/lbrynomics.db -o ./lbrynomics.db.zst")
-    cmd = "sshpass -p \"{p}\" scp -P {port} lbrynomics.db.zst {user}@{dest}"\
-            .format(p=secrets["password"], user=secrets["user"],
+    cmd = "sshpass -e scp -P {port} lbrynomics.db.zst {user}@{dest}"\
+            .format(user=secrets["user"],
                     dest=secrets["destination"], port=secrets["port"])
-    os.system(cmd)
+    env = os.environ.copy()
+    env["SSHPASS"] = secrets["password"]
+    result = subprocess.run(cmd, env=env, shell=True)
     os.system("rm lbrynomics.db.zst")
 
 
