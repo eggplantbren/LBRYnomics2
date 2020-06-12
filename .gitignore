@@ -11,3 +11,6 @@ json/subscriber_counts_preview.csv
 secrets.yaml
 json/rss.xml
 plots/interactive.html
+view_counter.log
+logfile
+daemon.out

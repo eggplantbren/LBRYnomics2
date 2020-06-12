@@ -5,7 +5,10 @@ import numpy.random as rng
 import time
 from top_channels import get_view_counts
 
-conn = apsw.Connection("db/views.db")
+VIEWS_THRESHOLD = 10
+LBC_THRESHOLD = 0.99999
+
+conn = apsw.Connection("db/view_counter.db")
 db = conn.cursor()
 db.execute("PRAGMA JOURNAL_MODE=DELETE;")
 db.execute("BEGIN;")
@@ -40,8 +43,8 @@ def do_100():
         rowid = min_rowid + rng.randint(max_rowid - min_rowid + 1)
         row = dbs["claims"].execute("""SELECT claim_hash, (amount+support_amount)/1E8 lbc FROM claim
                                        WHERE claim_type=1 AND rowid=?
-                                       AND (amount + support_amount) >= 1E8;""",
-                                    (rowid, )).fetchone()
+                                       AND lbc >= ?;""",
+                                    (rowid, LBC_THRESHOLD)).fetchone()
         if row is not None:
             claim_hashes.add(row[0])
 
@@ -51,7 +54,7 @@ def do_100():
     views = get_view_counts(claim_ids, 0, len(claim_ids))
     zipped = []
     for i in range(len(views)):
-        if views[i] >= 100:
+        if views[i] >= VIEWS_THRESHOLD:
             zipped.append((now, claim_hashes[i], views[i]))
 
     db.execute("BEGIN;")
@@ -68,9 +71,9 @@ while True:
     print(f"Attempt {k}. Checking 100 streams...", end="", flush=True)
     do_100()
     c = claims_seen()
-    print(f"done. Seen {c} claims with >= 100 views and >= 1 LBC.", flush=True)
+    print(f"done. Seen {c} claims with >= {VIEWS_THRESHOLD} views and >= {LBC_THRESHOLD} LBC.", flush=True)
     k += 1
-    time.sleep(1.0)
+    time.sleep(0.0)
 
 conn.close()
 
