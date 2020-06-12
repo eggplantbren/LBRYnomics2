@@ -76,7 +76,7 @@ while True:
     try:
         do_100()
         c = claims_seen()
-        print(f"done. Seen {c} claims with >= {VIEWS_THRESHOLD} views and >= {LBC_THRESHOLD} LBC.", flush=True)
+        print(f"done. Seen {c} with >= {VIEWS_THRESHOLD} views and >= {LBC_THRESHOLD} LBC.", flush=True)
     except:
         pass
     time.sleep(SLEEP)
