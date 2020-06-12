@@ -67,18 +67,16 @@ def do_100():
 def claims_seen():
     return db.execute("SELECT COUNT(DISTINCT claim_hash) FROM views;").fetchone()[0]
 
-
-k = 1
-while True:
-    print(f"Attempt {k}. Checking 100 streams...", end="", flush=True)
-    try:
-        do_100()
-        c = claims_seen()
-        print(f"done. Seen {c} with >= {VIEWS_THRESHOLD} views and >= {LBC_THRESHOLD} LBC.", flush=True)
-    except:
-        pass
-    time.sleep(SLEEP)
-    k += 1
-
-conn.close()
+if __name__ == "__main__":
+    k = 1
+    while True:
+        print(f"Attempt {k}. Checking 100 streams...", end="", flush=True)
+        try:
+            do_100()
+            c = claims_seen()
+            print(f"done. Seen {c} with >= {VIEWS_THRESHOLD} views and >= {LBC_THRESHOLD} LBC.", flush=True)
+        except:
+            pass
+        time.sleep(SLEEP)
+        k += 1
 
