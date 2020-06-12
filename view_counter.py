@@ -5,8 +5,9 @@ import numpy.random as rng
 import time
 from top_channels import get_view_counts
 
-VIEWS_THRESHOLD = 10
+VIEWS_THRESHOLD = 100
 LBC_THRESHOLD = 0.99999
+SLEEP = 10.0
 
 conn = apsw.Connection("db/view_counter.db")
 db = conn.cursor()
@@ -50,7 +51,10 @@ def do_100():
 
     # Get the view counts and prepare to add to DB
     claim_hashes = list(claim_hashes)
-    claim_ids = [claim_hash.hex() for claim_hash in claim_hashes]
+    claim_ids = dbs["claims"].execute(f"""SELECT claim_id FROM claim WHERE claim_hash IN\
+                                ({','.join('?' for _ in claim_hashes)});""",
+                                       claim_hashes).fetchall()
+    claim_ids = [cid[0] for cid in claim_ids]
     views = get_view_counts(claim_ids, 0, len(claim_ids))
     zipped = []
     for i in range(len(views)):
@@ -69,11 +73,14 @@ def claims_seen():
 k = 1
 while True:
     print(f"Attempt {k}. Checking 100 streams...", end="", flush=True)
-    do_100()
-    c = claims_seen()
-    print(f"done. Seen {c} claims with >= {VIEWS_THRESHOLD} views and >= {LBC_THRESHOLD} LBC.", flush=True)
+    try:
+        do_100()
+        c = claims_seen()
+        print(f"done. Seen {c} claims with >= {VIEWS_THRESHOLD} views and >= {LBC_THRESHOLD} LBC.", flush=True)
+    except:
+        pass
+    time.sleep(SLEEP)
     k += 1
-    time.sleep(0.0)
 
 conn.close()
 
