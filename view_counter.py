@@ -51,14 +51,12 @@ def do_100():
 
     # Get the view counts and prepare to add to DB
     claim_hashes = list(claim_hashes)
-    claim_ids = dbs["claims"].execute(f"""SELECT claim_id FROM claim WHERE claim_hash IN\
-                                ({','.join('?' for _ in claim_hashes)});""",
-                                       claim_hashes).fetchall()
-    claim_ids = [cid[0] for cid in claim_ids]
+    claim_ids = [ch[::-1].hex() for ch in claim_hashes]
     views = get_view_counts(claim_ids, 0, len(claim_ids))
     zipped = []
     for i in range(len(views)):
         if views[i] >= VIEWS_THRESHOLD:
+            #print(claim_hashes[i], claim_ids[i])
             zipped.append((now, claim_hashes[i], views[i]))
 
     db.execute("BEGIN;")
