@@ -1,7 +1,7 @@
 import apsw
 import config
 
-db1 = apsw.Connection(config.claims_db_file)
+db1 = apsw.Connection(config.claims_db_file, flags=apsw.SQLITE_OPEN_READONLY)
 db2 = apsw.Connection("db/lbrynomics.db")
 
 # Cursors
