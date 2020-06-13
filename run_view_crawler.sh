@@ -1,2 +1,2 @@
 #!/bin/bash
-python view_counter.py |& rotatelogs -n 1 ./view_counter.log 1M
+python view_crawler.py |& rotatelogs -n 1 ./view_crawler.log 1M

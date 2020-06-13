@@ -1,5 +1,6 @@
 import apsw
 from databases import dbs
+import json
 import numpy as np
 import numpy.random as rng
 import time
@@ -94,14 +95,27 @@ def status():
     result["streams_seen"] = db.execute("""SELECT COUNT(DISTINCT claim_hash)
                                            FROM streams;""").fetchone()[0]
 
-    result["measurements"] = db.execute("""SELECT COUNT(id)
+    result["measurements_saved"] = db.execute("""SELECT COUNT(id)
                                            FROM stream_measurements;""")\
                                                             .fetchone()[0]
     return result
 
 
-if __name__ == "__main__":
+def read_top(num=100):
+    data = []
+    k = 1
+    for row in db.execute("""SELECT s.claim_hash, s.name, MAX(sm.views) v
+                             FROM streams s INNER JOIN stream_measurements sm
+                                    ON s.claim_hash = sm.stream
+                             GROUP BY s.claim_hash
+                             ORDER BY v DESC LIMIT 100;"""):
+        data.append(dict(rank=k,
+                         url="https://lbry.tv/" + row[1] + ":" + row[0][::-1].hex(),
+                         views=row[2]))
+        k += 1
+    return data
 
+if __name__ == "__main__":
     initialise_database()
 
     k = 1
@@ -115,4 +129,16 @@ if __name__ == "__main__":
             print("Something went wrong.\n\n", end="", flush=True)
         time.sleep(SLEEP)
         k += 1
+
+        if k % 10 == 0:
+            print("Saving JSON...", end="", flush=True)
+            f = open("json/view_crawler.json", "w")
+            json.dump(read_top(), f)
+            f.close()
+            print("done.\n\n", end="", flush=True)
+
+        if k % 1000 == 0:
+            print("Vacuuming database...", end="", flush=True)
+            db.execute("VACUUM;")
+            print("done.\n\n", end="", flush=True)
 
