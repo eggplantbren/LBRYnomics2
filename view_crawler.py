@@ -58,59 +58,64 @@ def do_100():
                                        WHERE claim_type=1 AND rowid=?
                                        AND lbc >= ?;""",
                                     (rowid, LBC_THRESHOLD)).fetchone()
+
         if row is not None:
-            measurements[row[0]] = dict(name=row[1], lbc=row[2])
+            nsfw = dbs["claims"].execute("""SELECT COUNT(*) FROM tag
+                                            WHERE claim_hash = ?
+                                            AND tag in
+                                            ('nsfw', 'xxx', 'sex',
+                                             'porn', 'mature')""", (row[0], )
+                                        ).fetchone()[0]
+            if nsfw == 0:
+                measurements[row[0]] = dict(name=row[1], lbc=row[2])
 
     # Get the view counts and prepare to add to DB
     claim_hashes = list(measurements.keys())
     claim_ids = [ch[::-1].hex() for ch in claim_hashes]
     views = get_view_counts(claim_ids, 0, len(claim_ids))
 
-    db.execute("BEGIN;")
+    # Rows to insert new streams and new measurements
+    zipped0 = []
+    zipped1 = []
 
-    # Insert or ignore new streams
-    zipped = []
-    for ch in claim_hashes:
-        zipped.append((ch,
-                       measurements[ch]["name"]))
+    for i in range(len(views)):
+        if views[i] >= VIEWS_THRESHOLD and \
+                        measurements[claim_hashes[i]]["lbc"] >= LBC_THRESHOLD:
+            ch = claim_hashes[i]
+            zipped0.append((ch, measurements[ch]["name"]))
+            zipped1.append((now, ch, views[i], measurements[ch]["lbc"]))
+
+    db.execute("BEGIN;")
     db.executemany("""INSERT INTO streams (claim_hash, name)
                       VALUES (?, ?)
-                      ON CONFLICT (claim_hash) DO NOTHING;""", zipped)
-
-    # Insert new measurements
-    zipped = []
-    for i in range(len(views)):
-        if views[i] >= VIEWS_THRESHOLD:
-            ch = claim_hashes[i]
-            zipped.append((now, ch, views[i], measurements[ch]["lbc"]))
+                      ON CONFLICT (claim_hash) DO NOTHING;""", zipped0)
     db.executemany("""INSERT INTO stream_measurements (time, stream, views, lbc)
-                      VALUES (?, ?, ?, ?);""", zipped)
-
+                      VALUES (?, ?, ?, ?);""", zipped1)
     db.execute("COMMIT;")
 
 def status():
 
     # Preparing for when we'll want more status measurements
     result = dict()
-    result["streams_seen"] = db.execute("""SELECT COUNT(DISTINCT claim_hash)
-                                           FROM streams;""").fetchone()[0]
-
-    result["measurements_saved"] = db.execute("""SELECT COUNT(id)
-                                           FROM stream_measurements;""")\
+    result["streams_in_db"] = db.execute("""SELECT COUNT(claim_hash)
+                                            FROM streams;""").fetchone()[0]
+    result["measurements_in_db"] = db.execute("""SELECT COUNT(id)
+                                                 FROM stream_measurements;""")\
                                                             .fetchone()[0]
     return result
 
 
-def read_top(num=100):
+def read_top(num=1000):
     data = []
     k = 1
     for row in db.execute("""SELECT s.claim_hash, s.name, MAX(sm.views) v
                              FROM streams s INNER JOIN stream_measurements sm
                                     ON s.claim_hash = sm.stream
                              GROUP BY s.claim_hash
-                             ORDER BY v DESC LIMIT 100;"""):
+                             ORDER BY v DESC LIMIT ?;""", (num, )):
         data.append(dict(rank=k,
-                         url="https://lbry.tv/" + row[1] + ":" + row[0][::-1].hex(),
+                         claim_name=row[1],
+                         claim_id=row[0][::-1].hex(),
                          views=row[2]))
         k += 1
     return data
@@ -133,7 +138,7 @@ if __name__ == "__main__":
         if k % 10 == 0:
             print("Saving JSON...", end="", flush=True)
             f = open("json/view_crawler.json", "w")
-            json.dump(read_top(), f)
+            json.dump(read_top(), f, indent=2)
             f.close()
             print("done.\n\n", end="", flush=True)
 
