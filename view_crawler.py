@@ -7,8 +7,8 @@ import time
 from top_channels import get_view_counts
 
 VIEWS_THRESHOLD = 100
-LBC_THRESHOLD = 0.99999
-SLEEP = 10.0
+LBC_THRESHOLD = 0.0
+SLEEP = 1.0
 
 conn = apsw.Connection("db/view_crawler.db")
 db = conn.cursor()
@@ -20,8 +20,8 @@ def initialise_database():
 
     db.execute("""
         CREATE TABLE IF NOT EXISTS streams
-            (claim_hash   BYTES PRIMARY KEY,
-             name         TEXT NOT NULL)
+            (claim_hash BYTES PRIMARY KEY,
+             name       TEXT NOT NULL)
         WITHOUT ROWID;
                 """)
     db.execute("""
@@ -33,9 +33,20 @@ def initialise_database():
              lbc    REAL NOT NULL DEFAULT 0.0,
              FOREIGN KEY (stream) REFERENCES streams(claim_hash));
                 """)
+    db.execute("""CREATE TABLE IF NOT EXISTS metadata
+            (id    INTEGER PRIMARY KEY,
+             name  TEXT UNIQUE NOT NULL,
+             value INTEGER);""")
+    db.execute("""
+                INSERT INTO metadata (name, value)
+                VALUES ('lbry_api_calls', 0)
+                ON CONFLICT (name) DO NOTHING;
+               """)
+
+    # An index. Could probably be improved.
+    db.execute("""CREATE INDEX IF NOT EXISTS idx1 ON stream_measurements
+                    (views DESC, stream);""")
     db.execute("COMMIT;")
-
-
 
 
 def do_100():
@@ -79,10 +90,12 @@ def do_100():
     zipped1 = []
 
     for i in range(len(views)):
+        ch = claim_hashes[i]
+        zipped0.append((ch, measurements[ch]["name"]))
+
         if views[i] >= VIEWS_THRESHOLD and \
-                        measurements[claim_hashes[i]]["lbc"] >= LBC_THRESHOLD:
+                        measurements[ch]["lbc"] >= LBC_THRESHOLD:
             ch = claim_hashes[i]
-            zipped0.append((ch, measurements[ch]["name"]))
             zipped1.append((now, ch, views[i], measurements[ch]["lbc"]))
 
     db.execute("BEGIN;")
@@ -91,6 +104,7 @@ def do_100():
                       ON CONFLICT (claim_hash) DO NOTHING;""", zipped0)
     db.executemany("""INSERT INTO stream_measurements (time, stream, views, lbc)
                       VALUES (?, ?, ?, ?);""", zipped1)
+    db.execute("UPDATE metadata set value=value+1 WHERE name='lbry_api_calls';")
     db.execute("COMMIT;")
 
 def status():
@@ -106,19 +120,25 @@ def status():
 
 
 def read_top(num=1000):
-    data = []
     k = 1
+    ranks = []
+    names = []
+    claim_ids = []
+    tv_urls = []
+    views = []
     for row in db.execute("""SELECT s.claim_hash, s.name, MAX(sm.views) v
                              FROM streams s INNER JOIN stream_measurements sm
                                     ON s.claim_hash = sm.stream
                              GROUP BY s.claim_hash
                              ORDER BY v DESC LIMIT ?;""", (num, )):
-        data.append(dict(rank=k,
-                         claim_name=row[1],
-                         claim_id=row[0][::-1].hex(),
-                         views=row[2]))
+        ranks.append(k)
+        names.append(row[1])
+        claim_ids.append(row[0][::-1].hex())
+        tv_urls.append("https://lbry.tv/" + names[-1] + ":" + claim_ids[-1])
+        views.append(row[2])
         k += 1
-    return data
+    return dict(ranks=ranks, names=names, claim_ids=claim_ids, tv_urls=tv_urls,
+                views=views)
 
 if __name__ == "__main__":
     initialise_database()
