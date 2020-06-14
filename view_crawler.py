@@ -15,7 +15,7 @@ db = conn.cursor()
 
 
 def initialise_database():
-    db.execute("PRAGMA JOURNAL_MODE=DELETE;")
+    db.execute("PRAGMA JOURNAL_MODE=WAL;")
     db.execute("BEGIN;")
 
     db.execute("""
