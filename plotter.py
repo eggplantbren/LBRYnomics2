@@ -151,7 +151,7 @@ def ylabel(mode):
     return string
 
 def set_ylim(mode, subplot=1):
-    if mode in ["num_streams", "num_channels", "reposts"]:
+    if mode in ["num_streams", "num_channels", "num_reposts"]:
         plt.ylim(bottom=-0.5)
     if mode == "followers":
         plt.ylim(bottom=-0.5)
