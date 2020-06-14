@@ -11,6 +11,7 @@ json/subscriber_counts_preview.csv
 secrets.yaml
 json/rss.xml
 plots/interactive.html
+lbrynomics.log
 view_crawler.log
 logfile
 daemon.out
