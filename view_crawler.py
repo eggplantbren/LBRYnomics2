@@ -111,6 +111,9 @@ def status():
 
     # Preparing for when we'll want more status measurements
     result = dict()
+    result["lbry_api_calls"] = db.execute("""SELECT value FROM metadata WHERE
+                                              name='lbry_api_calls';""")\
+                                            .fetchone()[0]
     result["streams_in_db"] = db.execute("""SELECT COUNT(claim_hash)
                                             FROM streams;""").fetchone()[0]
     result["measurements_in_db"] = db.execute("""SELECT COUNT(id)
@@ -145,7 +148,7 @@ if __name__ == "__main__":
 
     k = 1
     while True:
-        print(f"Attempt {k}. Checking 100 streams...", end="", flush=True)
+        print(f"Checking 100 streams...", end="", flush=True)
         try:
             do_100()
             s = status()
