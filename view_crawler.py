@@ -124,16 +124,24 @@ def status():
 
 def read_top(num=1000):
     k = 1
-    result = []
+    result = dict()
+    result["ranks"] = []
+    result["names"] = []
+    result["claim_ids"] = []
+    result["tv_urls"] = []
+    result["views"] = []
     for row in db.execute("""SELECT s.claim_hash, s.name, MAX(sm.views) v
                              FROM streams s INNER JOIN stream_measurements sm
                                     ON s.claim_hash = sm.stream
                              GROUP BY s.claim_hash
                              ORDER BY v DESC LIMIT ?;""", (num, )):
         claim_id = row[0][::-1].hex()
-        result.append(dict(rank=k, name=row[1], claim_id=claim_id,
-                           tv_url="https://lbry.tv/" + row[1] + ":" + claim_id,
-                           views=row[2]))
+        result["ranks"].append(k)
+        result["names"].append(row[1])
+        result["claim_ids"].append(claim_id)
+        result["tv_urls"].append("https://lbry.tv/" + result["names"][-1] + ":"\
+                                   + claim_id)
+        result["views"].append(row[2])
         k += 1
     return result
 
