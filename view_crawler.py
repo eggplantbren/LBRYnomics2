@@ -124,24 +124,18 @@ def status():
 
 def read_top(num=1000):
     k = 1
-    ranks = []
-    names = []
-    claim_ids = []
-    tv_urls = []
-    views = []
+    result = []
     for row in db.execute("""SELECT s.claim_hash, s.name, MAX(sm.views) v
                              FROM streams s INNER JOIN stream_measurements sm
                                     ON s.claim_hash = sm.stream
                              GROUP BY s.claim_hash
                              ORDER BY v DESC LIMIT ?;""", (num, )):
-        ranks.append(k)
-        names.append(row[1])
-        claim_ids.append(row[0][::-1].hex())
-        tv_urls.append("https://lbry.tv/" + names[-1] + ":" + claim_ids[-1])
-        views.append(row[2])
+        claim_id = row[0][::-1].hex()
+        result.append(dict(rank=k, name=row[1], claim_id=claim_id,
+                           tv_url="https://lbry.tv/" + row[1] + ":" + claim_id,
+                           views=row[2]))
         k += 1
-    return dict(ranks=ranks, names=names, claim_ids=claim_ids, tv_urls=tv_urls,
-                views=views)
+    return result
 
 if __name__ == "__main__":
     initialise_database()
