@@ -162,6 +162,42 @@ def read_top(num=1000):
         k += 1
     return result
 
+def popular_recently(num=1000):
+    start = time.time() - 30.0*86400.0
+
+    k = 1
+    result = dict()
+    result["ranks"] = []
+    result["names"] = []
+    result["titles"] = []
+    result["claim_ids"] = []
+    result["tv_urls"] = []
+    result["view_rates"] = []
+    for row in db.execute("""
+            -- Recent measurements
+            SELECT stream, name, title,
+                (MAX(views) - MIN(views))/(MAX(time) - MIN(time)) view_rate FROM
+                (SELECT * FROM stream_measurements sm
+                    INNER JOIN streams s ON sm.stream = s.claim_hash
+                    WHERE time >= ?)
+            GROUP BY stream
+            ORDER BY view_rate DESC
+            LIMIT ?;""", (start, num)):
+        claim_id = row[0][::-1].hex()
+        result["ranks"].append(k)
+        result["names"].append(row[1])
+        title = row[2]
+        if title is None:
+            title = "Not yet scraped :-("
+        result["titles"].append(title)
+        result["claim_ids"].append(claim_id)
+        result["tv_urls"].append("https://lbry.tv/" + result["names"][-1] + ":"\
+                                   + claim_id)
+        result["view_rates"].append(row[3]*86400.0)
+        k += 1
+    return result
+
+
 if __name__ == "__main__":
     initialise_database()
 
@@ -177,12 +213,20 @@ if __name__ == "__main__":
         time.sleep(SLEEP)
         k += 1
 
-        if k % 10 == 0:
-            print("Saving JSON...", end="", flush=True)
+        if k % 100 == 0:
+            print("Creating JSON of top viewed (all time)...", end="", flush=True)
             f = open("json/view_crawler.json", "w")
             json.dump(read_top(), f, indent=2)
             f.close()
             print("done.\n\n", end="", flush=True)
+
+        if k % 100 == 0:
+            print("Creating JSON of top recent view rates...", end="", flush=True)
+            f = open("json/view_crawler_recent.json", "w")
+            json.dump(popular_recently(), f, indent=2)
+            f.close()
+            print("done.\n\n", end="", flush=True)
+
 
         if k % 1000 == 0:
             print("Cleaning up database...", end="", flush=True)
