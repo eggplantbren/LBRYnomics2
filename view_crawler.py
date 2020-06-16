@@ -9,6 +9,7 @@ from top_channels import get_view_counts
 VIEWS_THRESHOLD = 100
 LBC_THRESHOLD = 0.0
 SLEEP = 1.0
+NUM_PER_API_CALL = 197
 
 conn = apsw.Connection("db/view_crawler.db")
 db = conn.cursor()
@@ -50,7 +51,7 @@ def initialise_database():
     db.execute("COMMIT;")
 
 
-def do_100():
+def do_api_call():
 
     now = time.time()
 
@@ -59,9 +60,9 @@ def do_100():
                                     .fetchall()[0]
     min_rowid, max_rowid = result
 
-    # Put up to 100 claim hashes in here
+    # Put up to 197 claim hashes in here
     measurements = dict()
-    while len(measurements) < 100:
+    while len(measurements) < NUM_PER_API_CALL:
         rowid = min_rowid + rng.randint(max_rowid - min_rowid + 1)
         row = dbs["claims"].execute("""SELECT claim_hash,
                                        claim_name,
@@ -166,9 +167,9 @@ if __name__ == "__main__":
 
     k = 1
     while True:
-        print(f"Checking 100 streams...", end="", flush=True)
+        print(f"Checking {NUM_PER_API_CALL} streams...", end="", flush=True)
         try:
-            do_100()
+            do_api_call()
             s = status()
             print(f"done.\n Status: {s}.\n\n", end="", flush=True)
         except:
@@ -184,7 +185,8 @@ if __name__ == "__main__":
             print("done.\n\n", end="", flush=True)
 
         if k % 1000 == 0:
-            print("Vacuuming database...", end="", flush=True)
+            print("Cleaning up database...", end="", flush=True)
             db.execute("VACUUM;")
+            db.execute("PRAGMA main.WAL_CHECKPOINT(TRUNCATE);")
             print("done.\n\n", end="", flush=True)
 
