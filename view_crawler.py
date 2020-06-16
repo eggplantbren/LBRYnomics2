@@ -21,7 +21,8 @@ def initialise_database():
     db.execute("""
         CREATE TABLE IF NOT EXISTS streams
             (claim_hash BYTES PRIMARY KEY,
-             name       TEXT NOT NULL)
+             name       TEXT NOT NULL,
+             title      TEXT)
         WITHOUT ROWID;
                 """)
     db.execute("""
@@ -64,7 +65,8 @@ def do_100():
         rowid = min_rowid + rng.randint(max_rowid - min_rowid + 1)
         row = dbs["claims"].execute("""SELECT claim_hash,
                                        claim_name,
-                                       (amount+support_amount)/1E8 lbc
+                                       (amount+support_amount)/1E8 lbc,
+                                       title
                                        FROM claim
                                        WHERE claim_type=1 AND rowid=?
                                        AND lbc >= ?;""",
@@ -78,7 +80,8 @@ def do_100():
                                              'porn', 'mature')""", (row[0], )
                                         ).fetchone()[0]
             if nsfw == 0:
-                measurements[row[0]] = dict(name=row[1], lbc=row[2])
+                measurements[row[0]] = dict(name=row[1], lbc=row[2],
+                                            title=row[3])
 
     # Get the view counts and prepare to add to DB
     claim_hashes = list(measurements.keys())
@@ -89,6 +92,9 @@ def do_100():
     zipped0 = []
     zipped1 = []
 
+    # Row for adding title
+    zipped2 = []
+
     for i in range(len(views)):
         ch = claim_hashes[i]
         zipped0.append((ch, measurements[ch]["name"]))
@@ -98,10 +104,15 @@ def do_100():
             ch = claim_hashes[i]
             zipped1.append((now, ch, views[i], measurements[ch]["lbc"]))
 
+            # Only bother with title if a measurement is made
+            zipped2.append((measurements[ch]["title"], ch))
+
     db.execute("BEGIN;")
     db.executemany("""INSERT INTO streams (claim_hash, name)
                       VALUES (?, ?)
                       ON CONFLICT (claim_hash) DO NOTHING;""", zipped0)
+    db.executemany("""UPDATE streams SET title=? where claim_hash=?;""",
+                   zipped2)
     db.executemany("""INSERT INTO stream_measurements (time, stream, views, lbc)
                       VALUES (?, ?, ?, ?);""", zipped1)
     db.execute("UPDATE metadata set value=value+1 WHERE name='lbry_api_calls';")
@@ -127,10 +138,11 @@ def read_top(num=1000):
     result = dict()
     result["ranks"] = []
     result["names"] = []
+    result["titles"] = []
     result["claim_ids"] = []
     result["tv_urls"] = []
     result["views"] = []
-    for row in db.execute("""SELECT s.claim_hash, s.name, MAX(sm.views) v
+    for row in db.execute("""SELECT s.claim_hash, s.name, s.title, MAX(sm.views) v
                              FROM streams s INNER JOIN stream_measurements sm
                                     ON s.claim_hash = sm.stream
                              GROUP BY s.claim_hash
@@ -138,10 +150,14 @@ def read_top(num=1000):
         claim_id = row[0][::-1].hex()
         result["ranks"].append(k)
         result["names"].append(row[1])
+        title = row[2]
+        if title is None:
+            title = "Not yet scraped :-("
+        result["titles"].append(title)
         result["claim_ids"].append(claim_id)
         result["tv_urls"].append("https://lbry.tv/" + result["names"][-1] + ":"\
                                    + claim_id)
-        result["views"].append(row[2])
+        result["views"].append(row[3])
         k += 1
     return result
 
