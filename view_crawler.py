@@ -176,7 +176,7 @@ def popular_recently(num=1000):
     for row in db.execute("""
             -- Recent measurements
             SELECT stream, name, title,
-                (MAX(views) - MIN(views))/(MAX(time) - MIN(time)) view_rate FROM
+                (MAX(views) - MIN(views))/(MAX(time) - MIN(time) + 7200.0) view_rate FROM
                 (SELECT * FROM stream_measurements sm
                     INNER JOIN streams s ON sm.stream = s.claim_hash
                     WHERE time >= ?)
