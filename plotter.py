@@ -100,15 +100,15 @@ def title(mode, value):
 
     string = ""
     if mode == "num_channels":
-        string += f"Total number of channels = {num}"
+        string += f"Number of channels = {num}"
     if mode == "num_streams":
-        string += f"Total number of publications = {num}"
+        string += f"Number of publications = {num}"
     if mode == "lbc_deposits":
-        string += f"Total staked in deposits = {num} LBC"
+        string += f"LBC staked in deposits = {num} LBC"
     if mode == "num_supports":
-        string += f"Total number of active supports+tips = {num}"
+        string += f"Number of active supports+tips = {num}"
     if mode == "lbc_supports":
-        string += f"Total locked in active supports+tips = {num} LBC"
+        string += f"LBC locked in active supports+tips = {num} LBC"
     if mode == "ytsync_new_pending":
         string += f"New channels in queue to sync = {num}"
     if mode == "ytsync_pending_update":
@@ -120,7 +120,7 @@ def title(mode, value):
     if mode == "views":
         string += f"Average views of top 200 channels = {num}"
     if mode == "num_reposts":
-        string += f"Total number of reposts = {num}"
+        string += f"Number of reposts = {num}"
     return string
 
 
@@ -147,7 +147,7 @@ def ylabel(mode):
     if mode == "views":
         string += "Avg. views of top 200 channels"
     if mode == "num_reposts":
-        string += "Total number of reposts"
+        string += "Number of reposts"
     return string
 
 def set_ylim(mode, subplot=1):
