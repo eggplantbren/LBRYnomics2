@@ -122,8 +122,8 @@ def view_counts_channel(channel_hash):
         claim_ids.append(row[0])
 
     counts = 0
-    for i in range((len(claim_ids) - 1)//100 + 1):
-        result = get_view_counts(claim_ids, 100*i, 100*(i+1))
+    for i in range((len(claim_ids) - 1)//197 + 1):
+        result = get_view_counts(claim_ids, 197*i, 197*(i+1))
         if sum([x is None for x in result]) != 0:
             raise ValueError("Error getting view counts.")
         counts += sum(result)
@@ -205,8 +205,8 @@ def get_top(n=250, publish=200):
     print("Making top channels list.", flush=True)
     channels = channels_with_content()
     counts = []
-    for i in range((len(channels) - 1)//100 + 1):
-        counts += get_followers(channels, 100*i, 100*(i+1))
+    for i in range((len(channels) - 1)//197 + 1):
+        counts += get_followers(channels, 197*i, 197*(i+1))
         print("    Got follower counts for {a}/{b} channels."\
                 .format(a=len(counts), b=len(channels)), end="\r", flush=True)
     print("")
