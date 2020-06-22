@@ -1,6 +1,11 @@
 import apsw
 from databases import dbs
+import datetime
 import lists
+import numpy as np
+import requests
+import time
+import yaml
 
 """
 A rewrite and simplification of the top channel table code.
@@ -20,6 +25,17 @@ db = conn.cursor()
 
 # LBC threshold for auto-qualification
 LBC_THRESHOLD = 20000.0
+
+# Quality filter parameters
+QUALITY_FILTER = [0.2, 1.0]
+
+# Size of table to maintain
+TABLE_SIZE = 500
+
+# Size of table to export
+EXPORT_SIZE = 200
+
+
 
 
 def create_tables():
@@ -139,9 +155,49 @@ def get_nsfw(claim_hash):
         nsfw = rows[0][0] > 0
     return nsfw
 
+def get_followers(channels, start, end):
+    """
+    Get follower numbers for channels[start:end]
+    """
+    result = []
+
+    # Elegantly handle end
+    if end > len(channels):
+        end = len(channels)
+
+    if start == end:
+        print("Start equalled end!")
+
+    # Get auth token
+    f= open("secrets.yaml")
+    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
+    f.close()
+
+    # Prepare the request to the LBRY API
+    url = "https://api.lbry.com/subscription/sub_count?auth_token=" +\
+                auth_token + "&claim_id="
+    for i in range(start, end):
+        url += channels[i].hex()[::-1]
+        if i != end-1:
+            url += ","
+
+    # JSON response from API
+    attempts = 10
+    while attempts > 0:
+        try:
+            response = requests.get(url).json()
+            for value in response["data"]:
+                result.append(value)
+            break
+        except:
+            attempts -= 1
+
+    return result
+
+
 def qualifying_channels():
     """
-    Return a set of all channels with either (i) at least one stream, or
+    Return a list of all channels with either (i) at least one stream, or
     (ii) more than LBC_THRESHOLD staked ON THE CHANNEL CLAIM.
     """
     print("    Finding eligible channels...", end="", flush=True)
@@ -175,6 +231,135 @@ def qualifying_channels():
         if row[0] not in black_list:
             result.add(row[0])
     print("done. Found {k} channels.".format(k=len(result)), flush=True)
+    return list(result)
+
+
+def do_epoch(force=False):
+    """
+    Do one epoch of measurements, if the time is right.
+    Returns True if it does anything, False if the time wasn't right.
+    """
+    rows = db.execute("SELECT id, time FROM epochs ORDER BY time DESC LIMIT 1;")\
+                .fetchall()
+    if len(rows) == 0:
+        last_epoch = (0, 0.0)
+    else:
+        last_epoch = rows[0]
+
+    # How much time has passed?
+    now = time.time()
+    gap = last_epoch[1] - now
+    if not force and (datetime.datetime.utcnow().hour > 3 \
+                      or gap < 0.5*86400.0):
+        return False
+
+    # Print message
+    print("Performing top channel measurements.", flush=True)
+
+    # Save the epoch
+    epoch_id = last_epoch[0] + 1
+    db.execute("BEGIN;")
+    db.execute("INSERT INTO epochs VALUES (?, ?);", (epoch_id, now))
+    db.execute("COMMIT;")
+
+    # Get channels
+    channels = qualifying_channels()
+
+    # Get the follower counts
+    followers = []
+    for i in range((len(channels) - 1)//197 + 1):
+        followers += get_followers(channels, 197*i, 197*(i+1))
+        print("\r    Got follower counts for {a}/{b} channels."\
+                .format(a=len(followers), b=len(channels)), end="", flush=True)
+    print("")
+
+    # Sort in descending order by followers
+    ii = np.argsort(followers)[::-1]
+    channels, followers = channels[ii], followers[ii]
+
+    # Put measurements into database, until 500 have passed the quality filter
+    passed = []
+    for i in range(len(channels)):
+        views = view_counts_channel(channels[i])
+        lbc = get_lbc(channels[i])
+
+        # Check quality filter
+        routes = [False for _ in range(3)]
+        if lbc >= LBC_THRESHOLD:
+            routes[0] = True
+        if views/followers[i] >= min(QUALITY_FILTER) and\
+           lbc/followers[i] >= max(QUALITY_FILTER):
+            routes[1] = True
+        if views/followers[i] >= max(QUALITY_FILTER) and\
+           lbc/followers[i] >= min(QUALITY_FILTER):
+            routes[2] = True
+        passed.append(np.any(routes))
+        print(f"Quality filter passed = {passed[-1]}.", flush=True)
+
+        row = (channels[i], epoch_id, views, followers[i],
+               get_reposts(channels[i]), lbc)
+        db.execute("BEGIN;")
+        db.execute("INSERT INTO measurements VALUES (?, ?, ?, ?, ?, ?);", row)
+        db.execute("COMMIT;")
+
+#         channel   BYTES NOT NULL,
+#         epoch     INTEGER NOT NULL,
+#         views     INTEGER,
+#         followers INTEGER,
+#         reposts   INTEGER,
+#         lbc       REAL,
+
+    return True
+
+
+def view_counts_channel(channel_hash):
+    claim_ids = []
+    for row in cdb.execute("""SELECT claim_id FROM claim
+                              WHERE channel_hash = ? AND claim_type=1;""",
+                                     (channel_hash, )):
+        claim_ids.append(row[0])
+
+    counts = 0
+    for i in range((len(claim_ids) - 1)//197 + 1):
+        result = get_view_counts(claim_ids, 197*i, 197*(i+1))
+        if sum([x is None for x in result]) != 0:
+            raise ValueError("Error getting view counts.")
+        counts += sum(result)
+    return counts
+
+
+
+def get_view_counts(claim_ids, start, end):
+    result = []
+
+    # Elegantly handle end
+    if end > len(claim_ids):
+        end = len(claim_ids)
+
+    if start == end:
+        print("Start equalled end!")
+
+    # Get auth token
+    f= open("secrets.yaml")
+    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
+    f.close()
+
+    # Prepare the request to the LBRY API
+    url = "https://api.lbry.com/file/view_count?auth_token=" +\
+                auth_token + "&claim_id="
+    for i in range(start, end):
+        url += claim_ids[i]
+        if i != end-1:
+            url += ","
+
+    # JSON response from API
+    try:
+        response = requests.get(url).json()
+        for value in response["data"]:
+            result.append(value)
+    except:
+        result.append(None)
+
     return result
 
 
@@ -182,7 +367,7 @@ if __name__ == "__main__":
     create_tables()
     import_from_ldb()
 
-    qualifying_channels()
+    do_epoch(True)
 #    claim_id = "36b7bd81c1f975878da8cfe2960ed819a1c85bb5"
 #    claim_hash = bytes.fromhex(claim_id)[::-1]
 #    print(get_vanity_name(claim_hash))
