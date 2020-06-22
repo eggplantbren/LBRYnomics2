@@ -9,6 +9,10 @@ It will run separately and have its own database.
 # Claims DB
 cdb = dbs["claims"]
 
+# LBRYnomics DB
+lconn = apsw.Connection("db/lbrynomics.db", flags=apsw.SQLITE_OPEN_READONLY)
+ldb = lconn.cursor()
+
 # Connection to top channel DB
 conn = apsw.Connection("db/top_channels.db")
 db = conn.cursor()
@@ -43,6 +47,28 @@ def create_tables():
          FOREIGN KEY (channel) REFERENCES channels (claim_hash),
          FOREIGN KEY (epoch) REFERENCES epochs (id));
     """)
+    db.execute("COMMIT;")
+
+
+def import_from_ldb():
+    """
+    Copy epochs and measurements from the old database to the new one.
+    """
+    db.execute("BEGIN;")
+
+    # Import epochs
+    for row in ldb.execute("SELECT * FROM epochs;"):
+        db.execute("""INSERT INTO epochs VALUES (?, ?)
+                      ON CONFLICT (id) DO NOTHING;""", row)
+
+    # Import channels and vanity names
+    for row in ldb.execute("""SELECT claim_id, vanity_name
+                              FROM channel_measurements;"""):
+        claim_hash = bytes.fromhex(row[0])[::-1]
+        vanity_name = row[1]
+        db.execute("""INSERT INTO channels VALUES (?, ?)
+                      ON CONFLICT (claim_hash) DO NOTHING;""",
+                   (claim_hash, vanity_name))      
     db.execute("COMMIT;")
 
 
@@ -93,6 +119,8 @@ def get_nsfw(claim_hash):
 
 if __name__ == "__main__":
     create_tables()
+    import_from_ldb()
+
     claim_id = "36b7bd81c1f975878da8cfe2960ed819a1c85bb5"
     claim_hash = bytes.fromhex(claim_id)[::-1]
     print(get_vanity_name(claim_hash))
