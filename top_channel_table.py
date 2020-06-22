@@ -40,12 +40,21 @@ def create_tables():
         (id        INTEGER PRIMARY KEY,
          channel   BYTES NOT NULL,
          epoch     INTEGER NOT NULL,
-         views     INTEGER NOT NULL,
-         followers INTEGER NOT NULL,
-         reposts   INTEGER NOT NULL,
-         lbc       REAL NOT NULL,
+         views     INTEGER,
+         followers INTEGER,
+         reposts   INTEGER,
+         lbc       REAL,
          FOREIGN KEY (channel) REFERENCES channels (claim_hash),
-         FOREIGN KEY (epoch) REFERENCES epochs (id));
+         FOREIGN KEY (epoch) REFERENCES epochs (id),
+         UNIQUE (channel, epoch));
+    """)
+
+    db.execute("""
+    CREATE INDEX IF NOT EXISTS epoch_idx ON measurements (epoch);
+    """)
+
+    db.execute("""
+    CREATE INDEX IF NOT EXISTS channel_idx ON measurements (channel, epoch);
     """)
     db.execute("COMMIT;")
 
@@ -68,9 +77,18 @@ def import_from_ldb():
         vanity_name = row[1]
         db.execute("""INSERT INTO channels VALUES (?, ?)
                       ON CONFLICT (claim_hash) DO NOTHING;""",
-                   (claim_hash, vanity_name))      
-    db.execute("COMMIT;")
+                   (claim_hash, vanity_name))
 
+    # Import measurements
+    for row in ldb.execute("""SELECT claim_id, epoch, num_followers, views,
+                           times_reposted, lbc FROM channel_measurements;"""):
+        channel = bytes.fromhex(row[0])[::-1]
+        db.execute("""INSERT INTO measurements
+                   (channel, epoch, views, followers, reposts, lbc)
+                   VALUES (?, ?, ?, ?, ?, ?)
+                   ON CONFLICT (channel, epoch) DO NOTHING;""",
+                   (channel, row[1], row[3], row[2], row[4], row[5]))
+    db.execute("COMMIT;")
 
 
 def get_vanity_name(claim_hash):
