@@ -1,5 +1,6 @@
 import apsw
 from databases import dbs
+import lists
 
 """
 A rewrite and simplification of the top channel table code.
@@ -16,6 +17,10 @@ ldb = lconn.cursor()
 # Connection to top channel DB
 conn = apsw.Connection("db/top_channels.db")
 db = conn.cursor()
+
+# LBC threshold for auto-qualification
+LBC_THRESHOLD = 20000.0
+
 
 def create_tables():
     """
@@ -134,15 +139,54 @@ def get_nsfw(claim_hash):
         nsfw = rows[0][0] > 0
     return nsfw
 
+def qualifying_channels():
+    """
+    Return a set of all channels with either (i) at least one stream, or
+    (ii) more than LBC_THRESHOLD staked ON THE CHANNEL CLAIM.
+    """
+    print("    Finding eligible channels...", end="", flush=True)
+
+    # Convert claim_ids to claim_hashes
+    black_list = set([bytes.fromhex(cid)[::-1] for cid in lists.black_list])
+
+    # LBC qualification
+    result = set()
+    for row in cdb.execute("""
+        SELECT claim_hash
+        FROM
+            claim
+        WHERE
+            claim_type = 2 AND 1E-8*(amount + support_amount) >= ?;
+        """, (LBC_THRESHOLD, )):
+        if row[0] not in black_list:
+            result.add(row[0])
+
+    # Having streams qualification
+    for row in cdb.execute("""
+        SELECT c.claim_hash, COUNT(*) num_streams
+        FROM
+            claim c, claim s
+        WHERE
+            s.channel_hash = c.claim_hash AND
+            s.claim_type = 1
+        GROUP BY c.claim_hash
+        HAVING num_streams >= 1;
+        """):
+        if row[0] not in black_list:
+            result.add(row[0])
+    print("done. Found {k} channels.".format(k=len(result)), flush=True)
+    return result
+
 
 if __name__ == "__main__":
     create_tables()
     import_from_ldb()
 
-    claim_id = "36b7bd81c1f975878da8cfe2960ed819a1c85bb5"
-    claim_hash = bytes.fromhex(claim_id)[::-1]
-    print(get_vanity_name(claim_hash))
-    print(get_lbc(claim_hash))
-    print(get_reposts(claim_hash))
-    print(get_nsfw(claim_hash))
+    qualifying_channels()
+#    claim_id = "36b7bd81c1f975878da8cfe2960ed819a1c85bb5"
+#    claim_hash = bytes.fromhex(claim_id)[::-1]
+#    print(get_vanity_name(claim_hash))
+#    print(get_lbc(claim_hash))
+#    print(get_reposts(claim_hash))
+#    print(get_nsfw(claim_hash))
 
