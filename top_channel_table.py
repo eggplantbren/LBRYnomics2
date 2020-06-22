@@ -61,8 +61,8 @@ def create_tables():
         (id        INTEGER PRIMARY KEY,
          channel   BYTES NOT NULL,
          epoch     INTEGER NOT NULL,
-         views     INTEGER,
          followers INTEGER,
+         views     INTEGER,
          reposts   INTEGER,
          lbc       REAL,
          FOREIGN KEY (channel) REFERENCES channels (claim_hash),
@@ -105,12 +105,23 @@ def import_from_ldb():
                            times_reposted, lbc FROM channel_measurements;"""):
         channel = bytes.fromhex(row[0])[::-1]
         db.execute("""INSERT INTO measurements
-                   (channel, epoch, views, followers, reposts, lbc)
+                   (channel, epoch, followers, views, reposts, lbc)
                    VALUES (?, ?, ?, ?, ?, ?)
                    ON CONFLICT (channel, epoch) DO NOTHING;""",
-                   (channel, row[1], row[3], row[2], row[4], row[5]))
+                   (channel, row[1], row[2], row[3], row[4], row[5]))
     db.execute("COMMIT;")
 
+
+def quality_filter(followers, views, lbc):
+    if lbc >= LBC_THRESHOLD:
+        return True
+    if views/followers >= min(QUALITY_FILTER) and\
+       lbc/followers >= max(QUALITY_FILTER):
+        return True
+    if views/followers >= max(QUALITY_FILTER) and\
+       lbc/followers >= min(QUALITY_FILTER):
+        return True
+    return False
 
 def get_vanity_name(claim_hash):
     """
@@ -268,48 +279,91 @@ def do_epoch(force=False):
     # Get the follower counts
     followers = []
     for i in range((len(channels) - 1)//197 + 1):
-        followers += get_followers(channels, 197*i, 197*(i+1))
+        followers.append(get_followers(channels, 197*i, 197*(i+1)))
         print("\r    Got follower counts for {a}/{b} channels."\
                 .format(a=len(followers), b=len(channels)), end="", flush=True)
     print("")
 
     # Sort in descending order by followers
     ii = np.argsort(followers)[::-1]
-    channels, followers = channels[ii], followers[ii]
+    channels, followers = np.array(channels)[ii], np.array(followers)[ii]
 
     # Put measurements into database, until 500 have passed the quality filter
     passed = []
     for i in range(len(channels)):
         views = view_counts_channel(channels[i])
         lbc = get_lbc(channels[i])
-
-        # Check quality filter
-        routes = [False for _ in range(3)]
-        if lbc >= LBC_THRESHOLD:
-            routes[0] = True
-        if views/followers[i] >= min(QUALITY_FILTER) and\
-           lbc/followers[i] >= max(QUALITY_FILTER):
-            routes[1] = True
-        if views/followers[i] >= max(QUALITY_FILTER) and\
-           lbc/followers[i] >= min(QUALITY_FILTER):
-            routes[2] = True
-        passed.append(np.any(routes))
+        passed.append(quality_filter(followers, views, lbc))
         print(f"Quality filter passed = {passed[-1]}.", flush=True)
 
-        row = (channels[i], epoch_id, views, followers[i],
+        row = (channels[i], epoch_id, followers[i], views,
                get_reposts(channels[i]), lbc)
         db.execute("BEGIN;")
         db.execute("INSERT INTO measurements VALUES (?, ?, ?, ?, ?, ?);", row)
         db.execute("COMMIT;")
 
-#         channel   BYTES NOT NULL,
-#         epoch     INTEGER NOT NULL,
-#         views     INTEGER,
-#         followers INTEGER,
-#         reposts   INTEGER,
-#         lbc       REAL,
+        if sum(passed) >= TABLE_SIZE:
+            break
+
+    export_json()
 
     return True
+
+
+def export_json():
+    """
+    Export the latest epoch as JSON for Electron.
+    """
+
+    now = time.time()
+
+    result = dict()
+    result["unix_time"] = now
+    result["human_time_utc"] = str(datetime.datetime.utcfromtimestamp(int(now))) + " UTC"
+    result["ranks"] = []
+    result["claim_ids"] = []
+    result["vanity_names"] = []
+    result["views"] = []
+    result["times_reposted"] = []
+    result["lbc"] = []
+    result["subscribers"] = []
+    result["change"] = []
+    result["rank_change"] = []
+    result["views_change"] = []
+    result["times_reposted_change"] = []
+    result["is_nsfw"] = []
+    result["lbryf"] = []
+    result["inc"] = []
+    result["grey"] = []
+    result["lbrynomics"] = []
+    result["is_new"] = []
+
+    latest_epoch = db.execute("""
+                    SELECT id FROM epochs ORDER BY time DESC limit 1;""")\
+                        .fetchone()[0]
+    old_epoch = db.execute("""
+                          SELECT id, abs(id-(?-7)) difference FROM epochs
+                          ORDER BY difference ASC LIMIT 1;
+                          """, (latest_epoch, )).fetchone()[0]
+
+    rows = db.execute("""SELECT claim_hash, vanity_name, followers, views, reposts, lbc
+                         FROM measurements INNER JOIN channels
+                                ON channels.claim_hash = measurements.channel
+                         WHERE epoch = ?
+                         ORDER BY followers DESC;""",
+                      (latest_epoch, )).fetchall()
+    for row in rows:
+        claim_hash, vanity_name, followers, views, reposts, lbc = row
+        passed = quality_filter(followers, views, lbc)
+        if passed:
+            result["ranks"].append(len(result["ranks"]) + 1)
+            result["claim_ids"].append(channel[::-1].hex())
+            result["vanity_names"].append(vanity_name)
+            result["views"].append(views)
+            result["times_reposted"].append(reposts)
+            result["lbc"].append(lbc)
+            result["subscribers"].append(followers)
+            result["change"].append()
 
 
 def view_counts_channel(channel_hash):
