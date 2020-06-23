@@ -284,7 +284,7 @@ def do_epoch(force=False):
     # Get the follower counts
     followers = []
     for i in range((len(channels) - 1)//197 + 1):
-        followers.append(get_followers(channels, 197*i, 197*(i+1)))
+        followers += get_followers(channels, 197*i, 197*(i+1))
         print("\r    Got follower counts for {a}/{b} channels."\
                 .format(a=len(followers), b=len(channels)), end="", flush=True)
     print("")
