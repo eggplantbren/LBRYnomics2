@@ -193,7 +193,7 @@ def get_followers(channels, start, end):
     url = "https://api.lbry.com/subscription/sub_count?auth_token=" +\
                 auth_token + "&claim_id="
     for i in range(start, end):
-        url += channels[i].hex()[::-1]
+        url += channels[i][::-1].hex()
         if i != end-1:
             url += ","
 
@@ -299,14 +299,16 @@ def do_epoch(force=False):
     for i in range(len(channels)):
         views = view_counts_channel(channels[i])
         lbc = get_lbc(channels[i])
-        passed.append(quality_filter(followers, views, lbc) or channels[i][::-1].hex() in lists.white_list)
+        passed.append(quality_filter(followers[i], views, lbc) or channels[i][::-1].hex() in lists.white_list)
+        print(followers[i], views, lbc)
         print(f"Quality filter passed = {passed[-1]}.", flush=True)
 
         row = (channels[i], epoch_id, rank, followers[i], views,
                get_reposts(channels[i]), lbc)
         db.execute("BEGIN;")
-        db.execute("INSERT INTO measurements VALUES (?, ?, ?, ?, ?, ?, ?);",
-                   row)
+        db.execute("""INSERT INTO measurements
+                   (channel, epoch, rank, followers, views, reposts, lbc)
+                   VALUES (?, ?, ?, ?, ?, ?, ?);""", row)
         db.execute("COMMIT;")
         rank += 1
 
@@ -354,7 +356,7 @@ def export_json():
                           ORDER BY difference ASC LIMIT 1;
                           """, (latest_epoch, )).fetchone()[0]
 
-    rows = db.execute("""SELECT claim_hash, vanity_name, rank, followers, views, reposts, lbc
+    rows = db.execute("""SELECT claim_hash, vanity_name, followers, views, reposts, lbc
                          FROM measurements INNER JOIN channels
                                 ON channels.claim_hash = measurements.channel
                          WHERE epoch = ?
@@ -365,7 +367,7 @@ def export_json():
         passed = quality_filter(followers, views, lbc) or claim_hash[::-1].hex() in lists.white_list
         if passed:
             result["ranks"].append(len(result["ranks"]) + 1)
-            result["claim_ids"].append(channel[::-1].hex())
+            result["claim_ids"].append(claim_hash[::-1].hex())
             result["vanity_names"].append(vanity_name)
             result["views"].append(views)
             result["times_reposted"].append(reposts)
