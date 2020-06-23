@@ -61,6 +61,7 @@ def create_tables():
         (id        INTEGER PRIMARY KEY,
          channel   BYTES NOT NULL,
          epoch     INTEGER NOT NULL,
+         rank      INTEGER,
          followers INTEGER,
          views     INTEGER,
          reposts   INTEGER,
@@ -101,14 +102,14 @@ def import_from_ldb():
                    (claim_hash, vanity_name))
 
     # Import measurements
-    for row in ldb.execute("""SELECT claim_id, epoch, num_followers, views,
+    for row in ldb.execute("""SELECT claim_id, epoch, rank, num_followers, views,
                            times_reposted, lbc FROM channel_measurements;"""):
         channel = bytes.fromhex(row[0])[::-1]
         db.execute("""INSERT INTO measurements
-                   (channel, epoch, followers, views, reposts, lbc)
-                   VALUES (?, ?, ?, ?, ?, ?)
+                   (channel, epoch, rank, followers, views, reposts, lbc)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)
                    ON CONFLICT (channel, epoch) DO NOTHING;""",
-                   (channel, row[1], row[2], row[3], row[4], row[5]))
+                   (channel, row[1], row[2], row[3], row[4], row[5], row[6]))
     db.execute("COMMIT;")
 
 
@@ -158,6 +159,10 @@ def get_reposts(claim_hash):
 
 
 def get_nsfw(claim_hash):
+    manual_mature = [bytes.fromhex(claim_id)[::-1] for claim_id in lists.manual_mature]
+    if claim_hash in manual_mature:
+        return True
+
     nsfw = False
     rows = cdb.execute("""SELECT COUNT(*) FROM tag WHERE claim_hash = ?
                           AND tag.tag IN ('mature', 'xxx', 'sex', 'porn', 'nsfw');""",
@@ -290,19 +295,22 @@ def do_epoch(force=False):
 
     # Put measurements into database, until 500 have passed the quality filter
     passed = []
+    rank = 1
     for i in range(len(channels)):
         views = view_counts_channel(channels[i])
         lbc = get_lbc(channels[i])
-        passed.append(quality_filter(followers, views, lbc))
+        passed.append(quality_filter(followers, views, lbc) or channels[i][::-1].hex() in lists.white_list)
         print(f"Quality filter passed = {passed[-1]}.", flush=True)
 
-        row = (channels[i], epoch_id, followers[i], views,
+        row = (channels[i], epoch_id, rank, followers[i], views,
                get_reposts(channels[i]), lbc)
         db.execute("BEGIN;")
-        db.execute("INSERT INTO measurements VALUES (?, ?, ?, ?, ?, ?);", row)
+        db.execute("INSERT INTO measurements VALUES (?, ?, ?, ?, ?, ?, ?);",
+                   row)
         db.execute("COMMIT;")
+        rank += 1
 
-        if sum(passed) >= TABLE_SIZE:
+        if rank > TABLE_SIZE:
             break
 
     export_json()
@@ -346,7 +354,7 @@ def export_json():
                           ORDER BY difference ASC LIMIT 1;
                           """, (latest_epoch, )).fetchone()[0]
 
-    rows = db.execute("""SELECT claim_hash, vanity_name, followers, views, reposts, lbc
+    rows = db.execute("""SELECT claim_hash, vanity_name, rank, followers, views, reposts, lbc
                          FROM measurements INNER JOIN channels
                                 ON channels.claim_hash = measurements.channel
                          WHERE epoch = ?
@@ -354,7 +362,7 @@ def export_json():
                       (latest_epoch, )).fetchall()
     for row in rows:
         claim_hash, vanity_name, followers, views, reposts, lbc = row
-        passed = quality_filter(followers, views, lbc)
+        passed = quality_filter(followers, views, lbc) or claim_hash[::-1].hex() in lists.white_list
         if passed:
             result["ranks"].append(len(result["ranks"]) + 1)
             result["claim_ids"].append(channel[::-1].hex())
@@ -363,8 +371,36 @@ def export_json():
             result["times_reposted"].append(reposts)
             result["lbc"].append(lbc)
             result["subscribers"].append(followers)
-            result["change"].append()
+            old = db.execute("""SELECT rank, followers, views, reposts
+                                FROM measurements
+                                WHERE channel = ? AND epoch = ?;""",
+                            (channel, old_epoch)).fetchall()
+            if len(old) >= 1:
+                old = old[0]
+            if old is None:
+                result["change"].append(None)
+                result["rank_change"].append(None)
+                result["views_change"].append(None)
+                result["times_reposted_change"].append(None)
+            else:
+                rank = result["ranks"][-1]
+                result["change"].append(followers - old[1])
+                result["rank_change"].append(old[0] - rank)
+                result["views_change"].append(views - old[2])
+                result["times_reposted_change"].append(reposts - old[3])
 
+            # Fields for tags
+            claim_id = claim_hash[::-1].hex()
+            result["is_nsfw"].append(get_nsfw(claim_hash))
+            result["lbryf"].append(claim_id in lists.lbryf)
+            result["inc"].append(claim_id in lists.inc)
+            result["grey"].append(claim_id in lists.grey_list)
+            result["lbrynomics"].append(claim_id in lists.lbrynomics)
+            result["is_new"].append(result["change"][-1] is None)
+
+    f = open("test.json", "w")
+    json.dump(f, result)
+    f.close()
 
 def view_counts_channel(channel_hash):
     claim_ids = []
