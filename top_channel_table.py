@@ -303,7 +303,7 @@ def do_epoch(force=False):
         print(followers[i], views, lbc)
         print(f"Quality filter passed = {passed[-1]}.", flush=True)
 
-        row = (channels[i], epoch_id, rank, followers[i], views,
+        row = (bytes(channels[i]), epoch_id, rank, int(followers[i]), views,
                get_reposts(channels[i]), lbc)
         db.execute("BEGIN;")
         db.execute("""INSERT INTO measurements
@@ -376,7 +376,7 @@ def export_json():
             old = db.execute("""SELECT rank, followers, views, reposts
                                 FROM measurements
                                 WHERE channel = ? AND epoch = ?;""",
-                            (channel, old_epoch)).fetchall()
+                            (claim_hash, old_epoch)).fetchall()
             if len(old) >= 1:
                 old = old[0]
             if old is None:
