@@ -1,6 +1,7 @@
 import apsw
 from databases import dbs
 import datetime
+import json
 import lists
 import numpy as np
 import requests
@@ -297,11 +298,17 @@ def do_epoch(force=False):
     passed = []
     rank = 1
     for i in range(len(channels)):
+
+        # Get vanity name
+        vanity_name = cdb.execute("SELECT claim_name FROM claim\
+                                   WHERE claim_hash=?;", (channels[i], ))\
+                                    .fetchone()[0]
+
+        print(f"Working on channel {vanity_name}: ", end="", flush=True)
         views = view_counts_channel(channels[i])
         lbc = get_lbc(channels[i])
         passed.append(quality_filter(followers[i], views, lbc) or channels[i][::-1].hex() in lists.white_list)
-        print(followers[i], views, lbc)
-        print(f"Quality filter passed = {passed[-1]}.", flush=True)
+        print(f"\nDone. Quality filter passed = {passed[-1]}.\n", flush=True)
 
         row = (bytes(channels[i]), epoch_id, rank, int(followers[i]), views,
                get_reposts(channels[i]), lbc)
@@ -379,17 +386,35 @@ def export_json():
                             (claim_hash, old_epoch)).fetchall()
             if len(old) >= 1:
                 old = old[0]
-            if old is None:
+                rank = result["ranks"][-1]
+
+                if old[1] is not None:
+                    result["change"].append(followers - old[1])
+                else:
+                    result["change"].append(None)
+
+                if old[0] is not None:
+                    result["rank_change"].append(old[0] - rank)
+                else:
+                    result["rank_change"].append(None)
+
+                if old[2] is not None:
+                    result["views_change"].append(views - old[2])
+                else:
+                    result["views_change"].append(None)
+
+                if old[3] is not None:
+                    result["times_reposted_change"].append(reposts - old[3])
+                else:
+                    result["times_reposted_change"].append(None)
+
+
+            else:
                 result["change"].append(None)
                 result["rank_change"].append(None)
                 result["views_change"].append(None)
                 result["times_reposted_change"].append(None)
-            else:
-                rank = result["ranks"][-1]
-                result["change"].append(followers - old[1])
-                result["rank_change"].append(old[0] - rank)
-                result["views_change"].append(views - old[2])
-                result["times_reposted_change"].append(reposts - old[3])
+
 
             # Fields for tags
             claim_id = claim_hash[::-1].hex()
@@ -400,8 +425,8 @@ def export_json():
             result["lbrynomics"].append(claim_id in lists.lbrynomics)
             result["is_new"].append(result["change"][-1] is None)
 
-    f = open("test.json", "w")
-    json.dump(f, result)
+    f = open("json/test.json", "w")
+    f.write(json.dumps(result))
     f.close()
 
 def view_counts_channel(channel_hash):
@@ -449,6 +474,7 @@ def get_view_counts(claim_ids, start, end):
         response = requests.get(url).json()
         for value in response["data"]:
             result.append(value)
+        print(".", end="", flush=True)
     except:
         result.append(None)
 
