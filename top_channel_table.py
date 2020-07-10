@@ -304,7 +304,7 @@ def do_epoch(force=False):
                                    WHERE claim_hash=?;", (channels[i], ))\
                                     .fetchone()[0]
 
-        print(f"Working on channel {vanity_name}: ", end="", flush=True)
+        print(f"({i+1}) Working on channel {vanity_name}: ", end="", flush=True)
         views = view_counts_channel(channels[i])
         lbc = get_lbc(channels[i])
         passed.append(quality_filter(followers[i], views, lbc) or channels[i][::-1].hex() in lists.white_list)
