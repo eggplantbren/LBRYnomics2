@@ -30,13 +30,11 @@ LBC_THRESHOLD = 20000.0
 # Quality filter parameters
 QUALITY_FILTER = [0.2, 1.0]
 
-# Size of table to maintain
-TABLE_SIZE = 500
+# Size of table to maintain in the database
+TABLE_SIZE = 550
 
-# Size of table to export
-EXPORT_SIZE = 200
-
-
+# Size of the exported JSON
+EXPORT_SIZE = 500
 
 
 def create_tables():
@@ -381,6 +379,11 @@ def export_json():
                          ORDER BY followers DESC;""",
                       (latest_epoch, )).fetchall()
     for row in rows:
+
+        # Termination
+        if len(result["ranks"]) >= EXPORT_SIZE:
+            break
+
         claim_hash, vanity_name, followers, views, reposts, lbc = row
         passed = quality_filter(followers, views, lbc) or claim_hash[::-1].hex() in lists.white_list
         if passed:
