@@ -139,14 +139,18 @@ def get_vanity_name(claim_hash):
 
 def get_lbc(claim_hash):
     lbc = 0.0
-    rows = cdb.execute("""SELECT (amount + support_amount) FROM claim
-                          WHERE claim_hash = ?;""", (claim_hash, )).fetchall()
-    if len(rows) == 1:
-        lbc += rows[0][0]/1E8
-    rows = cdb.execute("""SELECT SUM(amount + support_amount) FROM claim
-                          WHERE channel_hash=?;""", (claim_hash, )).fetchall()
-    if len(rows) == 1:
-        lbc += rows[0][0]/1E8
+
+    try:
+        rows = cdb.execute("""SELECT (amount + support_amount) FROM claim
+                              WHERE claim_hash = ?;""", (claim_hash, )).fetchall()
+        if len(rows) == 1:
+            lbc += rows[0][0]/1E8
+        rows = cdb.execute("""SELECT SUM(amount + support_amount) FROM claim
+                              WHERE channel_hash=?;""", (claim_hash, )).fetchall()
+        if len(rows) == 1:
+            lbc += rows[0][0]/1E8
+    except:
+        pass
     return lbc
 
 
@@ -317,7 +321,8 @@ def do_epoch(force=False):
                    (channel, epoch, rank, followers, views, reposts, lbc)
                    VALUES (?, ?, ?, ?, ?, ?, ?);""", row)
         db.execute("COMMIT;")
-        rank += 1
+        if passed[-1]:
+            rank += 1
 
         if rank > TABLE_SIZE:
             break
