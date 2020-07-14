@@ -314,7 +314,11 @@ def do_epoch(force=False):
         passed.append(quality_filter(followers[i], views, lbc) or channels[i][::-1].hex() in lists.white_list)
         print(f"\nDone. Quality filter passed = {passed[-1]}.\n", flush=True)
 
-        row = (bytes(channels[i]), epoch_id, rank, int(followers[i]), views,
+        _rank = None
+        if passed[-1]:
+            _rank = rank
+
+        row = (bytes(channels[i]), epoch_id, _rank, int(followers[i]), views,
                get_reposts(channels[i]), lbc)
         db.execute("BEGIN;")
         db.execute("""INSERT INTO channels VALUES (?, ?)
