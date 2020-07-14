@@ -317,6 +317,8 @@ def do_epoch(force=False):
         row = (bytes(channels[i]), epoch_id, rank, int(followers[i]), views,
                get_reposts(channels[i]), lbc)
         db.execute("BEGIN;")
+        db.execute("""INSERT INTO channels VALUES (?, ?)
+                        ON CONFLICT (claim_hash) DO NOTHING;""", (channels[i], vanity_name))
         db.execute("""INSERT INTO measurements
                    (channel, epoch, rank, followers, views, reposts, lbc)
                    VALUES (?, ?, ?, ?, ?, ?, ?);""", row)
