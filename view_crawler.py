@@ -230,7 +230,6 @@ if __name__ == "__main__":
 
         if k % 1000 == 0:
             print("Cleaning up database...", end="", flush=True)
-            db.execute("VACUUM;")
             db.execute("PRAGMA main.WAL_CHECKPOINT(TRUNCATE);")
             print("done.\n\n", end="", flush=True)
 
