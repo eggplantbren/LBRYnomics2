@@ -1,32 +1,38 @@
 import config
-from databases import dbs
 import numpy as np
 import apsw
 import time
 
 
+
 def create_db():
 
+    ldb_conn = apsw.Connection("db/lbrynomics.db")
+    ldb = ldb_conn.cursor()
+
+    cdb_conn = apsw.Connection(config.claims_db_file)
+    cdb = cdb_conn.cursor()
+
     # Set pragmas
-    dbs["lbrynomics"].execute("""
+    ldb.execute("""
     PRAGMA synchronous = 1;
     PRAGMA journal_mode = WAL;
     """)
 
     # Add indices to claims.db
-    dbs["claims"].execute("""create index if not exists lbrynomics_cti_idx
+    cdb.execute("""create index if not exists lbrynomics_cti_idx
                 on claim (claim_type, creation_timestamp);""")
 
     # Add indices to claims.db
-    dbs["claims"].execute("""create index if not exists lbrynomics_sh_idx
+    cdb.execute("""create index if not exists lbrynomics_sh_idx
                 on support (height);""")
-    dbs["claims"].execute("""create index if not exists lbrynomics_test
+    cdb.execute("""create index if not exists lbrynomics_test
                 on claim (claim_type, channel_hash, claim_id)""")
-    dbs["claims"].execute("""create index if not exists lbrynomics_height_amount_idx
+    cdb.execute("""create index if not exists lbrynomics_height_amount_idx
                 on support (height, amount);""")
 
     # Create tables for measurements etc.
-    dbs["lbrynomics"].execute("""
+    ldb.execute("""
     CREATE TABLE IF NOT EXISTS measurements
         (id INTEGER PRIMARY KEY,
          time REAL NOT NULL,
@@ -44,11 +50,12 @@ def create_db():
     """)
 
     # Create indices
-    dbs["lbrynomics"].execute("""
+    ldb.execute("""
     CREATE INDEX IF NOT EXISTS time_idx ON measurements (time);
     """)
 
-
+    ldb_conn.close()
+    cdb_conn.close()
     
 def test_history():
     """
@@ -57,20 +64,29 @@ def test_history():
     much.
     """
 
+    ldb_conn = apsw.Connection("db/lbrynomics.db")
+    ldb = ldb_conn.cursor()
+
+    cdb_conn = apsw.Connection(config.claims_db_file,
+                              flags=apsw.SQLITE_OPEN_READONLY)
+    cdb = cdb_conn.cursor()
+
     print("Generating approximate historical data.", flush=True)
 
     # Count rows of history in table
-    rows = dbs["lbrynomics"].execute("""SELECT COUNT(*) FROM measurements
+    rows = ldb.execute("""SELECT COUNT(*) FROM measurements
                         WHERE lbc_deposits IS NULL;""").fetchone()[0]
     if rows > 0:
         # No need to do anything if history exists
+        ldb_conn.close()
+        cdb_conn.close()
         print("Done.\n")
         return
 
     # Obtain creation times from claims.db
     ts_channels = []
     ts_streams  = []
-    for row in dbs["claims"].execute("SELECT creation_timestamp, claim_type FROM claim;"):
+    for row in cdb.execute("SELECT creation_timestamp, claim_type FROM claim;"):
         if row[1] == 2:
             ts_channels.append(row[0])
         elif row[1] == 1:
@@ -103,16 +119,20 @@ def test_history():
 
     counts = np.cumsum(counts, axis=1)
 
-    dbs["lbrynomics"].execute("BEGIN;")
+    ldb.execute("BEGIN;")
 
     for i in range(counts.shape[1]):
         t = start + i*config.interval
-        dbs["lbrynomics"].execute("""INSERT INTO measurements (time, num_channels, num_streams)
+        ldb.execute("""INSERT INTO measurements (time, num_channels, num_streams)
                      VALUES (?, ?, ?);""", (t, counts[0, i], counts[1, i]))
         print("    Inserted {rows} rows into database."\
                     .format(rows=i+1), end="\r", flush=True)
     print("")
 
-    dbs["lbrynomics"].execute("COMMIT;")
+    ldb.execute("COMMIT;")
+
+    ldb_conn.close()
+    cdb_conn.close()
+
     print("Done.\n")
 

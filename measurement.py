@@ -1,6 +1,5 @@
 import apsw
 import collections
-from databases import dbs
 import datetime
 import config
 import json
@@ -8,14 +7,20 @@ import requests
 import time
 
 
-
+# Database connections
+ldb_conn = apsw.Connection("db/lbrynomics.db")
+ldb = ldb_conn.cursor()
+ldb.execute("PRAGMA JOURNAL_MODE=WAL;")
+cdb_conn = apsw.Connection(config.claims_db_file,
+                            flags=apsw.SQLITE_OPEN_READONLY)
+cdb = cdb_conn.cursor()
 
 def make_measurement(k):
 
     # Get current timestamp
     now = time.time()
 
-    m = 1 + dbs["lbrynomics"].execute("SELECT COUNT(*) FROM measurements;")\
+    m = 1 + ldb.execute("SELECT COUNT(*) FROM measurements;")\
                 .fetchone()[0]
     print(f"Making measurement {m}. ", end="")
     print("The time is " + str(datetime.datetime.utcfromtimestamp(int(now)))\
@@ -32,7 +37,7 @@ def make_measurement(k):
             HAVING claim_type = 1 OR claim_type = 2
             ORDER BY claim_type DESC;
             """
-    output = dbs["claims"].execute(query)
+    output = cdb.execute(query)
     measurement["num_channels"] = output.fetchone()[0]
     measurement["num_streams"]  = output.fetchone()[0]
 #    measurement["num_reposts"] = output.fetchone()[0]
@@ -41,7 +46,7 @@ def make_measurement(k):
     query = """
             SELECT SUM(amount)/1E8 FROM claim;
             """
-    output = dbs["claims"].execute(query)
+    output = cdb.execute(query)
     measurement["lbc_deposits"] = output.fetchone()[0]
 
 
@@ -49,7 +54,7 @@ def make_measurement(k):
     query = """
             SELECT COUNT(*), SUM(amount)/1E8 FROM support;
             """
-    output = dbs["claims"].execute(query)
+    output = cdb.execute(query)
     row = output.fetchone()
     measurement["num_supports"], measurement["lbc_supports"] = row
 
@@ -90,7 +95,7 @@ def make_measurement(k):
     query = "SELECT COUNT(claim_hash) FROM claim WHERE claim_type=3;"
     measurement["num_reposts"] = None
     try:
-        measurement["num_reposts"] = dbs["claims"].execute(query).fetchone()[0]
+        measurement["num_reposts"] = cdb.execute(query).fetchone()[0]
     except:
         pass
 
@@ -104,9 +109,9 @@ def make_measurement(k):
                                       circulating_supply, num_reposts)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
-    dbs["lbrynomics"].execute("BEGIN;")
-    dbs["lbrynomics"].execute(query, tuple(measurement.values()))
-    dbs["lbrynomics"].execute("COMMIT;")
+    ldb.execute("BEGIN;")
+    ldb.execute(query, tuple(measurement.values()))
+    ldb.execute("COMMIT;")
 
     print("    " + json.dumps(measurement, indent=4).replace("\n", "\n    "))
     print("Done.\n", flush=True)

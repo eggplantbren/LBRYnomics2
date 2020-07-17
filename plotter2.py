@@ -1,6 +1,5 @@
 import apsw
 from collections import OrderedDict
-import databases
 import datetime
 import numpy as np
 import numpy.random as rng

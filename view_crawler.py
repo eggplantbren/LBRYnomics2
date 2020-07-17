@@ -1,18 +1,22 @@
 import apsw
-from databases import dbs
+import config
 import json
+from misc import get_view_counts
 import numpy as np
 import numpy.random as rng
 import time
-from top_channel_table import get_view_counts
 
 VIEWS_THRESHOLD = 100
 LBC_THRESHOLD = 0.0
 SLEEP = 1.0
 NUM_PER_API_CALL = 197
 
+# Database connections
 conn = apsw.Connection("db/view_crawler.db")
 db = conn.cursor()
+claims_db = apsw.Connection(config.claims_db_file,
+                            flags=apsw.SQLITE_OPEN_READONLY)
+cdb = claims_db.cursor()
 
 
 def initialise_database():
@@ -56,7 +60,7 @@ def do_api_call():
     now = time.time()
 
     # Get the range of rowids
-    result = dbs["claims"].execute("SELECT MIN(rowid), MAX(rowid) FROM claim;")\
+    result = cdb.execute("SELECT MIN(rowid), MAX(rowid) FROM claim;")\
                                     .fetchall()[0]
     min_rowid, max_rowid = result
 
@@ -64,7 +68,7 @@ def do_api_call():
     measurements = dict()
     while len(measurements) < NUM_PER_API_CALL:
         rowid = min_rowid + rng.randint(max_rowid - min_rowid + 1)
-        row = dbs["claims"].execute("""SELECT claim_hash,
+        row = cdb.execute("""SELECT claim_hash,
                                        claim_name,
                                        (amount+support_amount)/1E8 lbc,
                                        title
@@ -74,7 +78,7 @@ def do_api_call():
                                     (rowid, LBC_THRESHOLD)).fetchone()
 
         if row is not None:
-            nsfw = dbs["claims"].execute("""SELECT COUNT(*) FROM tag
+            nsfw = cdb.execute("""SELECT COUNT(*) FROM tag
                                             WHERE claim_hash = ?
                                             AND tag in
                                             ('nsfw', 'xxx', 'sex',

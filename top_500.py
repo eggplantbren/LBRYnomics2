@@ -1,5 +1,5 @@
 import apsw
-from databases import dbs
+import config
 import datetime
 import json
 import lists
@@ -14,7 +14,9 @@ It will run separately and have its own database.
 """
 
 # Claims DB
-cdb = dbs["claims"]
+cdb_conn = apsw.Connection(config.claims_db_file,
+                          flags=apsw.SQLITE_OPEN_READONLY)
+cdb = cdb_conn.cursor()
 
 # LBRYnomics DB
 lconn = apsw.Connection("db/lbrynomics.db", flags=apsw.SQLITE_OPEN_READONLY)

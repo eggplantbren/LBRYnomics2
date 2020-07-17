@@ -1,6 +1,5 @@
 import apsw
 import config
-from databases import dbs
 import datetime
 import matplotlib
 import matplotlib.pyplot as plt
@@ -13,6 +12,9 @@ import time
 tcdb_conn = apsw.Connection("db/top_channels.db",
                             flags=apsw.SQLITE_OPEN_READONLY)
 tcdb = tcdb_conn.cursor()
+ldb_conn = apsw.Connection("db/lbrynomics.db",
+                           flags=apsw.SQLITE_OPEN_READONLY)
+ldb = ldb_conn.cursor()
 
 # Quantiles
 class quantile:
@@ -204,7 +206,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
         ts, ys = [], []
 
     if len(ts) == 0:
-        for row in dbs["lbrynomics"].execute(f"SELECT time, {mode} FROM measurements;"):
+        for row in ldb.execute(f"SELECT time, {mode} FROM measurements;"):
             if row[1] is not None:
                 ts.append(row[0])
                 ys.append(row[1])

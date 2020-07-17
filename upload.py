@@ -1,4 +1,4 @@
-from databases import dbs
+import apsw
 import os
 import subprocess
 import yaml
@@ -8,7 +8,10 @@ def backup(secrets_file="secrets.yaml"):
     secrets = yaml.load(f, Loader=yaml.SafeLoader)
     f.close()
 
-    dbs["lbrynomics"].execute("PRAGMA main.wal_checkpoint(FULL);")
+    ldb_conn = apsw.Connection("db/lbrynomics.db")
+    ldb = ldb_conn.cursor()
+    ldb.execute("PRAGMA main.wal_checkpoint(FULL);")
+    ldb_conn.close()
 
     os.system("zstd -19 db/lbrynomics.db -o ./lbrynomics.db.zst")
     cmd = "sshpass -e scp -P {port} lbrynomics.db.zst {user}@{dest}"\

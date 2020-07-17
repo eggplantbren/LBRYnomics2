@@ -1,10 +1,13 @@
 import apsw
 import config
-from databases import dbs
 import datetime
 from daemon_command import daemon_command
 import json
 import math
+
+cdb_conn = apsw.Connection(config.claims_db_file,
+                            flags=apsw.SQLITE_OPEN_READONLY)
+cdb = cdb_conn.cursor()
 
 
 def count_recent_all(now):
@@ -44,7 +47,7 @@ def count_recent(mode, now):
                 WHERE creation_timestamp >= ? AND creation_timestamp <= ?
                             AND claim_type = ?;
                 """
-        row = dbs["claims"].execute(query, (cutoffs[i], now, claim_type)).fetchone()
+        row = cdb.execute(query, (cutoffs[i], now, claim_type)).fetchone()
         if i==0:
             result_dict["total_{mode}".format(mode=mode)] = row[0]
         else:
@@ -58,7 +61,7 @@ def count_recent(mode, now):
             WHERE creation_timestamp >= ?
             AND claim_type = ?;
             """
-    new_today = dbs["claims"].execute(query, (start_of_today, claim_type)).fetchone()[0]
+    new_today = cdb.execute(query, (start_of_today, claim_type)).fetchone()[0]
     result_dict[f"new_{mode}_today_utc"] = new_today
 
     # Save some stats to JSON for Electron
@@ -127,7 +130,7 @@ def count_boosts(now):
 
 
 
-        for row in dbs["claims"].execute(query, data):
+        for row in cdb.execute(query, data):
             biggest = row[1]
             if biggest is None:
                 biggest = 0.0
@@ -151,7 +154,7 @@ def count_boosts(now):
                  ORDER BY num DESC
                  LIMIT 1;
                  """
-        for row in dbs["claims"].execute(query, data):
+        for row in cdb.execute(query, data):
             val = None
             try:
                 val = row[0]/1.0E8
@@ -176,7 +179,7 @@ def count_boosts(now):
             data += (cutoff, )
 
         claim_name, claim_id = None, None
-        for row in dbs["claims"].execute(query, data):
+        for row in cdb.execute(query, data):
             claim_name, claim_id = row[0:2]
 #        print(query, data, claim_name, claim_id)
 
@@ -205,7 +208,7 @@ def count_boosts(now):
             query += "AND support.height >= ?"
             data += (cutoff, )
 
-        for row in dbs["claims"].execute(query, data):
+        for row in cdb.execute(query, data):
             result["is_nsfw_{label}".format(label=labels[i])] = row[0] != 0
             break
 
