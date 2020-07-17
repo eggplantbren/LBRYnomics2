@@ -4,7 +4,7 @@ import json
 import numpy as np
 import numpy.random as rng
 import time
-from top_channels import get_view_counts
+from top_channel_table import get_view_counts
 
 VIEWS_THRESHOLD = 100
 LBC_THRESHOLD = 0.0

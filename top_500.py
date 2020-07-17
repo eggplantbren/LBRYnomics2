@@ -514,9 +514,10 @@ if __name__ == "__main__":
         done = do_epoch()
         if done:
             import plotter2
-            print("Making and uploading daily interactive graph...",
+            print("Making and uploading daily interactive graphs...",
                   flush=True, end="")
-            plotter2.html_plot()
+            plotter2.html_plot(mode="top")
+            plotter2.html_plot(mode="random")
             upload.upload(with_html_plot=True)
             print("done.", flush=True)
         else:

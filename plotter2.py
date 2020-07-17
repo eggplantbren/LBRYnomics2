@@ -3,6 +3,7 @@ from collections import OrderedDict
 import databases
 import datetime
 import numpy as np
+import numpy.random as rng
 import plotly
 import plotly.graph_objects as go
 
@@ -20,11 +21,11 @@ HTML = \
     <meta charset="utf-8">
     <style>body { background-color: #222222; color: #E6E6E6;
                   font-family: 'Open Sans', Arial, sans-serif; }</style>
-    <title>LBRY Top Channels Interactive Graphs</title>
+    <title>LBRY Channels Interactive Graphs</title>
     %%PLOTLYJS%%
 </head>
 <body>
-    <h2>Growth of the Top %%TOP%% LBRY Channels</h2>
+    <h2>LBRY Channels Interactive Graphs</h2>
     %%CONTENT%%
 </body>
 </html>
@@ -98,12 +99,29 @@ def html_plot(num_channels=20, mode="top"):
                              FROM channels c INNER JOIN measurements m
                                 ON m.channel = c.claim_hash
                              WHERE epoch = (SELECT MAX(id) FROM epochs)
-                             AND rank <= ?
-                             ORDER BY rank ASC;""", (num_channels, )):
+                             AND rank IS NOT NULL
+                             ORDER BY rank ASC;"""):
         claim_hash, vanity_name, rank = row
         channels[claim_hash] = dict(vanity_name=vanity_name, rank=rank,
                                   data={"ts": [], "followers": [],
                                         "views": [], "reposts": [], "lbc": []})
+        if mode == "top" and len(channels) >= num_channels:
+            break
+
+    if mode == "random":
+
+        # 20 random channels!
+        which = set()
+        while len(which) < num_channels:
+            which.add(rng.randint(len(channels)))
+        _channels = dict()
+        i = 0
+        for ch in channels:
+            if i in which:
+                _channels[ch] = channels[ch]
+            i += 1
+
+        channels = _channels
 
     # Question marks
     qms = "?, ".join(["" for i in range(num_channels+1)])
@@ -130,14 +148,22 @@ def html_plot(num_channels=20, mode="top"):
     div3 = make_fig(channels, "reposts")
     div4 = make_fig(channels, "lbc")
 
-    f = open("plots/interactive.html", "w")
+    if mode=="top":
+        filename = "plots/interactive.html"
+    else:
+        filename = "plots/interactive_random.html"
+    f = open(filename, "w")
     html = HTML.replace("%%TOP%%", str(num_channels))
     html = html.replace("%%CONTENT%%", "\n".join([div1, div2, div3, div4]))
     f.write(html)
     f.close()
 
     # Version without HTML surrounding it
-    f = open("plots/interactive_parts.html", "w")
+    if mode=="top":
+        filename = "plots/interactive_parts.html"
+    else:
+        filename = "plots/interactive_random_parts.html"
+    f = open(filename, "w")
     f.write("<!-- JavaScript for Plotly -->\n\n")
     f.write(plotlyjs + "\n")
     f.write("<!-- followers plot -->\n")
@@ -153,6 +179,7 @@ def html_plot(num_channels=20, mode="top"):
 
 
 if __name__ == "__main__":
-    html_plot()
+    html_plot(mode="top")
+    html_plot(mode="random")
 
 
