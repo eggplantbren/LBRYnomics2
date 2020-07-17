@@ -6,6 +6,12 @@ import numpy as np
 import plotly
 import plotly.graph_objects as go
 
+# Read-only connection to top channels database
+tcdb_conn = apsw.Connection("db/top_channels.db",
+                            flags=apsw.SQLITE_OPEN_READONLY)
+tcdb = tcdb_conn.cursor()
+
+
 HTML = \
 """
 <!DOCTYPE html>
@@ -28,10 +34,10 @@ plotlyjs = "".join(f.readlines())
 HTML = HTML.replace("%%PLOTLYJS%%", plotlyjs)
 f.close()
 
-def make_fig(channels, quantity="num_followers"):
-    assert quantity in ["num_followers", "views", "reposts", "lbc"]
+def make_fig(channels, quantity="followers"):
+    assert quantity in ["followers", "views", "reposts", "lbc"]
 
-    if quantity == "num_followers":
+    if quantity == "followers":
         yaxis_title = "Followers"
     elif quantity == "views":
         yaxis_title = "Views"
@@ -53,15 +59,15 @@ def make_fig(channels, quantity="num_followers"):
                                  color="rgb(230, 230, 230)"))
 
     # Loop over channels
-    for claim_id in channels:
+    for claim_hash in channels:
         datetimes = [datetime.datetime.fromtimestamp(t)\
-                            for t in channels[claim_id]["data"]["ts"]]
-        #print(channels[claim_id]["vanity_name"], datetimes[-1])
+                            for t in channels[claim_hash]["data"]["ts"]]
+        #print(channels[claim_hash]["vanity_name"], datetimes[-1])
         fig.add_trace(go.Scatter(x=datetimes,
-                                 y=channels[claim_id]["data"][quantity],
+                                 y=channels[claim_hash]["data"][quantity],
                                  showlegend=True,
                                  mode="lines+markers",
-                                 name=channels[claim_id]["vanity_name"]))
+                                 name=channels[claim_hash]["vanity_name"]))
 
     # Add year lines
 #    shapes = []
@@ -83,48 +89,49 @@ def make_fig(channels, quantity="num_followers"):
 
     return div
 
-def html_plot(top=20):
-
-    db = databases.dbs["lbrynomics"]
-    # print(db.execute("SELECT MAX(id) FROM epochs;").fetchall())
+def html_plot(num_channels=20, mode="top"):
+    assert mode in {"top", "random"}
 
     # Get current top channels
     channels = OrderedDict()
-    for row in db.execute("""SELECT claim_id, vanity_name, rank
-                             FROM channel_measurements
+    for row in tcdb.execute("""SELECT claim_hash, vanity_name, rank
+                             FROM channels c INNER JOIN measurements m
+                                ON m.channel = c.claim_hash
                              WHERE epoch = (SELECT MAX(id) FROM epochs)
                              AND rank <= ?
-                             ORDER BY rank ASC;""", (top, )):
-        claim_id, vanity_name, rank = row
-        channels[claim_id] = dict(vanity_name=vanity_name, rank=rank,
-                                  data={"ts": [], "num_followers": [],
+                             ORDER BY rank ASC;""", (num_channels, )):
+        claim_hash, vanity_name, rank = row
+        channels[claim_hash] = dict(vanity_name=vanity_name, rank=rank,
+                                  data={"ts": [], "followers": [],
                                         "views": [], "reposts": [], "lbc": []})
 
     # Question marks
-    qms = "?, ".join(["" for i in range(top+1)])
+    qms = "?, ".join(["" for i in range(num_channels+1)])
     qms = "(" + qms[0:-2] + ")"
 
-    for row in db.execute(f"""SELECT claim_id, vanity_name,
-                                    time, num_followers, views, times_reposted, lbc
-                             FROM epochs e INNER JOIN channel_measurements cm
-                             ON e.id = cm.epoch
-                             WHERE claim_id IN {qms};""", # No injection risk
+    for row in tcdb.execute(f"""SELECT claim_hash, vanity_name,
+                                    time, followers, views, reposts, lbc
+                             FROM epochs e INNER JOIN measurements m
+                                           INNER JOIN channels c
+                                           ON e.id = m.epoch AND
+                                           m.channel = c.claim_hash
+                             WHERE claim_hash IN {qms};""", # No injection risk
                              channels.keys()):
-        claim_id, vanity_name, time, num_followers, views, reposts, lbc = row
-        channels[claim_id]["data"]["ts"].append(time)
-        channels[claim_id]["data"]["num_followers"].append(num_followers)
-        channels[claim_id]["data"]["views"].append(views)
-        channels[claim_id]["data"]["reposts"].append(reposts)
-        channels[claim_id]["data"]["lbc"].append(lbc)
+        claim_hash, vanity_name, time, followers, views, reposts, lbc = row
+        channels[claim_hash]["data"]["ts"].append(time)
+        channels[claim_hash]["data"]["followers"].append(followers)
+        channels[claim_hash]["data"]["views"].append(views)
+        channels[claim_hash]["data"]["reposts"].append(reposts)
+        channels[claim_hash]["data"]["lbc"].append(lbc)
 #        print(time)
 
-    div1 = make_fig(channels, "num_followers")
+    div1 = make_fig(channels, "followers")
     div2 = make_fig(channels, "views")
     div3 = make_fig(channels, "reposts")
     div4 = make_fig(channels, "lbc")
 
     f = open("plots/interactive.html", "w")
-    html = HTML.replace("%%TOP%%", str(top))
+    html = HTML.replace("%%TOP%%", str(num_channels))
     html = html.replace("%%CONTENT%%", "\n".join([div1, div2, div3, div4]))
     f.write(html)
     f.close()
@@ -133,7 +140,7 @@ def html_plot(top=20):
     f = open("plots/interactive_parts.html", "w")
     f.write("<!-- JavaScript for Plotly -->\n\n")
     f.write(plotlyjs + "\n")
-    f.write("<!-- num_followers plot -->\n")
+    f.write("<!-- followers plot -->\n")
     f.write(div1 + "\n")
     f.write("<!-- views plot -->\n")
     f.write(div2 + "\n")

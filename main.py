@@ -6,7 +6,6 @@ import measurement
 import plotter
 import recent
 import subprocess
-import top_channels
 import time
 import upload
 
@@ -32,9 +31,6 @@ while True:
     # Count recent activity and write to JSON
     recent.count_recent_all(result["time"])
 
-    # Top channels
-    top_channels.check_and_run()
-
     # Data about LBRYnomics itself
     lbrynomics_meta.lbrynomics_meta(result["time"], d)
 
@@ -47,7 +43,7 @@ while True:
 
     # Backup db periodically
     if k % 36 == 0:
-        print("Backing up DB file...", flush=True)
+        print("Backing up DB files...", flush=True)
         upload.backup()
         print("done.\n", flush=True)
 

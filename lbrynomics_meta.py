@@ -1,6 +1,12 @@
+import apsw
 from databases import dbs
 import datetime
 import json
+
+# Read-only connection to top channels database
+tcdb_conn = apsw.Connection("db/top_channels.db",
+                            flags=apsw.SQLITE_OPEN_READONLY)
+tcdb = tcdb_conn.cursor()
 
 def lbrynomics_meta(now, uptime):
     """
@@ -26,7 +32,7 @@ def lbrynomics_meta(now, uptime):
     result["historical_estimates_in_db"] = db.execute("""
         SELECT COUNT(id) FROM measurements WHERE lbc_deposits IS NULL;
         """).fetchone()[0]
-    result["top_channel_days_in_db"] = db.execute("""
+    result["top_channel_days_in_db"] = tcdb.execute("""
         SELECT count(id) FROM epochs;
         """).fetchone()[0]
 

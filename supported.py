@@ -14,15 +14,14 @@ f.close()
 response = requests.post("http://localhost:5279", json={"method": "status", "params": {}}).json()
 block = response["result"]["wallet"]["blocks"]
 
-back = input(f"How many blocks back do you want to go?: ")
-print("")
-start_block = block - int(back)
+#back = input(f"How many blocks back do you want to go?: ")
+#print("")
+start_block = 0 #block - int(back)
 
 conn = apsw.Connection(x["claims_db_file"])
 db = conn.cursor()
 
-channels = ["@emmyhucker", "@justinmurphy", "@paulvanderklay",
-            "@alaslewisandbarnes", "@veritasium"]
+channels = ["@paulvanderklay", "@emmyhucker"]
 
 #channels = ["@emmyhucker", "@justinmurphy", "@paulvanderklay", "@mikenayna",
 #            "@theworthyhouse", "@AlasLewisAndBarnes", "@veritasium",
@@ -72,15 +71,15 @@ for channel in channels:
 #    # Truncate to the most recent week
 #    ys = ys[ts >= block - 4032 - 10]
 #    ts = ts[ts >= block - 4032 - 10]
-#    ys = np.cumsum(ys)
+    ys = np.cumsum(ys)
 
-#    plt.plot(ts, ys, "o-", markersize=3, label=channel)
+    plt.plot(ts, ys, "o-", markersize=3, label=channel)
 
-#plt.legend()
-#plt.axvline(block, linestyle="--", color="r", alpha=0.3)
-##plt.xlim([block - 576, block + 10])
+plt.legend()
+plt.axvline(block, linestyle="--", color="r", alpha=0.3)
+#plt.xlim([block - 576, block + 10])
 #plt.xlim([block - 4032 - 10, block + 10])
-#plt.ylim(bottom=0.0)
-#plt.show()
+plt.ylim(bottom=0.0)
+plt.show()
 conn.close()
 

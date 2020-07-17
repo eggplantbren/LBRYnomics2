@@ -41,32 +41,11 @@ def create_db():
          ytsync_failed INTEGER,
          circulating_supply REAL,
          num_reposts INTEGER);
-
-    -- Create channel measurements table
-    CREATE TABLE IF NOT EXISTS channel_measurements
-        (id INTEGER PRIMARY KEY,
-         claim_id STRING NOT NULL,
-         vanity_name STRING NOT NULL,
-         epoch INTEGER NOT NULL,
-         num_followers INTEGER NOT NULL,
-         rank INTEGER NOT NULL,
---         revenue REAL,
-         views INTEGER,
-         times_reposted INTEGER,
-         lbc REAL,
-         FOREIGN KEY (epoch) REFERENCES epochs (id));
-
-    -- Create epochs channel
-    CREATE TABLE IF NOT EXISTS epochs
-        (id       INTEGER PRIMARY KEY,
-         time     REAL NOT NULL);
     """)
 
     # Create indices
     dbs["lbrynomics"].execute("""
     CREATE INDEX IF NOT EXISTS time_idx ON measurements (time);
-    CREATE INDEX IF NOT EXISTS channel_idx ON channel_measurements (claim_id, epoch);
-    CREATE INDEX IF NOT EXISTS epoch_idx ON channel_measurements (epoch);
     """)
 
 

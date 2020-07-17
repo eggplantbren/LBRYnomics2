@@ -1,3 +1,4 @@
+backup_db
 plots/*.svg
 plots/*.png
 json/*.json
@@ -10,8 +11,11 @@ url.txt
 json/subscriber_counts_preview.csv
 secrets.yaml
 json/rss.xml
-plots/interactive.html
-lbrynomics.log
+plots/interactive*.html
+main.log
+top_500.log
 view_crawler.log
 logfile
 daemon.out
+top_500.csv
+

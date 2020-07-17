@@ -9,6 +9,36 @@ from numba import njit
 import numpy as np
 import time
 
+# Read-only connection to top channels database
+tcdb_conn = apsw.Connection("db/top_channels.db",
+                            flags=apsw.SQLITE_OPEN_READONLY)
+tcdb = tcdb_conn.cursor()
+
+# Quantiles
+class quantile:
+    def __init__(self):
+        self.xs = []
+
+    def step(self, x):
+        self.xs.append(x)
+
+    def final(self):
+        if len(self.xs) == 0:
+            return None
+        self.xs = sorted(self.xs)[::-1]
+        if len(self.xs) > 100:
+            return self.xs[100]
+        return self.xs[-1]
+
+    # Under Python 2.3 remove the following line and add
+    # factory=classmethod(factory) at the end
+    @classmethod
+    def factory(cls):
+        return cls(), cls.step, cls.final
+
+tcdb_conn.createaggregatefunction("QUANTILE", quantile.factory)
+
+
 @njit
 def derivative(ts, ys):
     result = np.empty(len(ys) - 1)
@@ -72,14 +102,14 @@ def annotate_all(mode, subplot=1):
                  "New users prompted\n to create a channel",
                  fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
-    if mode in ["views", "followers"]:
-        loc = mdates.date2num(datetime.date(2020, 5, 11))
-        plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
-        x_range = np.diff(plt.gca().get_xlim())
-        plt.text(loc - 0.035*x_range,
-                 text_pos,
-                 "Introduced filters to prevent\nchannels faking popularity",
-                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
+#    if mode in ["views", "followers"]:
+#        loc = mdates.date2num(datetime.date(2020, 5, 11))
+#        plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
+#        x_range = np.diff(plt.gca().get_xlim())
+#        plt.text(loc - 0.035*x_range,
+#                 text_pos,
+#                 "Introduced filters to prevent\nchannels faking popularity",
+#                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
 
     # Zero lines on some lower panels
@@ -116,9 +146,9 @@ def title(mode, value):
     if mode == "circulating_supply":
         string += f"Circulating supply = {num} LBC (max supply=1.083202 billion)"
     if mode == "followers":
-        string += f"Average followers of top 200 channels = {num}"
+        string += f"Followers of 100th-ranked channel = {num}"
     if mode == "views":
-        string += f"Average views of top 200 channels = {num}"
+        string += f"Views of 100th-most-viewed channel in top 500 = {num}"
     if mode == "num_reposts":
         string += f"Number of reposts = {num}"
     return string
@@ -143,9 +173,9 @@ def ylabel(mode):
     if mode == "circulating_supply":
         string += "Circulating LBC supply"
     if mode == "followers":
-        string += "Avg. followers of top 200 channels"
+        string += "Followers"
     if mode == "views":
-        string += "Avg. views of top 200 channels"
+        string += "Views"
     if mode == "num_reposts":
         string += "Number of reposts"
     return string
@@ -153,10 +183,10 @@ def ylabel(mode):
 def set_ylim(mode, subplot=1):
     if mode in ["num_streams", "num_channels", "num_reposts"]:
         plt.ylim(bottom=-0.5)
-    if mode == "followers":
-        plt.ylim(bottom=-0.5)
-    if mode == "views":
-        plt.ylim(bottom=-0.5)
+#    if mode == "followers":
+#        plt.ylim(bottom=-0.5)
+#    if mode == "views":
+#        plt.ylim(bottom=-0.5)
     if mode in ["ytsync_new_pending", "ytsync_pending_update"] and\
             subplot==1:
         plt.ylim(bottom=-0.5)
@@ -317,26 +347,28 @@ def make_plots(production=True):
 
     # Followers data
     query = """
-    SELECT time, AVG(num_followers) FROM channel_measurements INNER JOIN epochs
-            ON epochs.id = channel_measurements.epoch
-            WHERE rank <= 200
-            GROUP BY channel_measurements.epoch;
+    SELECT time, followers FROM measurements INNER JOIN epochs
+            ON epochs.id = measurements.epoch
+            WHERE rank = 100
+            ORDER BY time ASC;
     """
     ts, ys = [], []
-    for row in dbs["lbrynomics"].execute(query):
+    for row in tcdb.execute(query):
         ts.append(row[0])
         ys.append(row[1])
     make_plot("followers", production, ts, ys)
 
     # Views data
     query = """
-    SELECT time, AVG(views) FROM channel_measurements INNER JOIN epochs
-            ON epochs.id = channel_measurements.epoch
-            WHERE rank <= 200 AND lbc IS NOT NULL
-            GROUP BY channel_measurements.epoch;
+        SELECT time, QUANTILE(views) v
+        FROM measurements m INNER JOIN epochs e ON m.epoch = e.id
+        WHERE rank IS NOT NULL AND views IS NOT NULL AND e.id >= 157
+        GROUP BY e.id
+        HAVING v NOT NULL
+        ORDER BY time ASC;
     """
     ts, ys = [], []
-    for row in dbs["lbrynomics"].execute(query):
+    for row in tcdb.execute(query):
         ts.append(row[0])
         ys.append(row[1])
     make_plot("views", production, ts, ys)

@@ -269,12 +269,9 @@ def do_epoch(force=False):
 
     # How much time has passed?
     now = time.time()
-    gap = now - last_epoch[1]
-
-    # Whether to do anything
-    do = force or (datetime.datetime.utcnow().hour == 23 and \
-                        gap >= 0.5*86400.0)
-    if not do:
+    gap = last_epoch[1] - now
+    if not force and (datetime.datetime.utcnow().hour < 23 \
+                      or gap < 0.5*86400.0):
         return False
 
     # Print message
@@ -508,21 +505,11 @@ def get_view_counts(claim_ids, start, end):
 
 if __name__ == "__main__":
     create_tables()
+    import_from_ldb()
 
-    k = 1
     while True:
         done = do_epoch()
-        if done:
-            import plotter2
-            print("Making and uploading daily interactive graph...",
-                  flush=True, end="")
-            plotter2.html_plot()
-            upload.upload(with_html_plot=True)
-            print("done.", flush=True)
-        else:
+        if not done:
             print(".", end="", flush=True)
-            if k % 60 == 0:
-                print("", flush=True)
         time.sleep(60.0)
-        k = k + 1
 
