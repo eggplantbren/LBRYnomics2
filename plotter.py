@@ -16,7 +16,7 @@ ldb_conn = apsw.Connection("db/lbrynomics.db",
                            flags=apsw.SQLITE_OPEN_READONLY)
 ldb = ldb_conn.cursor()
 
-# Quantiles
+# Quantiles - actually the MEDIAN
 class quantile:
     def __init__(self):
         self.xs = []
@@ -26,11 +26,8 @@ class quantile:
 
     def final(self):
         if len(self.xs) == 0:
-            return None
-        self.xs = sorted(self.xs)[::-1]
-        if len(self.xs) > 100:
-            return self.xs[100]
-        return self.xs[-1]
+            return 0.0
+        return np.median(self.xs)
 
     # Under Python 2.3 remove the following line and add
     # factory=classmethod(factory) at the end
@@ -148,9 +145,9 @@ def title(mode, value):
     if mode == "circulating_supply":
         string += f"Circulating supply = {num} LBC (max supply=1.083202 billion)"
     if mode == "followers":
-        string += f"Followers of 100th-ranked channel = {num}"
+        string += f"Median followers of top 200 channels = {num}"
     if mode == "views":
-        string += f"Views of 100th-most-viewed channel in top 500 = {num}"
+        string += f"Median views of top 200 channels = {num}"
     if mode == "num_reposts":
         string += f"Number of reposts = {num}"
     return string
@@ -349,10 +346,12 @@ def make_plots(production=True):
 
     # Followers data
     query = """
-    SELECT time, followers FROM measurements INNER JOIN epochs
-            ON epochs.id = measurements.epoch
-            WHERE rank = 100
-            ORDER BY time ASC;
+        SELECT time, QUANTILE(followers) f
+        FROM measurements m INNER JOIN epochs e ON m.epoch = e.id
+        WHERE rank <= 200 AND followers IS NOT NULL
+        GROUP BY e.id
+        HAVING f NOT NULL
+        ORDER BY time ASC;
     """
     ts, ys = [], []
     for row in tcdb.execute(query):
@@ -364,7 +363,7 @@ def make_plots(production=True):
     query = """
         SELECT time, QUANTILE(views) v
         FROM measurements m INNER JOIN epochs e ON m.epoch = e.id
-        WHERE rank IS NOT NULL AND views IS NOT NULL AND e.id >= 157
+        WHERE rank <= 200 AND views IS NOT NULL
         GROUP BY e.id
         HAVING v NOT NULL
         ORDER BY time ASC;
