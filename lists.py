@@ -26,11 +26,9 @@ lbryf = set(["f8d6eccd887c9cebd36b1d42aa349279b7f5c3ed",
           "60ea26a907f25bcbbc8215007eef2bf0fb846f5c",
           "d0174cf90b6ec4e26ee2fc013714b0803dec5dd1",
           "3849a35ae6122e0b7a035c2ba66e97b9e4ab9efa",
-          "c62ee910262e0a126181dc454b0556a174bfb120",
           "aaeda15cc0cafe689793a00d5e6c5a231e3b6ee8",
           "2bfe6cdb24a21bdc1b76fb7c416edd50e9e85945",
-          "3b807b82be6fadc0db4a057955766cea230839b9",
-          "0ed629d2b9c601300cacf7eabe9da0be79010212" ])
+          "3b807b82be6fadc0db4a057955766cea230839b9"])
 
 lbrynomics = set(["2d09719c8e06ab54ca5c1b4e44ddf3ee9d30241f",
                   "36b7bd81c1f975878da8cfe2960ed819a1c85bb5",
