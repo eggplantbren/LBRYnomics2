@@ -23,6 +23,8 @@ ldb = lconn.cursor()
 # Connection to top channel DB
 conn = apsw.Connection("db/top_channels.db")
 db = conn.cursor()
+db.execute("PRAGMA SYNCHRONOUS=1;")
+db.execute("PRAGMA JOURNAL_MODE=WAL;")
 
 # LBC threshold for auto-qualification
 LBC_THRESHOLD = 20000.0
@@ -51,13 +53,13 @@ def create_tables():
 
     db.execute("""
     CREATE TABLE IF NOT EXISTS epochs
-        (id   INTEGER PRIMARY KEY,
+        (id   INTEGER NOT NULL PRIMARY KEY,
          time REAL NOT NULL);
     """)
 
     db.execute("""
     CREATE TABLE IF NOT EXISTS measurements
-        (id        INTEGER PRIMARY KEY,
+        (id        INTEGER NOT NULL PRIMARY KEY,
          channel   BYTES NOT NULL,
          epoch     INTEGER NOT NULL,
          rank      INTEGER,
@@ -267,9 +269,12 @@ def do_epoch(force=False):
 
     # How much time has passed?
     now = time.time()
-    gap = last_epoch[1] - now
-    if not force and (datetime.datetime.utcnow().hour > 3 \
-                      or gap < 0.5*86400.0):
+    gap = now - last_epoch[1]
+
+    # Whether to do anything
+    do = force or (datetime.datetime.utcnow().hour == 23 and \
+                        gap >= 0.5*86400.0)
+    if not do:
         return False
 
     # Print message
@@ -306,10 +311,12 @@ def do_epoch(force=False):
                                    WHERE claim_hash=?;", (channels[i], ))\
                                     .fetchone()[0]
 
-        print(f"({i+1}) Working on channel {vanity_name}: ", end="", flush=True)
+        print(f"({i+1}) Getting view counts for channel {vanity_name}: ",
+              end="", flush=True)
         views = view_counts_channel(channels[i])
         lbc = get_lbc(channels[i])
-        passed.append(quality_filter(followers[i], views, lbc) or channels[i][::-1].hex() in lists.white_list)
+        passed.append(quality_filter(followers[i], views, lbc)\
+                        or channels[i][::-1].hex() in lists.white_list)
         print(f"\nDone. Quality filter passed = {passed[-1]}.\n", flush=True)
 
         _rank = None
@@ -332,6 +339,7 @@ def do_epoch(force=False):
             break
 
     export_json()
+    db.execute("PRAGMA main.WAL_CHECKPOINT(TRUNCATE);")
 
     return True
 
@@ -437,9 +445,12 @@ def export_json():
             result["inc"].append(claim_id in lists.inc)
             result["grey"].append(claim_id in lists.grey_list)
             result["lbrynomics"].append(claim_id in lists.lbrynomics)
-            result["is_new"].append(result["change"][-1] is None)
+            count = db.execute("SELECT COUNT(id) FROM measurements\
+                                WHERE channel = ?;", (claim_hash, ))\
+                                .fetchone()[0]
+            result["is_new"].append(count == 1)
 
-    f = open("json/test.json", "w")
+    f = open("json/top_500.json", "w")
     f.write(json.dumps(result))
     f.close()
 
@@ -497,13 +508,15 @@ def get_view_counts(claim_ids, start, end):
 
 if __name__ == "__main__":
     create_tables()
-    import_from_ldb()
+#    import_from_ldb()
 
-    do_epoch(True)
-#    claim_id = "36b7bd81c1f975878da8cfe2960ed819a1c85bb5"
-#    claim_hash = bytes.fromhex(claim_id)[::-1]
-#    print(get_vanity_name(claim_hash))
-#    print(get_lbc(claim_hash))
-#    print(get_reposts(claim_hash))
-#    print(get_nsfw(claim_hash))
+    k = 1
+    while True:
+        done = do_epoch()
+        if not done:
+            print(".", end="", flush=True)
+            if k % 60 == 0:
+                print("", flush=True)
+        time.sleep(60.0)
+        k = k + 1
 
