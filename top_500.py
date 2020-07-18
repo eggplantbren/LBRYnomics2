@@ -521,7 +521,7 @@ if __name__ == "__main__":
                   flush=True, end="")
             plotter2.html_plot(mode="top")
             plotter2.html_plot(mode="random")
-            upload.upload(with_html_plot=True)
+            upload.upload(html_plot=True)
             print("done.", flush=True)
         else:
             print(".", end="", flush=True)

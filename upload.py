@@ -23,25 +23,33 @@ def backup(secrets_file="secrets.yaml"):
     os.system("rm lbrynomics.db.zst")
 
 
-def upload(secrets_file="secrets.yaml", with_html_plot=False):
+def upload(secrets_file="secrets.yaml", html_plot=False):
 
     print("Uploading files...", end="", flush=True)
-    os.system("rm upload/*")
-    os.system("cp plots/*.svg upload")
-    os.system("cp json/*.json upload")
-    if with_html_plot:
+
+    if html_plot:
         os.system("cp plots/*.html upload")
+    else:
+        os.system("cp plots/*.svg upload")
+        os.system("cp json/*.json upload")
 
     f = open(secrets_file)
     secrets = yaml.load(f, Loader=yaml.SafeLoader)
     f.close()
 
-    cmd = "sshpass -e scp -P {port} upload/* {user}@{dest}"\
-            .format(user=secrets["user"],
+    wildcard = "*"
+    if html_plot:
+        wildcard += ".html"
+
+    cmd = "sshpass -e scp -P {port} upload/{wildcard} {user}@{dest}"\
+            .format(user=secrets["user"], wildcard=wildcard,
                     dest=secrets["destination"], port=secrets["port"])
     env = os.environ.copy()
     env["SSHPASS"] = secrets["password"]
     result = subprocess.run(cmd, env=env, shell=True)
+
+    if html_plot:
+        os.system("rm upload/*.html")
 
     print("done.\n", flush=True)
 
