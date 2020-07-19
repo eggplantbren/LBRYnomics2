@@ -451,7 +451,8 @@ def export_json():
             result["grey"].append(claim_id in lists.grey_list)
             result["lbrynomics"].append(claim_id in lists.lbrynomics)
             count = db.execute("SELECT COUNT(id) FROM measurements\
-                                WHERE channel = ?;", (claim_hash, ))\
+                                WHERE channel = ? AND rank <= ?;",
+                                (claim_hash, EXPORT_SIZE))\
                                 .fetchone()[0]
             result["is_new"].append(count == 1)
 
