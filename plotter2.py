@@ -24,7 +24,6 @@ HTML = \
     %%PLOTLYJS%%
 </head>
 <body>
-    <h2>LBRY Channels Interactive Graphs</h2>
     %%CONTENT%%
 </body>
 </html>
