@@ -418,29 +418,29 @@ def export_json():
                 if old[1] is not None:
                     result["change"].append(followers - old[1])
                 else:
-                    result["change"].append(None)
+                    result["change"].append(0)
 
                 if old[0] is not None:
                     result["rank_change"].append(old[0] - rank)
                 else:
-                    result["rank_change"].append(None)
+                    result["rank_change"].append(0)
 
                 if old[2] is not None:
                     result["views_change"].append(views - old[2])
                 else:
-                    result["views_change"].append(None)
+                    result["views_change"].append(0)
 
                 if old[3] is not None:
                     result["times_reposted_change"].append(reposts - old[3])
                 else:
-                    result["times_reposted_change"].append(None)
+                    result["times_reposted_change"].append(0)
 
 
             else:
-                result["change"].append(None)
-                result["rank_change"].append(None)
-                result["views_change"].append(None)
-                result["times_reposted_change"].append(None)
+                result["change"].append(0)
+                result["rank_change"].append(0)
+                result["views_change"].append(0)
+                result["times_reposted_change"].append(0)
 
 
             # Fields for tags
