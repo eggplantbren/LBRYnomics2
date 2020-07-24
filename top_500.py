@@ -128,17 +128,6 @@ def quality_filter(followers, views, lbc):
         return True
     return False
 
-def get_vanity_name(claim_hash):
-    """
-    Get the vanity name of a channel.
-    """
-    rows = cdb.execute("""SELECT claim_name FROM claim
-                          WHERE claim_hash = ?;""", (claim_hash, )).fetchall()
-    result = None
-    if len(rows) == 1:
-        result = rows[0][0]
-    return result
-
 
 def get_lbc(claim_hash):
     lbc = 0.0
@@ -311,9 +300,12 @@ def do_epoch(force=False):
     for i in range(len(channels)):
 
         # Get vanity name
-        vanity_name = cdb.execute("SELECT claim_name FROM claim\
-                                   WHERE claim_hash=?;", (channels[i], ))\
-                                    .fetchone()[0]
+        try:
+            vanity_name = cdb.execute("SELECT claim_name FROM claim\
+                                       WHERE claim_hash=?;", (channels[i], ))\
+                                        .fetchone()[0]
+        except:
+            vanity_name = "N/A"
 
         print(f"({i+1}) Getting view counts for channel {vanity_name}: ",
               end="", flush=True)
