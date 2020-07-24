@@ -147,11 +147,11 @@ def get_lbc(claim_hash):
 
 
 def get_reposts(claim_hash):
-    reposts = 0
-    rows = cdb.execute("""SELECT SUM(reposted) FROM claim
-                          WHERE channel_hash=?;""", (claim_hash, )).fetchall()
-    if len(rows) == 1:
-        reposts = rows[0][0]
+    reposts = cdb.execute("""SELECT SUM(reposted) FROM claim
+                             WHERE channel_hash=?;""",
+                          (claim_hash, )).fetchone()[0]
+    if reposts is None:
+        reposts = 0
     return reposts
 
 
