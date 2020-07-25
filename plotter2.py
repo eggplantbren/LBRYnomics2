@@ -108,6 +108,13 @@ def html_plot(num_channels=20, mode="top"):
 
     if mode == "random":
 
+        # Remove top 20
+        _channels = OrderedDict()
+        for ch in channels:
+            if channels[ch]["rank"] > 20:
+                _channels[ch] = channels[ch]
+        channels = _channels
+
         # 20 random channels!
         which = set()
         while len(which) < num_channels:
