@@ -117,5 +117,6 @@ black_list = set([ "98c39de1c681139e43131e4b32c2a21272eef06e",
 white_list = set(["b174a8f5ff9e7197b739b72a57cd58a6d40a4279",
                   "24d6fddfc6098e12b3197273e8161f63e62f47f0",
                   "06b6d6d6a893fb589ec2ded948f5122856921ed5",
-                  "828174a6adcdeee74de5211db1d006716aa54d07"])
+                  "828174a6adcdeee74de5211db1d006716aa54d07",
+                  "1ba5acff747615510cf3f6089f54d5de669ad94f"])
 
