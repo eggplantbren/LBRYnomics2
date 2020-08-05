@@ -62,11 +62,15 @@ def make_fig(channels, quantity="followers"):
         datetimes = [datetime.datetime.fromtimestamp(t)\
                             for t in channels[claim_hash]["data"]["ts"]]
         #print(channels[claim_hash]["vanity_name"], datetimes[-1])
+        visible = True
+        if channels[claim_hash]["vanity_name"] in ["@lbry", "@lbrycast"]:
+            visible = "legendonly"
         fig.add_trace(go.Scatter(x=datetimes,
                                  y=channels[claim_hash]["data"][quantity],
                                  showlegend=True,
                                  mode="lines+markers",
-                                 name=channels[claim_hash]["vanity_name"]))
+                                 name=channels[claim_hash]["vanity_name"],
+                                 visible=visible))
 
     # Add year lines
 #    shapes = []
