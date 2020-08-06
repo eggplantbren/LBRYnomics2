@@ -34,5 +34,5 @@ def lookup_channel(claim_id):
     return(json.dumps(result, indent=4))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0")
 
