@@ -151,6 +151,7 @@ def count_boosts(now):
 
         query += """
                  GROUP BY amount
+                 HAVING amount NOT IN (50000000, 100000000, 150000000, 200000000)
                  ORDER BY num DESC
                  LIMIT 1;
                  """
