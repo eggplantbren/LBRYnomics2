@@ -30,10 +30,10 @@ db.execute("PRAGMA SYNCHRONOUS=1;")
 db.execute("PRAGMA JOURNAL_MODE=WAL;")
 
 # LBC threshold for auto-qualification
-LBC_THRESHOLD = 20000.0
+LBC_THRESHOLD = 10000.0
 
 # Quality filter parameters
-QUALITY_FILTER = [0.2, 1.0]
+QUALITY_FILTER = [0.1, 1.0]
 
 # Size of table to maintain in the database
 TABLE_SIZE = 550
