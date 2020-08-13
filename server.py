@@ -7,6 +7,9 @@ app = Flask(__name__)
 conn = apsw.Connection("db/top_channels.db", flags=apsw.SQLITE_OPEN_READONLY)
 db = conn.cursor()
 
+conn2 = apsw.Connection("db/view_crawler.db", flags=apsw.SQLITE_OPEN_READONLY)
+db2 = conn2.cursor()
+
 @app.route("/")
 def hello_world():
    return "Hello World"
@@ -32,6 +35,29 @@ def lookup_channel(claim_id):
                       reposts=reposts,
                       lbc=lbc)
     return(json.dumps(result, indent=4))
+
+
+@app.route("/views/<claim_id>")
+def views(claim_id):
+    claim_hash = bytes.fromhex(claim_id)[::-1]
+
+    # Current views
+    current = db2.execute("SELECT MAX(views) FROM stream_measurements\
+                            WHERE stream = ?;",
+                          (claim_hash, )).fetchone()[0]
+
+    # Number of streams
+    num_streams = db2.execute("SELECT COUNT(*) FROM streams;").fetchone()[0]
+
+    rank = db2.execute("""SELECT COUNT(stream) FROM
+                       (SELECT stream, MAX(views) v FROM stream_measurements
+                        GROUP BY stream) AS temp WHERE temp.v >= ?;""",
+                        (current, )).fetchone()[0]
+
+    result = { "rank": rank, "out_of": num_streams }
+    return(json.dumps(result, indent=4))
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
