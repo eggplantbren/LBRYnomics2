@@ -1,6 +1,7 @@
 import apsw
 from flask import Flask
 import json
+import subprocess
 import time
 
 app = Flask(__name__)
@@ -13,6 +14,13 @@ db2 = conn2.cursor()
 @app.route("/")
 def hello_world():
    return "Hello World"
+
+@app.route("/status/")
+def status():
+    x = subprocess.run("ps -e | grep run_lbrynomics | wc -l",
+                       shell=True, capture_output=True)
+    count = int(x.stdout.decode("utf-8"))
+    return json.dumps({"running": count == 1}, indent=4)
 
 @app.route("/channel/<claim_id>")
 def lookup_channel(claim_id):
