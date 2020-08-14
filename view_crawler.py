@@ -52,7 +52,7 @@ def initialise_database():
     # An index. Could probably be improved.
     db.execute("""CREATE INDEX IF NOT EXISTS idx1 ON stream_measurements
                     (views DESC, stream);""")
-    db.execute("CREATE INDEX sv_idx ON stream_measurements (stream, views);")
+    db.execute("CREATE INDEX IF NOT EXISTS sv_idx ON stream_measurements (stream, views);")
 
     db.execute("COMMIT;")
 
