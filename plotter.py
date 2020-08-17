@@ -118,6 +118,11 @@ def annotate_all(mode, subplot=1):
                     "ytsync_pending_update"]:
             plt.axhline(0.0, color="w", linestyle="--", alpha=0.3)
 
+    # Log scales
+    if mode == "circulating_supply" and subplot == 2:
+        plt.gca().set_yscale("log")
+        plt.ylim(bottom=5.0E4, top=2.0E8)
+
 
 def title(mode, value):
     if type(value) == np.int64:
