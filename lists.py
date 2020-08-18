@@ -34,6 +34,8 @@ lbrynomics = set(["2d09719c8e06ab54ca5c1b4e44ddf3ee9d30241f",
                   "36b7bd81c1f975878da8cfe2960ed819a1c85bb5",
                   "e5f33f22ef656cb1595140409850a04d60aa474b"])
 
+friends = set(["1c8ad6a2ab4e889a71146ae4deeb23bb92dab627"])
+
 # Channels to be promoted
 # promo = set()
 # promo = set([""])

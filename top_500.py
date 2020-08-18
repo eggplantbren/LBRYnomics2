@@ -299,38 +299,38 @@ def do_epoch(force=False):
     db.execute("BEGIN;")
     for i in range(len(channels)):
 
-        # Get vanity name
-        try:
-            vanity_name = cdb.execute("SELECT claim_name FROM claim\
-                                       WHERE claim_hash=?;", (channels[i], ))\
-                                        .fetchone()[0]
-        except:
-            vanity_name = "N/A"
+        if rank <= TABLE_SIZE or channels[i] in lists.friends:
 
-        print(f"({i+1}) Getting view counts for channel {vanity_name}: ",
-              end="", flush=True)
-        views = view_counts_channel(channels[i])
-        lbc = get_lbc(channels[i])
-        passed.append(quality_filter(followers[i], views, lbc)\
-                        or channels[i][::-1].hex() in lists.white_list)
-        print(f"\nDone. Quality filter passed = {passed[-1]}.\n", flush=True)
+            # Get vanity name
+            try:
+                vanity_name = cdb.execute("SELECT claim_name FROM claim\
+                                           WHERE claim_hash=?;",
+                                            (channels[i], )).fetchone()[0]
+            except:
+                vanity_name = "N/A"
 
-        _rank = None
-        if passed[-1]:
-            _rank = rank
+            print(f"({i+1}) Getting view counts for channel {vanity_name}: ",
+                  end="", flush=True)
+            views = view_counts_channel(channels[i])
+            lbc = get_lbc(channels[i])
+            passed.append(quality_filter(followers[i], views, lbc)\
+                            or channels[i][::-1].hex() in lists.white_list)
+            print(f"\nDone. Quality filter passed = {passed[-1]}.\n", flush=True)
 
-        row = (bytes(channels[i]), epoch_id, _rank, int(followers[i]), views,
-               get_reposts(channels[i]), lbc)
-        db.execute("""INSERT INTO channels VALUES (?, ?)
-                        ON CONFLICT (claim_hash) DO NOTHING;""", (channels[i], vanity_name))
-        db.execute("""INSERT INTO measurements
-                   (channel, epoch, rank, followers, views, reposts, lbc)
-                   VALUES (?, ?, ?, ?, ?, ?, ?);""", row)
-        if passed[-1]:
-            rank += 1
+            _rank = None
+            if passed[-1]:
+                _rank = rank
 
-        if rank > TABLE_SIZE:
-            break
+            row = (bytes(channels[i]), epoch_id, _rank, int(followers[i]),
+                   views, get_reposts(channels[i]), lbc)
+            db.execute("""INSERT INTO channels VALUES (?, ?)
+                            ON CONFLICT (claim_hash) DO NOTHING;""",
+                      (channels[i], vanity_name))
+            db.execute("""INSERT INTO measurements
+                       (channel, epoch, rank, followers, views, reposts, lbc)
+                       VALUES (?, ?, ?, ?, ?, ?, ?);""", row)
+            if passed[-1]:
+                rank += 1
 
     db.execute("COMMIT;")
 
