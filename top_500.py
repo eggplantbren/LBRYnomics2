@@ -243,6 +243,11 @@ def qualifying_channels():
         """):
         if row[0] not in black_list:
             result.add(row[0])
+
+    # Friends of LBRYnomics
+    for f in lists.friends:
+        result.add(bytes.fromhex(f)[::-1])
+
     print("done. Found {k} channels.".format(k=len(result)), flush=True)
     return list(result)
 
@@ -296,10 +301,11 @@ def do_epoch(force=False):
     # Put measurements into database, until 500 have passed the quality filter
     passed = []
     rank = 1
+    friends = set([bytes.fromhex(cid)[::-1] for cid in lists.friends])
     db.execute("BEGIN;")
     for i in range(len(channels)):
 
-        if rank <= TABLE_SIZE or channels[i] in lists.friends:
+        if rank <= TABLE_SIZE or channels[i] in friends:
 
             # Get vanity name
             try:
