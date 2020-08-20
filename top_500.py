@@ -145,6 +145,16 @@ def get_lbc(claim_hash):
         pass
     return lbc
 
+def get_vanity_name(claim_hash):
+    # Get vanity name
+    try:
+        vanity_name = cdb.execute("SELECT claim_name FROM claim\
+                                   WHERE claim_hash=?;", (claim_hash, ))\
+                                    .fetchone()[0]
+    except:
+        vanity_name = "N/A"
+    return vanity_name
+
 
 def get_reposts(claim_hash):
     reposts = cdb.execute("""SELECT SUM(reposted) FROM claim
@@ -244,12 +254,9 @@ def qualifying_channels():
         if row[0] not in black_list:
             result.add(row[0])
 
-    # Friends of LBRYnomics
-    for f in lists.friends:
-        result.add(bytes.fromhex(f)[::-1])
-
     print("done. Found {k} channels.".format(k=len(result)), flush=True)
     return list(result)
+    
 
 
 def do_epoch(force=False):
@@ -301,42 +308,61 @@ def do_epoch(force=False):
     # Put measurements into database, until 500 have passed the quality filter
     passed = []
     rank = 1
-    friends = set([bytes.fromhex(cid)[::-1] for cid in lists.friends])
     db.execute("BEGIN;")
     for i in range(len(channels)):
 
-        if rank <= TABLE_SIZE or channels[i] in friends:
+        vanity_name = get_vanity_name(channels[i])
 
-            # Get vanity name
-            try:
-                vanity_name = cdb.execute("SELECT claim_name FROM claim\
-                                           WHERE claim_hash=?;",
-                                            (channels[i], )).fetchone()[0]
-            except:
-                vanity_name = "N/A"
+        print(f"({i+1}) Getting view counts for channel {vanity_name}: ",
+              end="", flush=True)
+        views = view_counts_channel(channels[i])
+        lbc = get_lbc(channels[i])
+        passed.append(quality_filter(followers[i], views, lbc)\
+                        or channels[i][::-1].hex() in lists.white_list)
+        print(f"\nDone. Quality filter passed = {passed[-1]}.\n", flush=True)
 
-            print(f"({i+1}) Getting view counts for channel {vanity_name}: ",
-                  end="", flush=True)
-            views = view_counts_channel(channels[i])
-            lbc = get_lbc(channels[i])
-            passed.append(quality_filter(followers[i], views, lbc)\
-                            or channels[i][::-1].hex() in lists.white_list)
-            print(f"\nDone. Quality filter passed = {passed[-1]}.\n", flush=True)
+        _rank = None
+        if passed[-1]:
+            _rank = rank
 
-            _rank = None
-            if passed[-1]:
-                _rank = rank
+        # Bytes is there to convert from numpy bytes back to Python ones
+        row = (bytes(channels[i]), epoch_id, _rank, int(followers[i]), views,
+               get_reposts(channels[i]), lbc)
+        db.execute("""INSERT INTO channels VALUES (?, ?)
+                        ON CONFLICT (claim_hash) DO NOTHING;""",
+                    (channels[i], vanity_name))
+        db.execute("""INSERT INTO measurements
+                   (channel, epoch, rank, followers, views, reposts, lbc)
+                   VALUES (?, ?, ?, ?, ?, ?, ?);""", row)
+        if passed[-1]:
+            rank += 1
 
-            row = (bytes(channels[i]), epoch_id, _rank, int(followers[i]),
-                   views, get_reposts(channels[i]), lbc)
+        if rank > TABLE_SIZE:
+            break
+
+    # Now do the friends
+    friends = []
+    for friend in lists.friends:
+        friends.append(bytes.fromhex(friend)[::-1])
+    for friend in friends:
+        already_done = db.execute("SELECT COUNT(*) FROM measurements\
+                                   WHERE channel = ? AND epoch = ?;",
+                                   (friend, epoch_id)).fetchone()[0] > 0
+        if not already_done:
+            vanity_name = get_vanity_name(friend)
+            followers = get_followers([friend], 0, 1)[0]
+            views = view_counts_channel(friend)
+            lbc = get_lbc(friend)
+            reposts = get_reposts(friend)
+
+            row = (friend, epoch_id, None, int(followers), int(views),
+                   int(reposts), float(lbc))
             db.execute("""INSERT INTO channels VALUES (?, ?)
                             ON CONFLICT (claim_hash) DO NOTHING;""",
-                      (channels[i], vanity_name))
+                        (friend, vanity_name))
             db.execute("""INSERT INTO measurements
                        (channel, epoch, rank, followers, views, reposts, lbc)
                        VALUES (?, ?, ?, ?, ?, ?, ?);""", row)
-            if passed[-1]:
-                rank += 1
 
     db.execute("COMMIT;")
 
