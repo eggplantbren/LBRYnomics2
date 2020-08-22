@@ -11,6 +11,10 @@ db = conn.cursor()
 conn2 = apsw.Connection("db/view_crawler.db", flags=apsw.SQLITE_OPEN_READONLY)
 db2 = conn2.cursor()
 
+# Generous timeouts
+conn.setbusytimeout(5000)
+conn2.setbusytimeout(5000)
+
 @app.route("/")
 def hello_world():
    return "Hello World"
