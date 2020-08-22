@@ -238,4 +238,7 @@ if __name__ == "__main__":
             print("Cleaning up database...", end="", flush=True)
             db.execute("PRAGMA main.WAL_CHECKPOINT(TRUNCATE);")
             print("done.\n\n", end="", flush=True)
+        if k % 10000 == 0:
+            print("Taking a ten minute break.")
+            time.sleep(600.0)
 
