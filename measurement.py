@@ -13,6 +13,7 @@ ldb = ldb_conn.cursor()
 ldb.execute("PRAGMA JOURNAL_MODE=WAL;")
 cdb_conn = apsw.Connection(config.claims_db_file,
                             flags=apsw.SQLITE_OPEN_READONLY)
+cdb_conn.setbusytimeout(5000)
 cdb = cdb_conn.cursor()
 
 def make_measurement(k):

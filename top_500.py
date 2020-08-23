@@ -17,6 +17,7 @@ It will run separately and have its own database.
 # Claims DB
 cdb_conn = apsw.Connection(config.claims_db_file,
                           flags=apsw.SQLITE_OPEN_READONLY)
+cdb_conn.setbusytimeout(5000)
 cdb = cdb_conn.cursor()
 
 # LBRYnomics DB

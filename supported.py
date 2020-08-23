@@ -21,7 +21,7 @@ start_block = 0 #block - int(back)
 conn = apsw.Connection(x["claims_db_file"])
 db = conn.cursor()
 
-channels = ["@paulvanderklay", "@emmyhucker"]
+channels = ["@Mantega", "@emmyhucker"]
 
 #channels = ["@emmyhucker", "@justinmurphy", "@paulvanderklay", "@mikenayna",
 #            "@theworthyhouse", "@AlasLewisAndBarnes", "@veritasium",
