@@ -37,7 +37,7 @@ LBC_THRESHOLD = 10000.0
 QUALITY_FILTER = [0.1, 1.0]
 
 # Size of table to maintain in the database
-TABLE_SIZE = 550
+TABLE_SIZE = 1050
 
 # Size of the exported JSON
 EXPORT_SIZE = 500
