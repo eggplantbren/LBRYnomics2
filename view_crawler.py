@@ -16,6 +16,7 @@ conn = apsw.Connection("db/view_crawler.db")
 db = conn.cursor()
 claims_db = apsw.Connection(config.claims_db_file,
                             flags=apsw.SQLITE_OPEN_READONLY)
+claims_db.setbusytimeout(5000)
 cdb = claims_db.cursor()
 
 
@@ -238,7 +239,4 @@ if __name__ == "__main__":
             print("Cleaning up database...", end="", flush=True)
             db.execute("PRAGMA main.WAL_CHECKPOINT(TRUNCATE);")
             print("done.\n\n", end="", flush=True)
-        if k % 10000 == 0:
-            print("Taking a ten minute break.")
-            time.sleep(600.0)
 
