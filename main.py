@@ -43,10 +43,10 @@ while True:
 #    upload.upload("secrets2.yaml")
 
     # Backup db periodically
-    if k % 36 == 0:
-        print("Backing up DB files...", flush=True)
-        upload.backup()
-        print("done.\n", flush=True)
+#    if k % 36 == 0:
+#        print("Backing up DB files...", flush=True)
+#        upload.backup()
+#        print("done.\n", flush=True)
 
     # Get the time and make another measurement in 5 minutes
     wait = config.interval - (time.time() - result["time"])
