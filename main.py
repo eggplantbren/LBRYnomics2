@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import config
 import create_db
 import lbrynomics_meta
