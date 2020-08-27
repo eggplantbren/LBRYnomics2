@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import apsw
 from flask import Flask
 import json
@@ -12,8 +13,8 @@ conn2 = apsw.Connection("db/view_crawler.db", flags=apsw.SQLITE_OPEN_READONLY)
 db2 = conn2.cursor()
 
 # Generous timeouts
-conn.setbusytimeout(5000)
-conn2.setbusytimeout(5000)
+conn.setbusytimeout(60000)
+conn2.setbusytimeout(60000)
 
 @app.route("/")
 def hello_world():

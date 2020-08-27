@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import apsw
 import config
 import json
@@ -14,11 +16,6 @@ NUM_PER_API_CALL = 197
 # Database connections
 conn = apsw.Connection("db/view_crawler.db")
 db = conn.cursor()
-claims_db = apsw.Connection(config.claims_db_file,
-                            flags=apsw.SQLITE_OPEN_READONLY)
-claims_db.setbusytimeout(5000)
-cdb = claims_db.cursor()
-
 
 def initialise_database():
     db.execute("PRAGMA JOURNAL_MODE=WAL;")
@@ -63,6 +60,11 @@ def do_api_call():
     now = time.time()
 
     # Get the range of rowids
+    claims_db = apsw.Connection(config.claims_db_file,
+                                flags=apsw.SQLITE_OPEN_READONLY)
+    claims_db.setbusytimeout(60000)
+    cdb = claims_db.cursor()
+
     result = cdb.execute("SELECT MIN(rowid), MAX(rowid) FROM claim;")\
                                     .fetchall()[0]
     min_rowid, max_rowid = result
@@ -125,6 +127,8 @@ def do_api_call():
                       VALUES (?, ?, ?, ?);""", zipped1)
     db.execute("UPDATE metadata set value=value+1 WHERE name='lbry_api_calls';")
     db.execute("COMMIT;")
+
+    claims_db.close()
 
 def status():
 
@@ -233,6 +237,9 @@ if __name__ == "__main__":
             json.dump(popular_recently(), f, indent=2)
             f.close()
             print("done.\n\n", end="", flush=True)
+
+            print("Resting for 60 seconds.", flush=True)
+            time.sleep(60)
 
 
         if k % 1000 == 0:

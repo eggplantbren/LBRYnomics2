@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import apsw
 import config
 import datetime
@@ -14,12 +16,6 @@ A rewrite and simplification of the top channel table code.
 It will run separately and have its own database.
 """
 
-# Claims DB
-cdb_conn = apsw.Connection(config.claims_db_file,
-                          flags=apsw.SQLITE_OPEN_READONLY)
-cdb_conn.setbusytimeout(5000)
-cdb = cdb_conn.cursor()
-
 # LBRYnomics DB
 lconn = apsw.Connection("db/lbrynomics.db", flags=apsw.SQLITE_OPEN_READONLY)
 ldb = lconn.cursor()
@@ -27,7 +23,6 @@ ldb = lconn.cursor()
 # Connection to top channel DB
 conn = apsw.Connection("db/top_channels.db")
 db = conn.cursor()
-db.execute("PRAGMA SYNCHRONOUS=1;")
 db.execute("PRAGMA JOURNAL_MODE=WAL;")
 
 # LBC threshold for auto-qualification
@@ -133,6 +128,12 @@ def quality_filter(followers, views, lbc):
 def get_lbc(claim_hash):
     lbc = 0.0
 
+    # Claims DB
+    cdb_conn = apsw.Connection(config.claims_db_file,
+                              flags=apsw.SQLITE_OPEN_READONLY)
+    cdb_conn.setbusytimeout(60000)
+    cdb = cdb_conn.cursor()
+
     try:
         rows = cdb.execute("""SELECT (amount + support_amount) FROM claim
                               WHERE claim_hash = ?;""", (claim_hash, )).fetchall()
@@ -144,13 +145,26 @@ def get_lbc(claim_hash):
             lbc += rows[0][0]/1E8
     except:
         pass
+
+    cdb_conn.close()
+
     return lbc
 
 
 def get_reposts(claim_hash):
+
+    # Claims DB
+    cdb_conn = apsw.Connection(config.claims_db_file,
+                              flags=apsw.SQLITE_OPEN_READONLY)
+    cdb_conn.setbusytimeout(60000)
+    cdb = cdb_conn.cursor()
+
     reposts = cdb.execute("""SELECT SUM(reposted) FROM claim
                              WHERE channel_hash=?;""",
                           (claim_hash, )).fetchone()[0]
+
+    cdb_conn.close()
+
     if reposts is None:
         reposts = 0
     return reposts
@@ -161,12 +175,21 @@ def get_nsfw(claim_hash):
     if claim_hash in manual_mature:
         return True
 
+    # Claims DB
+    cdb_conn = apsw.Connection(config.claims_db_file,
+                              flags=apsw.SQLITE_OPEN_READONLY)
+    cdb_conn.setbusytimeout(60000)
+    cdb = cdb_conn.cursor()
+
     nsfw = False
     rows = cdb.execute("""SELECT COUNT(*) FROM tag WHERE claim_hash = ?
                           AND tag.tag IN ('mature', 'xxx', 'sex', 'porn', 'nsfw');""",
                        (claim_hash, )).fetchall()
     if len(rows) > 0:
         nsfw = rows[0][0] > 0
+
+    cdb_conn.close()
+
     return nsfw
 
 def get_followers(channels, start, end):
@@ -219,6 +242,12 @@ def qualifying_channels():
     # Convert claim_ids to claim_hashes
     black_list = set([bytes.fromhex(cid)[::-1] for cid in lists.black_list])
 
+    # Claims DB
+    cdb_conn = apsw.Connection(config.claims_db_file,
+                              flags=apsw.SQLITE_OPEN_READONLY)
+    cdb_conn.setbusytimeout(60000)
+    cdb = cdb_conn.cursor()
+
     # LBC qualification
     result = set()
     for row in cdb.execute("""
@@ -244,6 +273,8 @@ def qualifying_channels():
         """):
         if row[0] not in black_list:
             result.add(row[0])
+    cdb_conn.close()
+
     print("done. Found {k} channels.".format(k=len(result)), flush=True)
     return list(result)
 
@@ -302,9 +333,15 @@ def do_epoch(force=False):
 
         # Get vanity name
         try:
+            # Claims DB
+            cdb_conn = apsw.Connection(config.claims_db_file,
+                                      flags=apsw.SQLITE_OPEN_READONLY)
+            cdb_conn.setbusytimeout(60000)
+            cdb = cdb_conn.cursor()
             vanity_name = cdb.execute("SELECT claim_name FROM claim\
                                        WHERE claim_hash=?;", (channels[i], ))\
                                         .fetchone()[0]
+            cdb_conn.close()
         except:
             vanity_name = "N/A"
 
@@ -455,17 +492,26 @@ def export_json():
 
 def view_counts_channel(channel_hash):
     claim_ids = []
+
+    # Claims DB
+    cdb_conn = apsw.Connection(config.claims_db_file,
+                              flags=apsw.SQLITE_OPEN_READONLY)
+    cdb_conn.setbusytimeout(60000)
+    cdb = cdb_conn.cursor()
+
     for row in cdb.execute("""SELECT claim_id FROM claim
                               WHERE channel_hash = ? AND claim_type=1;""",
                                      (channel_hash, )):
         claim_ids.append(row[0])
 
+    cdb_conn.close()
+
     counts = 0
     for i in range((len(claim_ids) - 1)//197 + 1):
         result = get_view_counts(claim_ids, 197*i, 197*(i+1))
-        if sum([x is None for x in result]) != 0:
-            raise ValueError("Error getting view counts.")
-        counts += sum(result)
+#        if sum([x is None for x in result]) != 0:
+#            raise ValueError("Error getting view counts.")
+        counts += sum([r for r in result if r is not None])
     return counts
 
 

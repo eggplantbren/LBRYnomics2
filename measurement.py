@@ -11,12 +11,15 @@ import time
 ldb_conn = apsw.Connection("db/lbrynomics.db")
 ldb = ldb_conn.cursor()
 ldb.execute("PRAGMA JOURNAL_MODE=WAL;")
-cdb_conn = apsw.Connection(config.claims_db_file,
-                            flags=apsw.SQLITE_OPEN_READONLY)
-cdb_conn.setbusytimeout(5000)
-cdb = cdb_conn.cursor()
 
 def make_measurement(k):
+
+    # Get reader
+    cdb_conn = apsw.Connection(config.claims_db_file,
+                                flags=apsw.SQLITE_OPEN_READONLY)
+    cdb_conn.setbusytimeout(60000)
+    cdb = cdb_conn.cursor()
+
 
     # Get current timestamp
     now = time.time()
@@ -113,6 +116,8 @@ def make_measurement(k):
     ldb.execute("BEGIN;")
     ldb.execute(query, tuple(measurement.values()))
     ldb.execute("COMMIT;")
+
+    cdb_conn.close()
 
     print("    " + json.dumps(measurement, indent=4).replace("\n", "\n    "))
     print("Done.\n", flush=True)
