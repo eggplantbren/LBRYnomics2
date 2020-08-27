@@ -5,11 +5,6 @@ from daemon_command import daemon_command
 import json
 import math
 
-cdb_conn = apsw.Connection(config.claims_db_file,
-                            flags=apsw.SQLITE_OPEN_READONLY)
-cdb = cdb_conn.cursor()
-
-
 def count_recent_all(now):
     print("Counting recent activity.", flush=True)
     count_recent("channels", now)
@@ -40,6 +35,10 @@ def count_recent(mode, now):
     result_dict["unix_time"] = now
     result_dict["human_time_utc"] = str(datetime.datetime.\
                                        utcfromtimestamp(int(now))) + " UTC"
+
+    cdb_conn = apsw.Connection(config.claims_db_file,
+                                flags=apsw.SQLITE_OPEN_READONLY)
+    cdb = cdb_conn.cursor()
 
     for i in range(len(cutoffs)):
         query = """
@@ -72,6 +71,8 @@ def count_recent(mode, now):
 
     print("    Saved {filename}. {new} so far this UTC day."\
 		.format(new=new_today, filename=filename), flush=True)
+
+    cdb_conn.close()
 
 
 def get_start_of_today(now):
@@ -107,6 +108,10 @@ def count_boosts(now):
     f.close()
     print("    Saved {filename}.".format(filename=filename), flush=True)
     """
+
+    cdb_conn = apsw.Connection(config.claims_db_file,
+                                    flags=apsw.SQLITE_OPEN_READONLY)
+    cdb = cdb_conn.cursor()
 
     for i in range(len(labels)):
         if i==0:
@@ -227,5 +232,7 @@ def count_boosts(now):
     f.close()
 
     print(f"    Saved {filename}.", flush=True)
+
+    cdb_conn.close()
 
 
