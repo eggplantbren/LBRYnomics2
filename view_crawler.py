@@ -238,8 +238,8 @@ if __name__ == "__main__":
             f.close()
             print("done.\n\n", end="", flush=True)
 
-            print("Resting for 60 seconds.", flush=True)
-            time.sleep(60)
+            print("Resting for two minutes.", flush=True)
+            time.sleep(120)
 
 
         if k % 1000 == 0:
