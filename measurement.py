@@ -106,7 +106,7 @@ def make_measurement(k):
 
     # Measure number of claims over which LBC is spread (exp of shannon entropy)
     ps = []
-    if k % 20 == 0:
+    if k % 10 == 0:
         for row in cdb.execute("SELECT (amount + support_amount) FROM claim;"):
             ps.append(row[0])
         ps = np.array(ps)
