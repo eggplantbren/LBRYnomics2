@@ -3,6 +3,7 @@ import collections
 import datetime
 import config
 import json
+import numpy as np
 import requests
 import time
 
@@ -103,6 +104,17 @@ def make_measurement(k):
     except:
         pass
 
+    # Measure number of claims over which LBC is spread (exp of shannon entropy)
+    ps = []
+    if k % 20 == 0:
+        for row in cdb.execute("SELECT (amount + support_amount) FROM claim;"):
+            ps.append(row[0])
+        ps = np.array(ps)
+        ps = ps/ps.sum()
+        measurement["lbc_spread"] = np.exp(-np.sum(ps*np.log(ps)))
+    else:
+        measurement["lbc_spread"] = None
+
     # Open output DB and write to it
     lbrynomics_db = apsw.Connection("db/lbrynomics.db")
     query = """
@@ -110,8 +122,8 @@ def make_measurement(k):
                                       lbc_deposits, num_supports, lbc_supports,
                                       ytsync_new_pending, ytsync_pending_update,
                                       ytsync_pending_upgrade, ytsync_failed,
-                                      circulating_supply, num_reposts)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                                      circulating_supply, num_reposts, lbc_spread)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
     ldb.execute("BEGIN;")
     ldb.execute(query, tuple(measurement.values()))
