@@ -155,6 +155,8 @@ def title(mode, value):
         string += f"Median views of top 200 channels = {num}"
     if mode == "num_reposts":
         string += f"Number of reposts = {num}"
+    if mode == "lbc_spread":
+        string += f"LBC spread = {num} claims."
     return string
 
 
@@ -182,6 +184,8 @@ def ylabel(mode):
         string += "Views"
     if mode == "num_reposts":
         string += "Number of reposts"
+    if mode == "lbc_spread":
+        string += "Number of claims"
     return string
 
 def set_ylim(mode, subplot=1):
@@ -347,7 +351,7 @@ def make_plots(production=True):
     make_plot("ytsync_new_pending", production)
     make_plot("ytsync_pending_update", production)
     make_plot("circulating_supply", production)
-
+    make_plot("lbc_spread", production)
 
     # Followers data
     query = """
