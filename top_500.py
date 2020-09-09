@@ -515,6 +515,46 @@ def view_counts_channel(channel_hash):
     return counts
 
 
+def get_odysee_reactions(claim_ids, start, end):
+    """
+    Count fires and slimes
+    """
+
+    # Elegantly handle end
+    if end > len(claim_ids):
+        end = len(claim_ids)
+
+    if start == end:
+        print("Start equalled end!")
+
+    # Get auth token
+    f= open("secrets.yaml")
+    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
+    f.close()
+
+    # Prepare the request to the LBRY API
+    cids = ""
+    for claim_id in claim_ids[start:end]:
+        cids += claim_id + ","
+    cids = cids[0:-1]
+
+    likes = []
+    dislikes = []
+    try:
+        response = requests.post("https://api.lbry.com/reaction/list",
+                                 data={"auth_token": auth_token,
+                                       "claim_ids": cids}).json()
+        response = response["data"]["others_reactions"]
+        for claim_id in claim_ids[start:end]:
+            likes.append(response[claim_id]["like"])
+            dislikes.append(response[claim_id]["dislike"])
+        print(".", end="", flush=True)
+    except:
+        likes.append(None)
+        dislikes.append(None)
+
+    return list(zip(likes, dislikes))
+
 
 def get_view_counts(claim_ids, start, end):
     result = []
