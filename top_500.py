@@ -347,7 +347,19 @@ def do_epoch(force=False):
 
         print(f"({i+1}) Getting view counts for channel {vanity_name}: ",
               end="", flush=True)
-        views = view_counts_channel(channels[i])
+
+        attempts = 10
+        while attempts > 0:
+            try:
+                views = view_counts_channel(channels[i])
+                if views > 0:
+                    attempts = 0
+                else:
+                    attempt -= 1
+            except:
+                attempts -= 1
+                views = 0
+
         lbc = get_lbc(channels[i])
         passed.append(quality_filter(followers[i], views, lbc)\
                         or channels[i][::-1].hex() in lists.white_list)
@@ -490,7 +502,11 @@ def export_json():
     f.write(json.dumps(result))
     f.close()
 
+
 def view_counts_channel(channel_hash):
+    """
+    Try using post
+    """
     claim_ids = []
 
     # Claims DB
@@ -503,16 +519,24 @@ def view_counts_channel(channel_hash):
                               WHERE channel_hash = ? AND claim_type=1;""",
                                      (channel_hash, )):
         claim_ids.append(row[0])
-
     cdb_conn.close()
 
-    counts = 0
-    for i in range((len(claim_ids) - 1)//197 + 1):
-        result = get_view_counts(claim_ids, 197*i, 197*(i+1))
-#        if sum([x is None for x in result]) != 0:
-#            raise ValueError("Error getting view counts.")
-        counts += sum([r for r in result if r is not None])
-    return counts
+    # Get auth token
+    f= open("secrets.yaml")
+    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
+    f.close()
+
+    # Prepare claim ID string
+    cids = ""
+    for claim_id in claim_ids:
+        cids += claim_id + ","
+    cids = cids[0:-1]
+
+    response = requests.post("https://api.lbry.com/file/view_count",
+                             data={"auth_token": auth_token,
+                                   "claim_id": cids}).json()
+
+    return sum(response["data"])
 
 
 def get_odysee_reactions(claim_ids, start, end):
@@ -556,39 +580,6 @@ def get_odysee_reactions(claim_ids, start, end):
     return list(zip(likes, dislikes))
 
 
-def get_view_counts(claim_ids, start, end):
-    result = []
-
-    # Elegantly handle end
-    if end > len(claim_ids):
-        end = len(claim_ids)
-
-    if start == end:
-        print("Start equalled end!")
-
-    # Get auth token
-    f= open("secrets.yaml")
-    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
-    f.close()
-
-    # Prepare the request to the LBRY API
-    url = "https://api.lbry.com/file/view_count?auth_token=" +\
-                auth_token + "&claim_id="
-    for i in range(start, end):
-        url += claim_ids[i]
-        if i != end-1:
-            url += ","
-
-    # JSON response from API
-    try:
-        response = requests.get(url).json()
-        for value in response["data"]:
-            result.append(value)
-        print(".", end="", flush=True)
-    except:
-        result.append(None)
-
-    return result
 
 
 if __name__ == "__main__":
