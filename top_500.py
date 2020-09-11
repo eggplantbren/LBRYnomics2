@@ -66,6 +66,8 @@ def create_tables():
          views     INTEGER,
          reposts   INTEGER,
          lbc       REAL,
+         likes     INTEGER,
+         dislikes  INTEGER,
          FOREIGN KEY (channel) REFERENCES channels (claim_hash),
          FOREIGN KEY (epoch) REFERENCES epochs (id),
          UNIQUE (channel, epoch));
@@ -348,17 +350,11 @@ def do_epoch(force=False):
         print(f"({i+1}) Getting view counts for channel {vanity_name}: ",
               end="", flush=True)
 
-        attempts = 10
-        while attempts > 0:
-            try:
-                views = view_counts_channel(channels[i])
-                if views > 0:
-                    attempts = 0
-                else:
-                    attempt -= 1
-            except:
-                attempts -= 1
-                views = 0
+        # View counts
+        views = view_counts_channel(channels[i])
+
+        # Likes and dislikes
+        likes, dislikes = odysee_reactions_channel(channels[i])
 
         lbc = get_lbc(channels[i])
         passed.append(quality_filter(followers[i], views, lbc)\
@@ -370,12 +366,13 @@ def do_epoch(force=False):
             _rank = rank
 
         row = (bytes(channels[i]), epoch_id, _rank, int(followers[i]), views,
-               get_reposts(channels[i]), lbc)
+               get_reposts(channels[i]), lbc, likes, dislikes)
         db.execute("""INSERT INTO channels VALUES (?, ?)
                         ON CONFLICT (claim_hash) DO NOTHING;""", (channels[i], vanity_name))
         db.execute("""INSERT INTO measurements
-                   (channel, epoch, rank, followers, views, reposts, lbc)
-                   VALUES (?, ?, ?, ?, ?, ?, ?);""", row)
+                   (channel, epoch, rank, followers, views, reposts, lbc,
+                    likes, dislikes)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);""", row)
         if passed[-1]:
             rank += 1
 
@@ -526,58 +523,78 @@ def view_counts_channel(channel_hash):
     auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
     f.close()
 
-    # Prepare claim ID string
-    cids = ""
-    for claim_id in claim_ids:
-        cids += claim_id + ","
-    cids = cids[0:-1]
+    result = 0
 
-    response = requests.post("https://api.lbry.com/file/view_count",
-                             data={"auth_token": auth_token,
-                                   "claim_id": cids}).json()
+    while len(claim_ids) > 0:
+        # Prepare claim ID string. Consume claim_ids 1000 at a time
+        cids = ""
+        payload_size = min(1000, len(claim_ids))
+        for i in range(payload_size):
+            cids += claim_ids[i] + ","
+        cids = cids[0:-1]
 
-    return sum(response["data"])
+        response = requests.post("https://api.lbry.com/file/view_count",
+                                 data={"auth_token": auth_token,
+                                       "claim_id": cids})
+        print(".", flush=True, end="")
+        if response.status_code == 200:
+            result += sum(response.json()["data"])
+            claim_ids = claim_ids[payload_size:]
+
+    return result
 
 
-def get_odysee_reactions(claim_ids, start, end):
+
+def odysee_reactions_channel(channel_hash):
     """
-    Count fires and slimes
+    Try using post
     """
+    claim_ids = []
 
-    # Elegantly handle end
-    if end > len(claim_ids):
-        end = len(claim_ids)
+    # Claims DB
+    cdb_conn = apsw.Connection(config.claims_db_file,
+                              flags=apsw.SQLITE_OPEN_READONLY)
+    cdb_conn.setbusytimeout(60000)
+    cdb = cdb_conn.cursor()
 
-    if start == end:
-        print("Start equalled end!")
+    for row in cdb.execute("""SELECT claim_id FROM claim
+                              WHERE channel_hash = ? AND claim_type=1;""",
+                                     (channel_hash, )):
+        claim_ids.append(row[0])
+    cdb_conn.close()
 
     # Get auth token
     f= open("secrets.yaml")
     auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
     f.close()
 
-    # Prepare the request to the LBRY API
-    cids = ""
-    for claim_id in claim_ids[start:end]:
-        cids += claim_id + ","
-    cids = cids[0:-1]
+    likes = 0
+    dislikes = 0
+    while len(claim_ids) > 0:        
+        # Prepare claim ID string. Consume claim_ids 1000 at a time
+        cids = ""
+        payload_size = min(1000, len(claim_ids))
+        for i in range(payload_size):
+            cids += claim_ids[i] + ","
+        cids = cids[0:-1]
 
-    likes = []
-    dislikes = []
-    try:
         response = requests.post("https://api.lbry.com/reaction/list",
                                  data={"auth_token": auth_token,
-                                       "claim_ids": cids}).json()
-        response = response["data"]["others_reactions"]
-        for claim_id in claim_ids[start:end]:
-            likes.append(response[claim_id]["like"])
-            dislikes.append(response[claim_id]["dislike"])
-        print(".", end="", flush=True)
-    except:
-        likes.append(None)
-        dislikes.append(None)
+                                       "claim_ids": cids})
+        print(".", flush=True, end="")
+        if response.status_code == 200:
+            response = response.json()
+            for claim_id in cids.split(","):
+                reactions = response["data"]["others_reactions"][claim_id]
+                likes += reactions["like"]
+                dislikes += reactions["dislike"]
+                reactions = response["data"]["my_reactions"][claim_id]
+                likes += reactions["like"]
+                dislikes += reactions["dislike"]
 
-    return list(zip(likes, dislikes))
+            claim_ids = claim_ids[payload_size:]
+
+    return (likes, dislikes)
 
 
 
