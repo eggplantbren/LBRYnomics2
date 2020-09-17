@@ -441,7 +441,7 @@ def export_json():
         if passed:
             result["ranks"].append(len(result["ranks"]) + 1)
             result["claim_ids"].append(claim_hash[::-1].hex())
-            result["vanity_names"].append(vanity_name)
+            result["vanity_names"].append(vanity_name[1:])
             result["views"].append(views)
             result["times_reposted"].append(reposts)
             result["lbc"].append(lbc)
