@@ -7,6 +7,7 @@ import json
 import lists
 import numpy as np
 import requests
+import sys
 import time
 import upload
 import yaml
@@ -351,10 +352,24 @@ def do_epoch(force=False):
               end="", flush=True)
 
         # View counts
-        views = view_counts_channel(channels[i])
+        for attempt in range(1, 11):
+            try:
+                views = view_counts_channel(channels[i])
+                break
+            except:
+                time.sleep(5.0)
+                if attempt == 10:
+                    sys.exit(-1)
 
         # Likes and dislikes
-        likes, dislikes = odysee_reactions_channel(channels[i])
+        for attempt in range(1, 11):
+            try:
+                likes, dislikes = odysee_reactions_channel(channels[i])
+                break
+            except:
+                time.sleep(5.0)
+                if attempt == 10:
+                    sys.exit(-1)
 
         lbc = get_lbc(channels[i])
         passed.append(quality_filter(followers[i], views, lbc)\
