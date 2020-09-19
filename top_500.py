@@ -430,6 +430,8 @@ def export_json():
     result["grey"] = []
     result["lbrynomics"] = []
     result["is_new"] = []
+    result["likes"] = []
+    result["dislikes"] = []
 
     latest_epoch = db.execute("""
                     SELECT id FROM epochs ORDER BY time DESC limit 1;""")\
@@ -439,7 +441,7 @@ def export_json():
                           ORDER BY difference ASC LIMIT 1;
                           """, (latest_epoch, )).fetchone()[0]
 
-    rows = db.execute("""SELECT claim_hash, vanity_name, followers, views, reposts, lbc
+    rows = db.execute("""SELECT claim_hash, vanity_name, followers, views, reposts, lbc, likes, dislikes
                          FROM measurements INNER JOIN channels
                                 ON channels.claim_hash = measurements.channel
                          WHERE epoch = ?
@@ -451,7 +453,7 @@ def export_json():
         if len(result["ranks"]) >= EXPORT_SIZE:
             break
 
-        claim_hash, vanity_name, followers, views, reposts, lbc = row
+        claim_hash, vanity_name, followers, views, reposts, lbc, likes, dislikes = row
         passed = quality_filter(followers, views, lbc) or claim_hash[::-1].hex() in lists.white_list
         if passed:
             result["ranks"].append(len(result["ranks"]) + 1)
@@ -461,6 +463,8 @@ def export_json():
             result["times_reposted"].append(reposts)
             result["lbc"].append(lbc)
             result["subscribers"].append(followers)
+            result["likes"].append(likes)
+            result["dislikes"].append(dislikes)
             old = db.execute("""SELECT rank, followers, views, reposts
                                 FROM measurements
                                 WHERE channel = ? AND epoch = ?;""",
