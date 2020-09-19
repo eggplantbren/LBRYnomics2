@@ -71,14 +71,26 @@ def annotate_all(mode, subplot=1):
 
 
     text_pos = 0.97*plt.gca().get_ylim()[1]
+    xlims = plt.gca().get_xlim()
+    xwidth = xlims[1] - xlims[0]
 
+    # Odysee
+    if mode in ["num_channels", "num_streams", "num_reposts"]:
+        loc = mdates.date2num(datetime.date(2020, 9, 18))
+        plt.axvline(loc, color="#e50054", linestyle="--", linewidth=1.5)
+
+        tp = text_pos
+        plt.text(loc - 0.018*xwidth,
+                 tp,
+                 "Odysee.com launched", color="#e50054",
+                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
     # MH
     if mode == "num_channels" or mode == "num_streams":
         loc = mdates.date2num(datetime.date(2019, 6, 9))
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
 
         tp = text_pos
-        plt.text(loc - 40.0,
+        plt.text(loc - 0.033*xwidth,
                  tp,
                  "@MH video 'Why I Quit\nYouTube\' published",
                  fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
@@ -87,7 +99,7 @@ def annotate_all(mode, subplot=1):
     if mode == "num_channels" or mode == "num_streams":
         loc = mdates.date2num(datetime.date(2019, 12, 25))
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
-        plt.text(loc - 40.0,
+        plt.text(loc - 0.033*xwidth,
                  text_pos,
                  "YouTube purges\ncrypto channels",
                  fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
@@ -96,7 +108,7 @@ def annotate_all(mode, subplot=1):
     if mode == "num_channels":
         loc = mdates.date2num(datetime.date(2019, 10, 15))
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
-        plt.text(loc - 40.0,
+        plt.text(loc - 0.033*xwidth,
                  text_pos,
                  "New users prompted\n to create a channel",
                  fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
