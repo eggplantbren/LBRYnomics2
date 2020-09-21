@@ -225,7 +225,7 @@ def get_followers(channels, start, end):
     attempts = 10
     while attempts > 0:
         try:
-            response = requests.get(url).json()
+            response = requests.get(url, timeout=20.0).json()
             for value in response["data"]:
                 result.append(value)
             break
@@ -425,10 +425,7 @@ def export_json():
     result["views_change"] = []
     result["times_reposted_change"] = []
     result["is_nsfw"] = []
-    result["lbryf"] = []
-    result["inc"] = []
     result["grey"] = []
-    result["lbrynomics"] = []
     result["is_new"] = []
     result["likes"] = []
     result["dislikes"] = []
@@ -504,10 +501,7 @@ def export_json():
             # Fields for tags
             claim_id = claim_hash[::-1].hex()
             result["is_nsfw"].append(get_nsfw(claim_hash))
-            result["lbryf"].append(claim_id in lists.lbryf)
-            result["inc"].append(claim_id in lists.inc)
             result["grey"].append(claim_id in lists.grey_list)
-            result["lbrynomics"].append(claim_id in lists.lbrynomics)
             count = db.execute("SELECT COUNT(id) FROM measurements\
                                 WHERE channel = ? AND rank <= ?;",
                                 (claim_hash, EXPORT_SIZE))\
@@ -554,7 +548,7 @@ def view_counts_channel(channel_hash):
 
         response = requests.post("https://api.lbry.com/file/view_count",
                                  data={"auth_token": auth_token,
-                                       "claim_id": cids})
+                                       "claim_id": cids}, timeout=20.0)
         print(".", flush=True, end="")
         if response.status_code == 200:
             result += sum(response.json()["data"])
@@ -599,7 +593,7 @@ def odysee_reactions_channel(channel_hash):
 
         response = requests.post("https://api.lbry.com/reaction/list",
                                  data={"auth_token": auth_token,
-                                       "claim_ids": cids})
+                                       "claim_ids": cids}, timeout=20.0)
         print(".", flush=True, end="")
         if response.status_code == 200:
             response = response.json()
