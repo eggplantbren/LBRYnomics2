@@ -82,10 +82,21 @@ def annotate_all(mode, subplot=1):
         plt.axvline(mdates.date2num(datetime.date(year, 1, 1)),
                     color="w", alpha=0.5, linewidth=1.5, linestyle="--")
 
-
-    text_pos = 0.97*plt.gca().get_ylim()[1]
+    ylims = plt.gca().get_ylim()
+    text_pos = ylims[0] + 0.97*(ylims[1] - ylims[0])
     xlims = plt.gca().get_xlim()
     xwidth = xlims[1] - xlims[0]
+
+
+    # Altonomy
+    if mode == "circulating_supply" and subplot == 1:
+        loc = mdates.date2num(datetime.date(2020, 6, 22))
+        plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
+        plt.text(loc - 0.018*xwidth,
+                 text_pos,
+                 "Altonomy market-making partnership",
+                 fontsize=12, rotation=90,
+                 rotation_mode="anchor", va="top", ha="right")
 
     # Odysee
     if mode in ["num_channels", "num_streams", "num_reposts", "followers",
@@ -125,15 +136,6 @@ def annotate_all(mode, subplot=1):
         plt.text(loc - 0.033*xwidth,
                  text_pos,
                  "New users prompted\n to create a channel",
-                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
-
-    # Altonomy
-    if mode == "circulating_supply":
-        loc = mdates.date2num(datetime.date(2020, 6, 30))
-        plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
-        plt.text(loc - 0.018*xwidth,
-                 text_pos,
-                 "Altonomy market-making partnership",
                  fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
     # Zero lines on some lower panels
