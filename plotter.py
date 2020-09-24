@@ -87,6 +87,15 @@ def annotate_all(mode, subplot=1):
     xlims = plt.gca().get_xlim()
     xwidth = xlims[1] - xlims[0]
 
+    # Nikooooo
+    if "ytsync" in mode:
+        loc = mdates.date2num(datetime.date(2020, 8, 15))
+        plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
+        plt.text(loc - 0.018*xwidth,
+                 text_pos,
+                 "Niko makes a breakthrough",
+                 fontsize=12, rotation=90,
+                 rotation_mode="anchor", va="top", ha="right")
 
     # Altonomy
     if mode == "circulating_supply" and subplot == 1:
