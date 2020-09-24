@@ -127,15 +127,14 @@ def annotate_all(mode, subplot=1):
                  "New users prompted\n to create a channel",
                  fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
-#    if mode in ["views", "followers"]:
-#        loc = mdates.date2num(datetime.date(2020, 5, 11))
-#        plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
-#        x_range = np.diff(plt.gca().get_xlim())
-#        plt.text(loc - 0.035*x_range,
-#                 text_pos,
-#                 "Introduced filters to prevent\nchannels faking popularity",
-#                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
-
+    # Altonomy
+    if mode == "circulating_supply":
+        loc = mdates.date2num(datetime.date(2020, 6, 30))
+        plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
+        plt.text(loc - 0.018*xwidth,
+                 text_pos,
+                 "Altonomy market-making partnership",
+                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
     # Zero lines on some lower panels
     if subplot == 2:
