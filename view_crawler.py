@@ -10,8 +10,8 @@ import time
 
 VIEWS_THRESHOLD = 100
 LBC_THRESHOLD = 0.0
-SLEEP = 1.0
-NUM_PER_API_CALL = 197
+SLEEP = 10.0
+NUM_PER_API_CALL = 1000
 
 # Database connections
 conn = apsw.Connection("db/view_crawler.db")
@@ -96,7 +96,7 @@ def do_api_call():
     # Get the view counts and prepare to add to DB
     claim_hashes = list(measurements.keys())
     claim_ids = [ch[::-1].hex() for ch in claim_hashes]
-    views = get_view_counts(claim_ids, 0, len(claim_ids))
+    views = get_view_counts(claim_ids)
 
     # Rows to insert new streams and new measurements
     zipped0 = []
