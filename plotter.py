@@ -57,8 +57,21 @@ def moving_average(ys, length=10):
 
 # Load LBRY Social logo
 logo = plt.imread("assets/logo_and_url.png")
+
+# Configure Matplotlib
 matplotlib.rcParams["figure.dpi"] = 500
-matplotlib.rcParams["font.family"] = "'Open Sans', Arial, sans-serif;"
+matplotlib.rcParams["font.family"] = "Roboto"
+plt.rcParams["font.size"] = 14
+plt.style.use("dark_background")
+plt.rcParams["axes.facecolor"] = "#3c3d3c"
+plt.rcParams["savefig.facecolor"] = "#3c3d3c"
+
+
+#In [4]: import matplotlib.font_manager 
+#   ...: flist = matplotlib.font_manager.get_fontconfig_fonts() 
+#   ...: names = [matplotlib.font_manager.FontProperties(fname=fname).get_name() 
+#   ...: for fname in flist] 
+#   ...: print(names)
 
 
 def annotate_all(mode, subplot=1):
@@ -67,7 +80,7 @@ def annotate_all(mode, subplot=1):
     # Add vertical lines for new years (approximately)
     for year in range(2017, 2021):
         plt.axvline(mdates.date2num(datetime.date(year, 1, 1)),
-                    color="r", linewidth=1.5, linestyle="--")
+                    color="w", alpha=0.5, linewidth=1.5, linestyle="--")
 
 
     text_pos = 0.97*plt.gca().get_ylim()[1]
@@ -75,7 +88,8 @@ def annotate_all(mode, subplot=1):
     xwidth = xlims[1] - xlims[0]
 
     # Odysee
-    if mode in ["num_channels", "num_streams", "num_reposts"]:
+    if mode in ["num_channels", "num_streams", "num_reposts", "followers",
+                "views"]:
         loc = mdates.date2num(datetime.date(2020, 9, 18))
         plt.axvline(loc, color="#e50054", linestyle="--", linewidth=1.5)
 
@@ -127,7 +141,7 @@ def annotate_all(mode, subplot=1):
     if subplot == 2:
         if mode in ["num_supports", "followers", "views", "lbc_deposits",
                     "lbc_supports", "num_reposts", "ytsync_new_pending",
-                    "ytsync_pending_update"]:
+                    "ytsync_pending_update", "lbc_spread"]:
             plt.axhline(0.0, color="w", linestyle="--", alpha=0.3)
 
     # Log scales
@@ -268,13 +282,6 @@ def make_plot(mode, production=True, ts=None, ys=None):
     xlim = [mdates.epoch2num(ts[0])  - 1.0,
             mdates.epoch2num(ts[-1]) + 1.0]
     xlim[1] += 0.07*(xlim[1] - xlim[0])
-
-    # Plotting stuff
-    plt.rcParams["font.family"] = "Liberation Sans"
-    plt.rcParams["font.size"] = 14
-    plt.style.use("dark_background")
-    plt.rcParams["axes.facecolor"] = "#3c3d3c"
-    plt.rcParams["savefig.facecolor"] = "#3c3d3c"
 
     plt.figure(figsize=(15, 12))
     plt.subplot(2, 1, 1)
