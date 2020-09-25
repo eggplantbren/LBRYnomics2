@@ -217,8 +217,8 @@ if __name__ == "__main__":
         print(f"Checking {NUM_PER_API_CALL} streams...", end="", flush=True)
         try:
             do_api_call()
-            s = status()
-            print(f"done.\n Status: {s}.\n\n", end="", flush=True)
+            s = json.dumps(status(), indent=4)
+            print(f"done.\nStatus:\n{s}.\n\n", end="", flush=True)
         except:
             print("Something went wrong.\n\n", end="", flush=True)
         time.sleep(SLEEP)
