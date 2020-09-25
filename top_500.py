@@ -462,7 +462,7 @@ def export_json():
             result["subscribers"].append(followers)
             result["likes"].append(likes)
             result["dislikes"].append(dislikes)
-            result["new_type"].append(0)
+            result["new_type"].append("n0")
             old = db.execute("""SELECT rank, followers, views, reposts
                                 FROM measurements
                                 WHERE channel = ? AND epoch = ?;""",
@@ -496,7 +496,7 @@ def export_json():
                 result["rank_change"].append(0)
                 result["views_change"].append(0)
                 result["times_reposted_change"].append(0)
-                result["new_type"][-1] = 2
+                result["new_type"][-1] = "n2"
 
 
 
@@ -509,7 +509,7 @@ def export_json():
                                 (claim_hash, EXPORT_SIZE))\
                                 .fetchone()[0]
             if count == 1:
-                result["new_type"][-1] = 1
+                result["new_type"][-1] = "n1"
 
     f = open("json/top_500.json", "w")
     f.write(json.dumps(result))
