@@ -429,6 +429,8 @@ def export_json():
     result["new_type"] = []
     result["likes"] = []
     result["dislikes"] = []
+#    result["titles"] = []
+
 
     latest_epoch = db.execute("""
                     SELECT id FROM epochs ORDER BY time DESC limit 1;""")\
@@ -462,7 +464,12 @@ def export_json():
             result["subscribers"].append(followers)
             result["likes"].append(likes)
             result["dislikes"].append(dislikes)
-            result["new_type"].append("n0")
+            result["new_type"].append(0)
+#            result["titles"].append("")
+#            for row in cdb.execute("SELECT title FROM claim\
+#                                    WHERE claim_hash = ?;", (claim_hash, )):
+#                result["titles"][-1] = row[0]
+
             old = db.execute("""SELECT rank, followers, views, reposts
                                 FROM measurements
                                 WHERE channel = ? AND epoch = ?;""",
