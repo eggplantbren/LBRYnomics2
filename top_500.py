@@ -429,8 +429,7 @@ def export_json():
     result["new_type"] = []
     result["likes"] = []
     result["dislikes"] = []
-#    result["titles"] = []
-
+    result["titles"] = []
 
     latest_epoch = db.execute("""
                     SELECT id FROM epochs ORDER BY time DESC limit 1;""")\
@@ -465,10 +464,6 @@ def export_json():
             result["likes"].append(likes)
             result["dislikes"].append(dislikes)
             result["new_type"].append(0)
-#            result["titles"].append("")
-#            for row in cdb.execute("SELECT title FROM claim\
-#                                    WHERE claim_hash = ?;", (claim_hash, )):
-#                result["titles"][-1] = row[0]
 
             old = db.execute("""SELECT rank, followers, views, reposts
                                 FROM measurements
@@ -517,6 +512,37 @@ def export_json():
                                 .fetchone()[0]
             if count == 1:
                 result["new_type"][-1] = "n1"
+
+    # Titles part. Initialise with Nones
+    titles = [None for _ in range(EXPORT_SIZE)]
+
+    # Map from claim id to index
+    lookup = dict()
+    urls = [] # List of unambiguous URLs
+    for i in range(len(result["claim_ids"])):
+        lookup[result["claim_ids"][i]] = i
+        urls.append("@" + result["vanity_names"][i] + "#" + result["claim_ids"][i])
+
+    # Paginated resolve
+    response = requests.post("http://localhost:5279",
+                             json={"method": "resolve",
+                                   "params": {"urls": urls}})
+    if response.status_code == 200:
+        items = response.json()["result"]
+        for key in items:
+            item = items[key]
+            claim_id = None
+            title = None
+            try:
+                claim_id = item["claim_id"]
+                title = item["value"]["title"]
+            except:
+                pass
+            if claim_id is not None and title is not None:
+                titles[lookup[claim_id]] = title
+    else:
+        print("Error getting titles.")
+    result["titles"] = titles
 
     f = open("json/top_500.json", "w")
     f.write(json.dumps(result))
