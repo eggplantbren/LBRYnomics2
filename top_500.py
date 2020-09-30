@@ -311,13 +311,7 @@ def do_epoch(force=False):
 
         # View counts
         views = view_counts_channel(channels[i])
-
-#                likes, dislikes = odysee_reactions_channel(channels[i])
-#                break
-#            except:
-#                time.sleep(5.0)
-#                if attempt == 10:
-#                    sys.exit(-1)
+        likes, dislikes = odysee_reactions_channel(channels[i])
 
         lbc = get_lbc(channels[i])
         passed.append(quality_filter(followers[i], views, lbc)\
