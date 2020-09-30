@@ -36,7 +36,11 @@ def get_counts(claim_ids, mode="views"):
         batch_sizes.append(end - start)
 
     # Run each batch
-    result = []
+    if mode == "likes_dislikes":
+        result = [[], []]
+    else:
+        result = []
+
     for i in range(num_batches):
         data = {"auth_token": auth_token}
         if mode == "likes_dislikes":
@@ -48,15 +52,30 @@ def get_counts(claim_ids, mode="views"):
         while attempts_remaining > 0:
             response = requests.post(url, data=data, timeout=30.0)
             if response.status_code == 200:
-                for value in response.json()["data"]:
-                    result.append(value)
+                print("Y", end="", flush=True)
+                if mode == "likes_dislikes":
+                    likes, dislikes = [], []
+                    mine = response.json()["data"]["my_reactions"]
+                    others = response.json()["data"]["others_reactions"]
+                    for claim_id in cids[i].split(","):
+                        likes += [mine[claim_id]["like"] + others[claim_id]["like"]]
+                        dislikes += [mine[claim_id]["dislike"] + others[claim_id]["dislike"]]
+                    result[0] += likes
+                    result[1] += dislikes
+                else:
+                    for value in response.json()["data"]:
+                        result.append(value)
                 attempts_remaining = 0
             else:
+                print("N", end="", flush=True)
                 attempts_remaining -= 1
                 if attempts_remaining > 0:
                     time.sleep(10.0)
                 else:
-                    result.append([None for _ in range(batch_sizes[i])])
+                    temp = None
+                    if mode == "likes_dislikes":
+                        temp = (None, None)
+                    result.append([temp for _ in range(batch_sizes[i])])
 
     return result
 

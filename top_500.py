@@ -7,6 +7,7 @@ import json
 import lists
 import numpy as np
 import requests
+from robust_post import get_counts
 import sys
 import time
 import upload
@@ -27,16 +28,16 @@ db = conn.cursor()
 db.execute("PRAGMA JOURNAL_MODE=WAL;")
 
 # LBC threshold for auto-qualification
-LBC_THRESHOLD = 10000.0
+LBC_THRESHOLD = 1000.0
 
 # Quality filter parameters
 QUALITY_FILTER = [0.1, 1.0]
 
 # Size of table to maintain in the database
-TABLE_SIZE = 1050
+TABLE_SIZE = 2050
 
 # Size of the exported JSON
-EXPORT_SIZE = 500
+EXPORT_SIZE = 2000
 
 
 def create_tables():
@@ -195,45 +196,6 @@ def get_nsfw(claim_hash):
 
     return nsfw
 
-def get_followers(channels, start, end):
-    """
-    Get follower numbers for channels[start:end]
-    """
-    result = []
-
-    # Elegantly handle end
-    if end > len(channels):
-        end = len(channels)
-
-    if start == end:
-        print("Start equalled end!")
-
-    # Get auth token
-    f= open("secrets.yaml")
-    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
-    f.close()
-
-    # Prepare the request to the LBRY API
-    url = "https://api.lbry.com/subscription/sub_count?auth_token=" +\
-                auth_token + "&claim_id="
-    for i in range(start, end):
-        url += channels[i][::-1].hex()
-        if i != end-1:
-            url += ","
-
-    # JSON response from API
-    attempts = 10
-    while attempts > 0:
-        try:
-            response = requests.get(url, timeout=20.0).json()
-            for value in response["data"]:
-                result.append(value)
-            break
-        except:
-            attempts -= 1
-
-    return result
-
 
 def qualifying_channels():
     """
@@ -317,12 +279,8 @@ def do_epoch(force=False):
     channels = qualifying_channels()
 
     # Get the follower counts
-    followers = []
-    for i in range((len(channels) - 1)//197 + 1):
-        followers += get_followers(channels, 197*i, 197*(i+1))
-        print("\r    Got follower counts for {a}/{b} channels."\
-                .format(a=len(followers), b=len(channels)), end="", flush=True)
-    print("")
+    print("Getting follower counts: ", flush=True, end="")
+    followers = get_counts([ch[::-1].hex() for ch in channels], "followers")
 
     # Sort in descending order by followers
     ii = np.argsort(followers)[::-1]
@@ -352,24 +310,14 @@ def do_epoch(force=False):
               end="", flush=True)
 
         # View counts
-        for attempt in range(1, 11):
-            try:
-                views = view_counts_channel(channels[i])
-                break
-            except:
-                time.sleep(5.0)
-                if attempt == 10:
-                    sys.exit(-1)
+        views = view_counts_channel(channels[i])
 
-        # Likes and dislikes
-        for attempt in range(1, 11):
-            try:
-                likes, dislikes = odysee_reactions_channel(channels[i])
-                break
-            except:
-                time.sleep(5.0)
-                if attempt == 10:
-                    sys.exit(-1)
+#                likes, dislikes = odysee_reactions_channel(channels[i])
+#                break
+#            except:
+#                time.sleep(5.0)
+#                if attempt == 10:
+#                    sys.exit(-1)
 
         lbc = get_lbc(channels[i])
         passed.append(quality_filter(followers[i], views, lbc)\
@@ -572,25 +520,7 @@ def view_counts_channel(channel_hash):
     auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
     f.close()
 
-    result = 0
-
-    while len(claim_ids) > 0:
-        # Prepare claim ID string. Consume claim_ids 1000 at a time
-        cids = ""
-        payload_size = min(1000, len(claim_ids))
-        for i in range(payload_size):
-            cids += claim_ids[i] + ","
-        cids = cids[0:-1]
-
-        response = requests.post("https://api.lbry.com/file/view_count",
-                                 data={"auth_token": auth_token,
-                                       "claim_id": cids}, timeout=20.0)
-        print(".", flush=True, end="")
-        if response.status_code == 200:
-            result += sum(response.json()["data"])
-            claim_ids = claim_ids[payload_size:]
-
-    return result
+    return sum(get_counts(claim_ids, "views"))
 
 
 
@@ -617,32 +547,9 @@ def odysee_reactions_channel(channel_hash):
     auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
     f.close()
 
-    likes = 0
-    dislikes = 0
-    while len(claim_ids) > 0:        
-        # Prepare claim ID string. Consume claim_ids 1000 at a time
-        cids = ""
-        payload_size = min(1000, len(claim_ids))
-        for i in range(payload_size):
-            cids += claim_ids[i] + ","
-        cids = cids[0:-1]
-
-        response = requests.post("https://api.lbry.com/reaction/list",
-                                 data={"auth_token": auth_token,
-                                       "claim_ids": cids}, timeout=20.0)
-        print(".", flush=True, end="")
-        if response.status_code == 200:
-            response = response.json()
-            for claim_id in cids.split(","):
-                reactions = response["data"]["others_reactions"][claim_id]
-                likes += reactions["like"]
-                dislikes += reactions["dislike"]
-                reactions = response["data"]["my_reactions"][claim_id]
-                likes += reactions["like"]
-                dislikes += reactions["dislike"]
-
-            claim_ids = claim_ids[payload_size:]
-
+    result = get_counts(claim_ids, "likes_dislikes")
+    likes = sum(result[0])
+    dislikes = sum(result[1])
     return (likes, dislikes)
 
 
