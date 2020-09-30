@@ -281,6 +281,7 @@ def do_epoch(force=False):
     # Get the follower counts
     print("Getting follower counts: ", flush=True, end="")
     followers = get_counts([ch[::-1].hex() for ch in channels], "followers")
+    print("done.", flush=True)
 
     # Sort in descending order by followers
     ii = np.argsort(followers)[::-1]
