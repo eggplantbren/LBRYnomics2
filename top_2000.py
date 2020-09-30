@@ -286,7 +286,7 @@ def do_epoch(force=False):
     ii = np.argsort(followers)[::-1]
     channels, followers = np.array(channels)[ii], np.array(followers)[ii]
 
-    # Put measurements into database, until 500 have passed the quality filter
+    # Put measurements into database, until 2000 have passed the quality filter
     passed = []
     rank = 1
     db.execute("BEGIN;")
@@ -486,7 +486,7 @@ def export_json():
         print("Error getting titles.")
     result["titles"] = titles
 
-    f = open("json/top_500.json", "w")
+    f = open("json/top_2000.json", "w")
     f.write(json.dumps(result))
     f.close()
 

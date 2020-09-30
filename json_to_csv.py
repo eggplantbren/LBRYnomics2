@@ -1,7 +1,7 @@
 import json
 import pandas
 
-f = open("json/top_500.json")
+f = open("json/top_2000.json")
 x = json.load(f)
 f.close()
 
@@ -17,5 +17,5 @@ df["likes"] = x["likes"]
 df["dislikes"] = x["dislikes"]
 df["nsfw"] = x["is_nsfw"]
 
-df.to_csv("top_500.csv", header=True, index=False)
+df.to_csv("top_2000.csv", header=True, index=False)
 
