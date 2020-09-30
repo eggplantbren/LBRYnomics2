@@ -7,7 +7,7 @@ f.close()
 
 df = pandas.DataFrame()
 df["rank"] = x["ranks"]
-df["vanity_name"] = x["vanity_names"]
+df["vanity_name"] = ["@" + n for n in x["vanity_names"]]
 df["claim_id"] = x["claim_ids"]
 df["lbc"] = x["lbc"]
 df["followers"] = x["subscribers"]
