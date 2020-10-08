@@ -373,6 +373,7 @@ def export_json():
     result["likes"] = []
     result["dislikes"] = []
     result["titles"] = []
+    result["top_500"] = []
 
     latest_epoch = db.execute("""
                     SELECT id FROM epochs ORDER BY time DESC limit 1;""")\
@@ -407,6 +408,7 @@ def export_json():
             result["likes"].append(likes)
             result["dislikes"].append(dislikes)
             result["new_type"].append(0)
+            result["top_500"].append(result["ranks"][-1] <= 500)
 
             old = db.execute("""SELECT rank, followers, views, reposts
                                 FROM measurements
