@@ -28,10 +28,10 @@ db = conn.cursor()
 db.execute("PRAGMA JOURNAL_MODE=WAL;")
 
 # LBC threshold for auto-qualification
-LBC_THRESHOLD = 1000.0
+LBC_THRESHOLD = 10000.0
 
 # Quality filter parameters
-QUALITY_FILTER = [0.1, 1.0]
+QUALITY_FILTER = [0.1, 0.5]
 
 # Size of table to maintain in the database
 TABLE_SIZE = 2050
