@@ -10,7 +10,9 @@
 manual_mature = set(["f24ab6f03d96aada87d4e14b2dac4aa1cee8d787",
                  "fd4b56c7216c2f96db4b751af68aa2789c327d48",
                  "ebe983567c5b64970d5dff2fe78dd1573f0d7b61",
-                 "be631cdc9ee6c4aac13c1e3acabc8d5e06fd05ba"])
+                 "be631cdc9ee6c4aac13c1e3acabc8d5e06fd05ba",
+                 "26c81abc9f4175ac9e5c271746ddb61f251e8d7a",
+                 "66df515ae3b4210cd70a5ed7071fdf4ed396ba50"])
 
 # Grey list (quietly disable link)
 grey_list = set(["ca8cfeb5b6660a0b8874593058178b7ce6af5fed",
