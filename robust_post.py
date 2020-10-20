@@ -4,7 +4,7 @@ import yaml
 
 BATCH_SIZE = 1000
 
-def get_counts(claim_ids, mode="views"):
+def get_counts(claim_ids, mode="views", batch_size=BATCH_SIZE):
 
     assert mode in ["views", "followers", "likes_dislikes"]
 
@@ -25,11 +25,11 @@ def get_counts(claim_ids, mode="views"):
 
     # Batch into groups of 1000
     cids = []
-    num_batches = 1 + (len(claim_ids)-1) // BATCH_SIZE
+    num_batches = 1 + (len(claim_ids)-1) // batch_size
     batch_sizes = []
     for i in range(num_batches):
-        start = i*BATCH_SIZE
-        end = (i+1)*BATCH_SIZE
+        start = i*batch_size
+        end = (i+1)*batch_size
         if end > len(claim_ids):
             end = len(claim_ids)
         cids.append(",".join(claim_ids[start:end]))
