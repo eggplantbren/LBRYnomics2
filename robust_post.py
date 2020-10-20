@@ -69,8 +69,10 @@ def get_counts(claim_ids, mode="views", batch_size=BATCH_SIZE):
             else:
                 print("N", end="", flush=True)
                 attempts_remaining -= 1
-                if attempts_remaining > 0:
+                if attempts_remaining == 4 and batch_size > 1:
                     time.sleep(10.0)
+                elif attempts_remaining > 1:
+                    time.sleep(0.1)
                 else:
                     if batch_size > 1:
                         return get_counts(claim_ids, mode, batch_size=1)
