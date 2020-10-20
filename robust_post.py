@@ -72,10 +72,13 @@ def get_counts(claim_ids, mode="views", batch_size=BATCH_SIZE):
                 if attempts_remaining > 0:
                     time.sleep(10.0)
                 else:
-                    temp = None
-                    if mode == "likes_dislikes":
-                        temp = (None, None)
-                    result.append([temp for _ in range(batch_sizes[i])])
+                    if batch_size > 1:
+                        return get_counts(claim_ids, mode, batch_size=1)
+                    else:
+                        temp = None
+                        if mode == "likes_dislikes":
+                            temp = (None, None)
+                        result.append([temp for _ in range(batch_sizes[i])])
 
     return result
 
