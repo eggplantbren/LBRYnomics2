@@ -14,9 +14,8 @@ json/rss.xml
 plots/interactive*.html
 main.log
 server.log
-top_500.log
 view_crawler.log
 logfile
 daemon.out
-top_500.csv
+top_2000.log
 
