@@ -112,21 +112,16 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
     auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
     f.close()
 
+    # Increment attempts
+    for cid in todo:
+        streams[cid]["attempts"] += 1
+
     # Create query
     cids = ",".join(todo)
     try:
         response = requests.post("https://api.lbry.com/reaction/list",
                              data={"auth_token": auth_token,
                                    "claim_ids": cids}, timeout=30.0)
-        query_returned = True
-    except:
-        query_returned = False
-
-    # Increment attempts
-    for cid in todo:
-        streams[cid]["attempts"] += 1
-
-    if query_returned and response.status_code == 200:
         data = response.json()["data"]
         for i in range(len(todo)):
             streams[todo[i]]["likes"] = data["my_reactions"][todo[i]]["like"]
@@ -135,7 +130,8 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
             streams[todo[i]]["dislikes"] += data["others_reactions"][todo[i]]["dislike"]
         next_batch_size = MAX_BATCH_SIZE
         success = True
-    else:
+
+    except:
         next_batch_size = len(todo) // 2
         if next_batch_size == 0:
             next_batch_size = 1
