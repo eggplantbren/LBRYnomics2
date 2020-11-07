@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import apsw
+from channel_measurement import *
 import config
 import datetime
 import json
@@ -310,9 +311,9 @@ def do_epoch(force=False):
         print(f"({i+1}) Getting view counts for channel {vanity_name}: ",
               end="", flush=True)
 
-        # View counts
-        views = view_counts_channel(channels[i])
-        likes, dislikes = odysee_reactions_channel(channels[i])
+        # View counts etc.
+        m = measure_channel(channels[i])
+        views, likes, dislikes = m["total_views"], m["total_likes"], m["total_dislikes"]
 
         lbc = get_lbc(channels[i])
         passed.append(quality_filter(followers[i], views, lbc)\
@@ -492,63 +493,6 @@ def export_json():
     f = open("json/top_2000.json", "w")
     f.write(json.dumps(result))
     f.close()
-
-
-def view_counts_channel(channel_hash):
-    """
-    Try using post
-    """
-    claim_ids = []
-
-    # Claims DB
-    cdb_conn = apsw.Connection(config.claims_db_file,
-                              flags=apsw.SQLITE_OPEN_READONLY)
-    cdb_conn.setbusytimeout(60000)
-    cdb = cdb_conn.cursor()
-
-    for row in cdb.execute("""SELECT claim_id FROM claim
-                              WHERE channel_hash = ? AND claim_type=1;""",
-                                     (channel_hash, )):
-        claim_ids.append(row[0])
-    cdb_conn.close()
-
-    # Get auth token
-    f= open("secrets.yaml")
-    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
-    f.close()
-
-    return sum(get_counts(claim_ids, "views"))
-
-
-
-def odysee_reactions_channel(channel_hash):
-    """
-    Try using post
-    """
-    claim_ids = []
-
-    # Claims DB
-    cdb_conn = apsw.Connection(config.claims_db_file,
-                              flags=apsw.SQLITE_OPEN_READONLY)
-    cdb_conn.setbusytimeout(60000)
-    cdb = cdb_conn.cursor()
-
-    for row in cdb.execute("""SELECT claim_id FROM claim
-                              WHERE channel_hash = ? AND claim_type=1;""",
-                                     (channel_hash, )):
-        claim_ids.append(row[0])
-    cdb_conn.close()
-
-    # Get auth token
-    f= open("secrets.yaml")
-    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
-    f.close()
-
-    result = get_counts(claim_ids, "likes_dislikes")
-    likes = sum(result[0])
-    dislikes = sum(result[1])
-    return (likes, dislikes)
-
 
 
 

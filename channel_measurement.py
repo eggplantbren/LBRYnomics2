@@ -27,7 +27,7 @@ def measure_channel(claim_hash):
                             WHERE channel_hash = ?\
                             AND claim_type = 1;",
                            (claim_hash, )):
-        streams[row[0]] = dict(views=None, likes=None, dislikes=None)
+        streams[row[0]] = dict(views=None, likes=None, dislikes=None, attempts=0)
     print(f"done. There are {len(streams)} streams.", flush=True)
 
     # Get the view counts. Dicts are mutable.
@@ -121,6 +121,10 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
     except:
         query_returned = False
 
+    # Increment attempts
+    for cid in todo:
+        streams[cid]["attempts"] += 1
+
     if query_returned and response.status_code == 200:
         data = response.json()["data"]
         for i in range(len(todo)):
@@ -135,6 +139,15 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
         if next_batch_size == 0:
             next_batch_size = 1
         success = False
+
+        # After five failed attempts, just give up and set result to zero
+        for cid in todo:
+            if streams[cid]["attempts"] >= 5:
+                streams[cid]["likes"] = 0
+                streams[cid]["dislikes"] = 0
+                next_batch_size = MAX_BATCH_SIZE
+                success = "ABORTED, IMPUTING ZERO"
+
     print(f"(batch_size={len(todo)}, success={success}) ", end="", flush=True)
 
     if next_batch_size >= 1:

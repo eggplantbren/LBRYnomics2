@@ -2,11 +2,15 @@ import requests
 import time
 import yaml
 
-BATCH_SIZE = 1000
+BATCH_SIZE = 200
 
 def get_counts(claim_ids, mode="views", batch_size=BATCH_SIZE):
+    """
+    Only used for follower mode now. For other quantities, use
+    channel_measurement.py
+    """
 
-    assert mode in ["views", "followers", "likes_dislikes"]
+    assert mode in ["followers"]
 
     result = []
 
