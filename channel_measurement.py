@@ -1,7 +1,5 @@
 import apsw
 import config
-import numpy as np
-import numpy.random as rng
 import requests
 import yaml
 
@@ -35,14 +33,24 @@ def measure_channel(claim_hash):
     # Get the view counts. Dicts are mutable.
     print(f"Getting view counts.", flush=True)
     get_views(streams)
+    print("done.")
 
-    return streams
+    print(f"Getting likes.", flush=True)
+    get_likes(streams)
+    print("done.")
+
+    total_views = sum(streams[cid]["views"] for cid in streams)
+    total_likes = sum(streams[cid]["likes"] for cid in streams)
+    total_dislikes = sum(streams[cid]["dislikes"] for cid in streams)
+
+    return dict(total_views=total_views, total_likes=total_likes,
+                total_dislikes=total_dislikes)
 
 
 
 def get_views(streams, batch_size=MAX_BATCH_SIZE):
 
-    # Find up to 1000 streams without a view count
+    # Find up to batch_size streams without a view count
     todo = []
     for claim_id in streams:
         if streams[claim_id]["views"] is None:
@@ -72,12 +80,59 @@ def get_views(streams, batch_size=MAX_BATCH_SIZE):
     else:
         next_batch_size = batch_size // 2
         success = False
-    print(f"(batch_size={batch_size}, success={success}) ", end="", flush=True)
+    print(f"(batch_size={len(todo)}, success={success}) ", end="", flush=True)
 
     if next_batch_size >= 1:
         get_views(streams, next_batch_size)
 
 
+def get_likes(streams, batch_size=MAX_BATCH_SIZE):
+
+    # Find up to batch_size streams without a view count
+    todo = []
+    for claim_id in streams:
+        if streams[claim_id]["likes"] is None or streams[claim_id]["dislikes"] is None:
+            todo.append(claim_id)
+        if len(todo) >= batch_size:
+            break
+
+    # Terminate if nothing left to do
+    if len(todo) == 0:
+        return
+
+    # Get auth token
+    f= open("secrets.yaml")
+    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
+    f.close()
+
+    # Create query
+    cids = ",".join(todo)
+    response = requests.post("https://api.lbry.com/reaction/list",
+                             data={"auth_token": auth_token,
+                                   "claim_ids": cids}, timeout=30.0)
+    if response.status_code == 200:
+        data = response.json()["data"]
+        for i in range(len(todo)):
+            streams[todo[i]]["likes"] = data["my_reactions"][todo[i]]["like"]
+            streams[todo[i]]["likes"] += data["others_reactions"][todo[i]]["like"]
+            streams[todo[i]]["dislikes"] = data["my_reactions"][todo[i]]["dislike"]
+            streams[todo[i]]["dislikes"] += data["others_reactions"][todo[i]]["dislike"]
+        next_batch_size = MAX_BATCH_SIZE
+        success = True
+    else:
+        next_batch_size = len(todo) // 2
+        if next_batch_size == 0:
+            next_batch_size = 1
+        success = False
+    print(f"(batch_size={len(todo)}, success={success}) ", end="", flush=True)
+
+    if next_batch_size >= 1:
+        get_likes(streams, next_batch_size)
+
+
+
 if __name__ == "__main__":
-    streams = measure_channel(bytes.fromhex("aaeda15cc0cafe689793a00d5e6c5a231e3b6ee8")[::-1])
+    result = measure_channel(bytes.fromhex("f16e438efc5600c85b13a666ea63bd9a8dde4695")[::-1])
+    print(result)
+
 
