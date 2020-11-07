@@ -86,6 +86,7 @@ def get_views(streams, batch_size=MAX_BATCH_SIZE):
         next_batch_size = len(todo) // 2
         if next_batch_size == 0:
             next_batch_size = 1
+        success = False
     print(f"(batch_size={len(todo)}, success={success}) ", end="", flush=True)
 
     if next_batch_size >= 1:
