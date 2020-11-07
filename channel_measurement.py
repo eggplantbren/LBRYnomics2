@@ -69,17 +69,23 @@ def get_views(streams, batch_size=MAX_BATCH_SIZE):
 
     # Create query
     cids = ",".join(todo)
-    response = requests.post("https://api.lbry.com/file/view_count",
-                             data={"auth_token": auth_token,
-                                   "claim_id": cids}, timeout=30.0)
-    if response.status_code == 200:
+    try:
+        response = requests.post("https://api.lbry.com/file/view_count",
+                                 data={"auth_token": auth_token,
+                                       "claim_id": cids}, timeout=30.0)
+        query_returned = True
+    except:
+        query_returned = False
+
+    if query_returned and response.status_code == 200:
         for i in range(len(todo)):
             streams[todo[i]]["views"] = response.json()["data"][i]
         next_batch_size = MAX_BATCH_SIZE
         success = True
     else:
-        next_batch_size = batch_size // 2
-        success = False
+        next_batch_size = len(todo) // 2
+        if next_batch_size == 0:
+            next_batch_size = 1
     print(f"(batch_size={len(todo)}, success={success}) ", end="", flush=True)
 
     if next_batch_size >= 1:
@@ -107,10 +113,15 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
 
     # Create query
     cids = ",".join(todo)
-    response = requests.post("https://api.lbry.com/reaction/list",
+    try:
+        response = requests.post("https://api.lbry.com/reaction/list",
                              data={"auth_token": auth_token,
                                    "claim_ids": cids}, timeout=30.0)
-    if response.status_code == 200:
+        query_returned = True
+    except:
+        query_returned = False
+
+    if query_returned and response.status_code == 200:
         data = response.json()["data"]
         for i in range(len(todo)):
             streams[todo[i]]["likes"] = data["my_reactions"][todo[i]]["like"]
@@ -132,7 +143,7 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
 
 
 if __name__ == "__main__":
-    result = measure_channel(bytes.fromhex("f16e438efc5600c85b13a666ea63bd9a8dde4695")[::-1])
+    result = measure_channel(bytes.fromhex("aaeda15cc0cafe689793a00d5e6c5a231e3b6ee8")[::-1])
     print(result)
 
 
