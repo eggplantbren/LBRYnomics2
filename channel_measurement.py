@@ -137,9 +137,9 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
             next_batch_size = 1
         success = False
 
-        # After five failed attempts, just give up and set result to zero
+        # After ten failed attempts, just give up and set result to zero
         for cid in todo:
-            if streams[cid]["attempts"] >= 5:
+            if streams[cid]["attempts"] >= 10:
                 streams[cid]["likes"] = 0
                 streams[cid]["dislikes"] = 0
                 next_batch_size = MAX_BATCH_SIZE
