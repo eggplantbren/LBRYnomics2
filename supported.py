@@ -21,7 +21,7 @@ start_block = 0 #block - int(back)
 conn = apsw.Connection(x["claims_db_file"])
 db = conn.cursor()
 
-channels = ["@Mantega", "@emmyhucker"]
+channels = ["@drsambailey", "@paulvanderklay", "@alaslewisandbarnes"]
 
 #channels = ["@emmyhucker", "@justinmurphy", "@paulvanderklay", "@mikenayna",
 #            "@theworthyhouse", "@AlasLewisAndBarnes", "@veritasium",
@@ -69,11 +69,11 @@ for channel in channels:
     print("")
 
 #    # Truncate to the most recent week
-#    ys = ys[ts >= block - 4032 - 10]
-#    ts = ts[ts >= block - 4032 - 10]
+    ys = ys[ts >= block - 4032 - 10]
+    ts = ts[ts >= block - 4032 - 10]
     ys = np.cumsum(ys)
 
-    plt.plot(ts, ys, "o-", markersize=3, label=channel)
+    plt.plot(ts, ys, "-", label=channel)
 
 plt.legend()
 plt.axvline(block, linestyle="--", color="r", alpha=0.3)
