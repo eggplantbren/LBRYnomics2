@@ -41,7 +41,7 @@ def upload(secrets_file="secrets.yaml", html_plot=False):
     if html_plot:
         wildcard += ".html"
 
-    cmd = "sshpass -e scp -P {port} upload/{wildcard} {user}@{dest}"\
+    cmd = "sshpass -e scp -C -P {port} upload/{wildcard} {user}@{dest}"\
             .format(user=secrets["user"], wildcard=wildcard,
                     dest=secrets["destination"], port=secrets["port"])
     env = os.environ.copy()
