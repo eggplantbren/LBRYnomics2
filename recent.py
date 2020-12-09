@@ -4,6 +4,7 @@ import datetime
 from daemon_command import daemon_command
 import json
 import math
+import requests
 
 def count_recent_all(now):
     print("Counting recent activity.", flush=True)
@@ -191,11 +192,21 @@ def count_boosts(now):
 
         tv_url = None
         if claim_name is not None:
-            tv_url = "https://lbry.tv/" + claim_name + ":" + claim_id
+            tv_url = "https://odysee.com/" + claim_name + ":" + claim_id
         result["tv_url_{label}".format(label=labels[i])] = tv_url
 #        print(tv_url)
 
 
+        # Get title of max boosted claim
+        try:
+            payload = {"method": "claim_search",
+                       "params": {"claim_ids": [claim_id]}}
+            response = requests.post("http://localhost:5279", json=payload)
+            title = response.json()["result"]["items"][0]["value"]["title"]
+        except:
+            title = None
+            pass
+        result[f"title_{labels[i]}"] = title
 
         # Get NSFW status of max boosted claim
         query = """
