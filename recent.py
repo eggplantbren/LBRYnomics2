@@ -197,16 +197,19 @@ def count_boosts(now):
 #        print(tv_url)
 
 
-        # Get title of max boosted claim
+        # Get title of max boosted claim and its channel
+        title, channel_title = None, None
         try:
             payload = {"method": "claim_search",
                        "params": {"claim_ids": [claim_id]}}
             response = requests.post("http://localhost:5279", json=payload)
-            title = response.json()["result"]["items"][0]["value"]["title"]
+            r = response.json()["result"]
+            title = r["items"][0]["value"]["title"]
+            channel_title = r["items"][0]["signing_channel"]["value"]["title"]
         except:
-            title = None
             pass
         result[f"title_{labels[i]}"] = title
+        result[f"channel_title_{labels[i]}"] = channel_title
 
         # Get NSFW status of max boosted claim
         query = """
