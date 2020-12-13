@@ -2,6 +2,9 @@ import apsw
 import config
 import datetime
 import matplotlib
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from numba import njit

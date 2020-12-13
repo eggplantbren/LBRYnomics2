@@ -1,5 +1,7 @@
 import apsw
 import config
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
@@ -21,7 +23,7 @@ start_block = 0 #block - int(back)
 conn = apsw.Connection(x["claims_db_file"])
 db = conn.cursor()
 
-channels = ["@drsambailey", "@paulvanderklay", "@alaslewisandbarnes"]
+channels = ["@drsambailey", "@paulvanderklay", "@alaslewisandbarnes", "@emmyhucker"]
 
 #channels = ["@emmyhucker", "@justinmurphy", "@paulvanderklay", "@mikenayna",
 #            "@theworthyhouse", "@AlasLewisAndBarnes", "@veritasium",
@@ -68,9 +70,9 @@ for channel in channels:
     print(channel, ys, np.round(np.sum(ys), 2))
     print("")
 
-#    # Truncate to the most recent week
-    ys = ys[ts >= block - 4032 - 10]
-    ts = ts[ts >= block - 4032 - 10]
+#    # Truncate to the most recent fortnight
+    ys = ys[ts >= block - 4032*2 - 10]
+    ts = ts[ts >= block - 4032*2 - 10]
     ys = np.cumsum(ys)
 
     plt.plot(ts, ys, "-", label=channel)
@@ -80,6 +82,8 @@ plt.axvline(block, linestyle="--", color="r", alpha=0.3)
 #plt.xlim([block - 576, block + 10])
 #plt.xlim([block - 4032 - 10, block + 10])
 plt.ylim(bottom=0.0)
-plt.show()
+print("Saving supported.png")
+plt.savefig("supported.png", dpi=450)
+#plt.show()
 conn.close()
 
