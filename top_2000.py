@@ -262,8 +262,9 @@ def do_epoch(force=False):
     gap = now - last_epoch[1]
 
     # Whether to do anything
-    do = force or (datetime.datetime.utcnow().hour == 21 and \
-                        gap >= 0.5*86400.0)
+    do = force or (datetime.datetime.utcnow().hour == 0 and \
+                        gap >= 0.25*86400.0) \
+               or (gap > 86400.0)
     if not do:
         return False
 
@@ -494,7 +495,18 @@ def export_json():
     f.write(json.dumps(result))
     f.close()
 
-
+    # Top 500
+    small = dict()
+    for key in result:
+        small[key] = result[key]
+        try:
+            if len(small[key]) == EXPORT_SIZE:
+                small[key] = small[key][0:500]
+        except:
+            pass
+    f = open("json/top_500.json", "w")
+    f.write(json.dumps(small))
+    f.close()
 
 if __name__ == "__main__":
     create_tables()
