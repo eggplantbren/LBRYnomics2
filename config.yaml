@@ -6,4 +6,4 @@ claims_db_file: "/home/brewer/lbry-sdk/lbryum_data/claims.db"
 interval: 300.0
 
 # Full path to lbry daemon binary
-lbrynet_bin: "/opt/LBRY/resources/static/daemon/lbrynet"
+lbrynet_bin: "/usr/bin/lbrynet"
