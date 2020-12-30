@@ -32,7 +32,8 @@ db.execute("PRAGMA JOURNAL_MODE=WAL;")
 LBC_THRESHOLD = 10000.0
 
 # Quality filter parameters
-QUALITY_FILTER = [0.1, 0.5]
+#QUALITY_FILTER = [0.1, 0.5]
+QUALITY_FILTER = 0.25
 
 # Size of table to maintain in the database
 TABLE_SIZE = 2050
@@ -121,13 +122,18 @@ def import_from_ldb():
 def quality_filter(followers, views, lbc):
     if lbc >= LBC_THRESHOLD:
         return True
-    if views/followers >= min(QUALITY_FILTER) and\
-       lbc/followers >= max(QUALITY_FILTER):
-        return True
-    if views/followers >= max(QUALITY_FILTER) and\
-       lbc/followers >= min(QUALITY_FILTER):
-        return True
-    return False
+    ratios = []
+    ratios.append(views/followers)
+    ratios.append(lbc/followers)
+    return np.sqrt(ratios[0]*ratios[1]) > QUALITY_FILTER
+
+#    if views/followers >= min(QUALITY_FILTER) and\
+#       lbc/followers >= max(QUALITY_FILTER):
+#        return True
+#    if views/followers >= max(QUALITY_FILTER) and\
+#       lbc/followers >= min(QUALITY_FILTER):
+#        return True
+#    return False
 
 
 def get_lbc(claim_hash):
