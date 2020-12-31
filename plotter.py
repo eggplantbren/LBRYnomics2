@@ -81,7 +81,7 @@ def annotate_all(mode, subplot=1):
 
     # Everyone gets year lines
     # Add vertical lines for new years (approximately)
-    for year in range(2017, 2021):
+    for year in range(2017, 2023):
         plt.axvline(mdates.date2num(datetime.date(year, 1, 1)),
                     color="w", alpha=0.5, linewidth=1.5, linestyle="--")
 
