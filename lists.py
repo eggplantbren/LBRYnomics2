@@ -100,5 +100,7 @@ white_list = set(["b174a8f5ff9e7197b739b72a57cd58a6d40a4279",
                   "e5f33f22ef656cb1595140409850a04d60aa474b",
                   "2a5eababa43ff1e895fd5aa2a334371d71ac36ba",
                   "eda3fbdbb1ab9da8f911e74a9071cbbc58f42447",
-                  "a19eb81752d531623df1ddcbc151f6a7bec4baad"])
+                  "a19eb81752d531623df1ddcbc151f6a7bec4baad",
+                  "96ee737634979ef1ae25591a2c33d8a7c201e3b5",
+                  "2e313fdf44a0f86ffd219844711fe0334495999c"])
 
