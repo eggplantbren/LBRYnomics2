@@ -268,7 +268,7 @@ def do_epoch(force=False):
     gap = now - last_epoch[1]
 
     # Whether to do anything
-    do = force or (datetime.datetime.utcnow().hour == 13 and \
+    do = force or (datetime.datetime.utcnow().hour == 0 and \
                         gap >= 0.25*86400.0) \
                or (gap > 86400.0)
     if not do:
