@@ -194,7 +194,7 @@ def get_nsfw(claim_hash):
 
     nsfw = False
     rows = cdb.execute("""SELECT COUNT(*) FROM tag WHERE claim_hash = ?
-                          AND tag.tag IN ('mature', 'xxx', 'sex', 'porn', 'nsfw');""",
+                          AND tag.tag IN ('hentai', 'mature', 'xxx', 'sex', 'porn', 'nsfw');""",
                        (claim_hash, )).fetchall()
     if len(rows) > 0:
         nsfw = rows[0][0] > 0
