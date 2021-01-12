@@ -102,7 +102,7 @@ def annotate_all(mode, subplot=1):
     if "ytsync" in mode:
         loc = mdates.date2num(datetime.date(2020, 8, 15))
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
-        plt.text(loc - 0.018*xwidth,
+        plt.text(loc - 0.020*xwidth,
                  text_pos,
                  "Niko makes a breakthrough",
                  fontsize=14, rotation=90,
@@ -112,7 +112,7 @@ def annotate_all(mode, subplot=1):
     if mode == "circulating_supply" and subplot == 1:
         loc = mdates.date2num(datetime.date(2020, 6, 22))
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
-        plt.text(loc - 0.018*xwidth,
+        plt.text(loc - 0.020*xwidth,
                  text_pos,
                  "Altonomy market-making partnership",
                  fontsize=14, rotation=90,
@@ -125,7 +125,7 @@ def annotate_all(mode, subplot=1):
         plt.axvline(loc, color="#e50054", linestyle="--", linewidth=1.5)
 
         tp = text_pos
-        plt.text(loc - 0.018*xwidth,
+        plt.text(loc - 0.020*xwidth,
                  tp,
                  "Odysee.com launched", color="#e50054",
                  fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
@@ -135,7 +135,7 @@ def annotate_all(mode, subplot=1):
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
 
         tp = text_pos
-        plt.text(loc - 0.033*xwidth,
+        plt.text(loc - 0.037*xwidth,
                  tp,
                  "@MH video 'Why I Quit\nYouTube\' published",
                  fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
@@ -144,7 +144,7 @@ def annotate_all(mode, subplot=1):
     if mode == "num_channels" or mode == "num_streams":
         loc = mdates.date2num(datetime.date(2019, 12, 25))
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
-        plt.text(loc - 0.033*xwidth,
+        plt.text(loc - 0.037*xwidth,
                  text_pos,
                  "YouTube purges\ncrypto channels",
                  fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
@@ -153,7 +153,7 @@ def annotate_all(mode, subplot=1):
     if mode == "num_channels":
         loc = mdates.date2num(datetime.date(2019, 10, 15))
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
-        plt.text(loc - 0.033*xwidth,
+        plt.text(loc - 0.037*xwidth,
                  text_pos,
                  "New users prompted\n to create a channel",
                  fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
