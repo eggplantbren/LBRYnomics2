@@ -64,7 +64,7 @@ logo = plt.imread("assets/logo_and_url.png")
 # Configure Matplotlib
 matplotlib.rcParams["figure.dpi"] = 500
 matplotlib.rcParams["font.family"] = "Roboto"
-plt.rcParams["font.size"] = 14
+plt.rcParams["font.size"] = 16
 plt.style.use("dark_background")
 plt.rcParams["axes.facecolor"] = "#3c3d3c"
 plt.rcParams["savefig.facecolor"] = "#3c3d3c"
@@ -97,7 +97,7 @@ def annotate_all(mode, subplot=1):
         plt.text(loc - 0.018*xwidth,
                  text_pos,
                  "Niko makes a breakthrough",
-                 fontsize=12, rotation=90,
+                 fontsize=14, rotation=90,
                  rotation_mode="anchor", va="top", ha="right")
 
     # Altonomy
@@ -107,7 +107,7 @@ def annotate_all(mode, subplot=1):
         plt.text(loc - 0.018*xwidth,
                  text_pos,
                  "Altonomy market-making partnership",
-                 fontsize=12, rotation=90,
+                 fontsize=14, rotation=90,
                  rotation_mode="anchor", va="top", ha="right")
 
     # Odysee
@@ -120,7 +120,7 @@ def annotate_all(mode, subplot=1):
         plt.text(loc - 0.018*xwidth,
                  tp,
                  "Odysee.com launched", color="#e50054",
-                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
+                 fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
     # MH
     if mode == "num_channels" or mode == "num_streams":
         loc = mdates.date2num(datetime.date(2019, 6, 9))
@@ -130,7 +130,7 @@ def annotate_all(mode, subplot=1):
         plt.text(loc - 0.033*xwidth,
                  tp,
                  "@MH video 'Why I Quit\nYouTube\' published",
-                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
+                 fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
     # Crypto purge
     if mode == "num_channels" or mode == "num_streams":
@@ -139,7 +139,7 @@ def annotate_all(mode, subplot=1):
         plt.text(loc - 0.033*xwidth,
                  text_pos,
                  "YouTube purges\ncrypto channels",
-                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
+                 fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
     # Onboarding
     if mode == "num_channels":
@@ -148,7 +148,7 @@ def annotate_all(mode, subplot=1):
         plt.text(loc - 0.033*xwidth,
                  text_pos,
                  "New users prompted\n to create a channel",
-                 fontsize=12, rotation=90, rotation_mode="anchor", va="top", ha="right")
+                 fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
     # Zero lines on some lower panels
     if subplot == 2:
@@ -419,37 +419,6 @@ def make_plots(production=True):
 
     print("Done.\n")
 
-
-def bokeh_plot(ts, ys):
-    """
-    Very experimental.
-    """
-    from bokeh.plotting import figure, output_file, save
-
-    output_file("streams.html")
-
-    p = figure(plot_width=1200, plot_height=400, x_axis_type="datetime",
-               x_axis_label="Time",
-               y_axis_label="Number of publications")
-
-    # Convert times to datetimes
-    dts = [datetime.datetime.utcfromtimestamp(t) for t in ts]
-
-    # Add a line renderer
-    line = p.line(dts, ys, line_width=2)
-
-    # Set background and line colors
-    p.background_fill_color = "#3c3d3c"
-    line.glyph.line_color = "#286dc1"
-
-    # Make grid less intense
-    p.xgrid.grid_line_alpha = 0.2
-    p.ygrid.grid_line_alpha = 0.2
-    p.xgrid.grid_line_dash = [6, 4]
-    p.ygrid.grid_line_dash = [6, 4]
-
-
-    save(p)
 
 if __name__ == "__main__":
     make_plots(production=False)
