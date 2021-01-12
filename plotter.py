@@ -89,6 +89,14 @@ def annotate_all(mode, subplot=1):
     text_pos = ylims[0] + 0.97*(ylims[1] - ylims[0])
     xlims = plt.gca().get_xlim()
     xwidth = xlims[1] - xlims[0]
+    ywidth = ylims[1] - ylims[0]
+
+    if subplot == 1:
+        # Timestamp
+        now = datetime.datetime.utcnow().replace(microsecond=0)
+        stamp = "Produced at " + str(now) + " UTC"
+        plt.text(xlims[0] + 0.0*xwidth, ylims[0] - 0.05*ywidth,
+                 stamp, color="w", alpha=0.5)
 
     # Nikooooo
     if "ytsync" in mode:
