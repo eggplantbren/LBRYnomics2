@@ -91,7 +91,8 @@ black_list = set([ "98c39de1c681139e43131e4b32c2a21272eef06e",
                 "32a5e8c4367953fb0a0f5445a8266272e72475ea",
                 "b780805930d3e62ba3faff742fb835f7e98b6882",
                 "8b310a6e394d36398f96b7c4153ced37ecd28b40",
-                "54986d02b37fe35ba865b5efb304bb0bf5229123"])
+                "54986d02b37fe35ba865b5efb304bb0bf5229123",
+                "24e018d6858c742d69be3be90460a09791e7b729"])
 
 # Legit channels that are exempt from the quality filter criteria
 # (mostly these are people who sell their LBC)
