@@ -35,7 +35,7 @@ def count_recent(mode, now):
     result_dict = {}
     result_dict["unix_time"] = now
     result_dict["human_time_utc"] = str(datetime.datetime.\
-                                       utcfromtimestamp(int(now))) + " UTC"
+                                       utcfromtimestamp(int(now)))
 
     cdb_conn = apsw.Connection(config.claims_db_file,
                                 flags=apsw.SQLITE_OPEN_READONLY)
@@ -95,7 +95,7 @@ def count_boosts(now):
     result = {}
     result["unix_time"] = now
     result["human_time_utc"] =\
-                    str(datetime.datetime.utcfromtimestamp(int(now))) + " UTC"
+                    str(datetime.datetime.utcfromtimestamp(int(now)))
     block = daemon_command("status")["wallet"]["blocks"]
 
     # Save next trending block

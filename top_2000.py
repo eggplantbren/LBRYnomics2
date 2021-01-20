@@ -363,7 +363,7 @@ def export_json():
 
     result = dict()
     result["unix_time"] = now
-    result["human_time_utc"] = str(datetime.datetime.utcfromtimestamp(int(now))) + " UTC"
+    result["human_time_utc"] = str(datetime.datetime.utcfromtimestamp(int(now)))
     result["ranks"] = []
     result["claim_ids"] = []
     result["vanity_names"] = []

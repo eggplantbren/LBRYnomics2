@@ -20,7 +20,7 @@ def lbrynomics_meta(now, uptime):
 
     result["unix_time_last_measurement"] = now
     result["human_time_last_measurement"] = str(datetime.datetime.\
-                                       utcfromtimestamp(int(now))) + " UTC"
+                                       utcfromtimestamp(int(now)))
     result["uptime_days_at_last_measurement"] = round(uptime, 4)
     result["active_measurements_in_db"] = ldb.execute("""
         SELECT count(id) FROM measurements WHERE lbc_deposits IS NOT NULL;
