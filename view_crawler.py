@@ -62,7 +62,7 @@ def do_api_call():
     # Get the range of rowids
     claims_db = apsw.Connection(config.claims_db_file,
                                 flags=apsw.SQLITE_OPEN_READONLY)
-    claims_db.setbusytimeout(60000)
+    claims_db.setbusytimeout(300000)
     cdb = claims_db.cursor()
 
     result = cdb.execute("SELECT MIN(rowid), MAX(rowid) FROM claim;")\

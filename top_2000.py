@@ -142,7 +142,7 @@ def get_lbc(claim_hash):
     # Claims DB
     cdb_conn = apsw.Connection(config.claims_db_file,
                               flags=apsw.SQLITE_OPEN_READONLY)
-    cdb_conn.setbusytimeout(60000)
+    cdb_conn.setbusytimeout(300000)
     cdb = cdb_conn.cursor()
 
     try:
@@ -167,7 +167,7 @@ def get_reposts(claim_hash):
     # Claims DB
     cdb_conn = apsw.Connection(config.claims_db_file,
                               flags=apsw.SQLITE_OPEN_READONLY)
-    cdb_conn.setbusytimeout(60000)
+    cdb_conn.setbusytimeout(300000)
     cdb = cdb_conn.cursor()
 
     reposts = cdb.execute("""SELECT SUM(reposted) FROM claim
@@ -189,7 +189,7 @@ def get_nsfw(claim_hash):
     # Claims DB
     cdb_conn = apsw.Connection(config.claims_db_file,
                               flags=apsw.SQLITE_OPEN_READONLY)
-    cdb_conn.setbusytimeout(60000)
+    cdb_conn.setbusytimeout(300000)
     cdb = cdb_conn.cursor()
 
     nsfw = False
@@ -217,7 +217,7 @@ def qualifying_channels():
     # Claims DB
     cdb_conn = apsw.Connection(config.claims_db_file,
                               flags=apsw.SQLITE_OPEN_READONLY)
-    cdb_conn.setbusytimeout(60000)
+    cdb_conn.setbusytimeout(300000)
     cdb = cdb_conn.cursor()
 
     # LBC qualification
@@ -306,7 +306,7 @@ def do_epoch(force=False):
             # Claims DB
             cdb_conn = apsw.Connection(config.claims_db_file,
                                       flags=apsw.SQLITE_OPEN_READONLY)
-            cdb_conn.setbusytimeout(60000)
+            cdb_conn.setbusytimeout(300000)
             cdb = cdb_conn.cursor()
             vanity_name = cdb.execute("SELECT claim_name FROM claim\
                                        WHERE claim_hash=?;", (channels[i], ))\
