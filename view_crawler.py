@@ -62,17 +62,20 @@ def do_api_call():
     # Get the range of rowids
     claims_db = apsw.Connection(config.claims_db_file,
                                 flags=apsw.SQLITE_OPEN_READONLY)
-    claims_db.setbusytimeout(300000)
+    claims_db.setbusytimeout(5000)
     cdb = claims_db.cursor()
 
+    cdb.execute("BEGIN;")
     result = cdb.execute("SELECT MIN(rowid), MAX(rowid) FROM claim;")\
                                     .fetchall()[0]
     min_rowid, max_rowid = result
+    cdb.execute("COMMIT;")
 
     # Put up to 197 claim hashes in here
     measurements = dict()
     while len(measurements) < NUM_PER_API_CALL:
         rowid = min_rowid + rng.randint(max_rowid - min_rowid + 1)
+        cdb.execute("BEGIN;")
         row = cdb.execute("""SELECT claim_hash,
                                        claim_name,
                                        (amount+support_amount)/1E8 lbc,
@@ -81,14 +84,18 @@ def do_api_call():
                                        WHERE claim_type=1 AND rowid=?
                                        AND lbc >= ?;""",
                                     (rowid, LBC_THRESHOLD)).fetchone()
+        cdb.execute("COMMIT;")
 
         if row is not None:
+            cdb.execute("BEGIN;")
             nsfw = cdb.execute("""SELECT COUNT(*) FROM tag
                                             WHERE claim_hash = ?
                                             AND tag in
                                             ('nsfw', 'xxx', 'sex',
                                              'porn', 'mature')""", (row[0], )
                                         ).fetchone()[0]
+            cdb.execute("COMMIT;")
+
             if nsfw == 0:
                 measurements[row[0]] = dict(name=row[1], lbc=row[2],
                                             title=row[3])
