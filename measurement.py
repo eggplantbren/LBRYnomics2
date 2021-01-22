@@ -17,7 +17,7 @@ def make_measurement(k):
 
     # Get reader
     cdb_conn = apsw.Connection(config.claims_db_file,
-                                flags=apsw.SQLITE_OPEN_READONLY)
+                               flags=apsw.SQLITE_OPEN_READONLY)
     cdb_conn.setbusytimeout(300000)
     cdb = cdb_conn.cursor()
 
@@ -42,25 +42,33 @@ def make_measurement(k):
             HAVING claim_type = 1 OR claim_type = 2
             ORDER BY claim_type DESC;
             """
+    cdb.execute("BEGIN;")
     output = cdb.execute(query)
+
     measurement["num_channels"] = output.fetchone()[0]
     measurement["num_streams"]  = output.fetchone()[0]
 #    measurement["num_reposts"] = output.fetchone()[0]
+    cdb.execute("COMMIT;")
+
 
     # Query claims.db to get some measurement info
     query = """
             SELECT SUM(amount)/1E8 FROM claim;
             """
+    cdb.execute("BEGIN;")
     output = cdb.execute(query)
     measurement["lbc_deposits"] = output.fetchone()[0]
+    cdb.execute("COMMIT;")
 
 
     # Query claims.db to get some measurement info
     query = """
             SELECT COUNT(*), SUM(amount)/1E8 FROM support;
             """
+    cdb.execute("BEGIN;")
     output = cdb.execute(query)
     row = output.fetchone()
+    cdb.execute("COMMIT;")
     measurement["num_supports"], measurement["lbc_supports"] = row
 
     # Get ytsync numbers
@@ -99,16 +107,21 @@ def make_measurement(k):
     # Count reposts
     query = "SELECT COUNT(claim_hash) FROM claim WHERE claim_type=3;"
     measurement["num_reposts"] = None
+    cdb.execute("BEGIN;")
     try:
         measurement["num_reposts"] = cdb.execute(query).fetchone()[0]
     except:
         pass
+    cdb.execute("COMMIT;")
+
 
     # Measure number of claims over which LBC is spread (exp of shannon entropy)
     ps = []
     if k % 10 == 0:
+        cdb.execute("BEGIN;")
         for row in cdb.execute("SELECT (amount + support_amount) FROM claim;"):
             ps.append(row[0])
+        cdb.execute("COMMIT;")
         ps = np.array(ps)
         ps = ps/ps.sum()
         measurement["lbc_spread"] = np.exp(-np.sum(ps*np.log(ps)))
