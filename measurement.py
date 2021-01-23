@@ -18,7 +18,7 @@ def make_measurement(k):
     # Get reader
     cdb_conn = apsw.Connection(config.claims_db_file,
                                flags=apsw.SQLITE_OPEN_READONLY)
-    cdb_conn.setbusytimeout(300000)
+    cdb_conn.setbusytimeout(60000)
     cdb = cdb_conn.cursor()
 
 
