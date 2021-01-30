@@ -15,7 +15,7 @@ def create_db():
 
     # Set pragmas
     ldb.execute("""
-    PRAGMA synchronous = 1;
+    PRAGMA synchronous = 0;
     PRAGMA journal_mode = WAL;
     """)
 
