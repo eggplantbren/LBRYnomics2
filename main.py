@@ -49,11 +49,8 @@ while True:
 #        print("done.\n", flush=True)
 
     # Get the time and make another measurement in 5 minutes
-    wait = config.interval - (time.time() - result["time"])
-    if wait < 0.0:
-        wait = 0.0
-    print("Sleeping for {wait} seconds.".format(wait=wait), end=" ", flush=True)
-    time.sleep(wait)
+    print("Sleeping for {wait} seconds.".format(wait=config.interval), end=" ", flush=True)
+    time.sleep(config.interval)
     print("done.\n", flush=True)
 
     k += 1
