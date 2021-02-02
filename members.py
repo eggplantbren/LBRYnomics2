@@ -1,12 +1,13 @@
 import apsw
 from config import claims_db_file
 import requests
-
+import time
 
 conn = apsw.Connection("db/members.db")
 db = conn.cursor()
 
 def create_database():
+    db.execute("pragma foreign_keys = on;")
     db.execute("pragma synchronous = 0;")
     db.execute("pragma journal_mode = wal;")
 
@@ -14,7 +15,22 @@ def create_database():
     db.execute("create table if not exists channels\
       (claim_hash  bytes not null primary key,\
        vanity_name text not null)\
-      without rowid;");
+      without rowid;")
+    db.execute("create table if not exists streams\
+      (claim_hash bytes not null primary key,\
+       channel    bytes not null,\
+       vanity_name text not null,\
+       foreign key (channel) references channels (claim_hash))\
+     without rowid;")
+    db.execute("create table if not exists stream_measurements\
+      (stream bytes not null,\
+       time   integer not null,\
+       lbc    real not null,\
+       views  integer not null default 0,\
+       comments integer not null default 0,\
+       primary key (stream, time),\
+       foreign key (stream) references streams (claim_hash))\
+      without rowid;")
     db.execute("commit;")
 
 
@@ -54,13 +70,23 @@ def add_channel(channel):
 def update_streams_in_channel(channel):
     assert channel.claim_type == "channel"
 
+    now = time.time()
     cconn = apsw.Connection(claims_db_file, flags=apsw.SQLITE_OPEN_READONLY)
     cdb = cconn.cursor()
-    for row in cdb.execute("select claim_hash, claim_name from claim\
+    db.execute("begin;")
+    for row in cdb.execute("select claim_hash, claim_name,\
+                                   amount + support_amount\
+                            from claim\
                             where channel_hash = ? and claim_type = 1;",
                            (channel.claim_hash, )):
-        claim_hash, claim_name = row
-        print(claim_name)
+        claim_hash, claim_name, deweys = row
+        my_row = [claim_hash, now, deweys/1E8]
+        db.execute("insert into streams values (?, ?, ?)\
+                    on conflict (claim_hash) do nothing;",
+                   (claim_hash, channel.claim_hash, claim_name))
+        db.execute("insert into stream_measurements (stream, time, lbc)\
+                    values (?, ?, ?);", my_row)
+    db.execute("commit;")
     cconn.close()
 
 
