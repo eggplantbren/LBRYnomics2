@@ -18,6 +18,15 @@ def create_database():
     db.execute("commit;")
 
 
+class Claim:
+    def __init__(self, url):
+        self.claim_id, self.claim_name, self.claim_type = resolve(url)
+
+    @property
+    def claim_hash(self):
+        return bytes.fromhex(self.claim_id)[::-1]
+
+
 def resolve(url):
     response = requests.post("http://localhost:5279",
                              json={"method": "resolve",
@@ -27,27 +36,36 @@ def resolve(url):
         item = response.json()["result"][url]
         claim_name = item["name"]
         claim_id = item["claim_id"]
+        claim_type = item["value_type"]
     except:
         return None
 
-    return [claim_name, claim_id]
+    return [claim_id, claim_name, claim_type]
 
-def add_channel(url):
-    claim_name, claim_id = resolve(url)
-    claim_hash = bytes.fromhex(claim_id)[::-1]
+def add_channel(channel):
+    assert channel.claim_type == "channel"
     db.execute("begin;")
-    db.execute("insert into channels values (?, ?);", (claim_hash, claim_name))
+    db.execute("insert into channels values (?, ?)\
+                on conflict (claim_hash) do nothing;",
+               (channel.claim_hash, channel.claim_name))
     db.execute("commit;")
 
-#    cconn = apsw.Connection(claims_db_file, flags=apsw.SQLITE_OPEN_READONLY)
-#    cdb = cconn.cursor()
-#    for row in cdb.execute("select claim_name from claim\
-#                            where channel_hash = ?;", (claim_hash, )):
-#        claim_name = row
-#        print(claim_name)
-#    cconn.close()
+
+def update_streams_in_channel(channel):
+    assert channel.claim_type == "channel"
+
+    cconn = apsw.Connection(claims_db_file, flags=apsw.SQLITE_OPEN_READONLY)
+    cdb = cconn.cursor()
+    for row in cdb.execute("select claim_hash, claim_name from claim\
+                            where channel_hash = ? and claim_type = 1;",
+                           (channel.claim_hash, )):
+        claim_hash, claim_name = row
+        print(claim_name)
+    cconn.close()
 
 
 create_database()
-add_channel("@BrendonBrewer")
+channel = Claim("@BrendonBrewer")
+add_channel(channel)
+update_streams_in_channel(channel)
 
