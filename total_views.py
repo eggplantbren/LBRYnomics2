@@ -4,9 +4,7 @@ import requests
 import time
 import yaml
 
-cconn = apsw.Connection(claims_db_file,
-                        flags=apsw.SQLITE_OPEN_READONLY)
-cdb = cconn.cursor()
+
 
 # Get auth token
 f = open("secrets.yaml")
@@ -15,19 +13,6 @@ auth_token = secrets["auth_token"]
 f.close()
 
 BATCH_SIZE = 22500
-
-
-conn = apsw.Connection("db/total_views.db")
-db = conn.cursor()
-db.execute("PRAGMA SYNCHRONOUS = 0;")
-db.execute("PRAGMA JOURNAL_MODE = WAL;")
-db.execute("BEGIN;")
-db.execute("""CREATE TABLE IF NOT EXISTS measurements
-(id          INTEGER NOT NULL PRIMARY KEY,
- time        REAL NOT NULL,
- total_views INTEGER NOT NULL);""")
-db.execute("COMMIT;")
-
 
 
 def batch_views(claim_ids):
@@ -45,6 +30,21 @@ def batch_views(claim_ids):
 
 
 def do_measurement():
+
+    cconn = apsw.Connection(claims_db_file,
+                            flags=apsw.SQLITE_OPEN_READONLY)
+    cdb = cconn.cursor()
+    conn = apsw.Connection("db/total_views.db")
+    db = conn.cursor()
+    db.execute("PRAGMA SYNCHRONOUS = 0;")
+    db.execute("PRAGMA JOURNAL_MODE = WAL;")
+    db.execute("BEGIN;")
+    db.execute("""CREATE TABLE IF NOT EXISTS measurements
+    (id          INTEGER NOT NULL PRIMARY KEY,
+     time        REAL NOT NULL,
+     total_views INTEGER NOT NULL);""")
+    db.execute("COMMIT;")
+
     now = time.time()
     cdb.execute("BEGIN;")
     total_views = 0
