@@ -311,7 +311,11 @@ def make_plot(mode, production=True, ts=None, ys=None):
     plt.figure(figsize=(15, 12))
     plt.subplot(2, 1, 1)
 
-    plt.plot(mdates.epoch2num(ts), ys, "w-", linewidth=1.5)
+    thin = 1
+    if len(ys) > 20000:
+        thin = len(ys)//20000
+
+    plt.plot(mdates.epoch2num(ts)[0::thin], ys[0::thin], "w-", linewidth=1.5)
     plt.xticks([])
     plt.xlim(xlim)
 
