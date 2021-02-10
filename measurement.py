@@ -39,7 +39,6 @@ def make_measurement(k):
     query = """
             SELECT COUNT(*), claim_type FROM claim
             GROUP BY claim_type
-            HAVING claim_type = 1 OR claim_type = 2
             ORDER BY claim_type DESC;
             """
     cdb.execute("BEGIN;")
@@ -47,29 +46,36 @@ def make_measurement(k):
 
     measurement["num_channels"] = output.fetchone()[0]
     measurement["num_streams"]  = output.fetchone()[0]
-#    measurement["num_reposts"] = output.fetchone()[0]
+    measurement["num_reposts"]  = output.fetchone()[0]
+    print(f"    num_channels = {measurement['num_channels']}.", flush=True)
+    print(f"    num_streams = {measurement['num_streams']}.", flush=True)
+    print(f"    num_reposts = {measurement['num_reposts']}.", flush=True)
     cdb.execute("COMMIT;")
 
 
     # Query claims.db to get some measurement info
     query = """
-            SELECT SUM(amount)/1E8 FROM claim;
-            """
-    cdb.execute("BEGIN;")
-    output = cdb.execute(query)
-    measurement["lbc_deposits"] = output.fetchone()[0]
-    cdb.execute("COMMIT;")
-
-
-    # Query claims.db to get some measurement info
-    query = """
-            SELECT COUNT(*), SUM(amount)/1E8 FROM support;
+            SELECT SUM(amount), SUM(support_amount) FROM claim;
             """
     cdb.execute("BEGIN;")
     output = cdb.execute(query)
     row = output.fetchone()
+    measurement["lbc_deposits"] = row[0] / 1E8
+    measurement["lbc_supports"] = row[1] / 1E8
+    print(f"    lbc_deposits = {measurement['lbc_deposits']}.", flush=True)
+    print(f"    lbc_supports = {measurement['lbc_supports']}.", flush=True)
     cdb.execute("COMMIT;")
-    measurement["num_supports"], measurement["lbc_supports"] = row
+
+
+    # Query claims.db to get some measurement info
+    query = """
+            SELECT COUNT(*) FROM support;
+            """
+    cdb.execute("BEGIN;")
+    output = cdb.execute(query)
+    measurement["num_supports"] = output.fetchone()[0]
+    print(f"    num_supports = {measurement['num_supports']}.", flush=True)
+    cdb.execute("COMMIT;")
 
     # Get ytsync numbers
     url = "https://api.lbry.com/yt/queue_status"
@@ -88,6 +94,9 @@ def make_measurement(k):
         measurement["ytsync_pending_update"] = None
         measurement["ytsync_pending_upgrade"] = None
         measurement["ytsync_failed"] = None
+    for key in measurement:
+        if key[0:6] == "ytsync":
+            print(f"    {key} = {measurement[key]}.", flush=True)
 
     # Get circulating supply
     measurement["circulating_supply"] = None
@@ -103,17 +112,8 @@ def make_measurement(k):
             measurement["circulating_supply"] = response["utxosupply"]["circulating"]
             if measurement["circulating_supply"] <= 0.0:
                 measurement["circulating_supply"] = None
-
-    # Count reposts
-    query = "SELECT COUNT(claim_hash) FROM claim WHERE claim_type=3;"
-    measurement["num_reposts"] = None
-    cdb.execute("BEGIN;")
-    try:
-        measurement["num_reposts"] = cdb.execute(query).fetchone()[0]
-    except:
-        pass
-    cdb.execute("COMMIT;")
-
+    print(f"    circulating_supply = {measurement['circulating_supply']}.",
+          flush=True)
 
     # Measure number of claims over which LBC is spread (exp of shannon entropy)
     ps = []
@@ -127,6 +127,7 @@ def make_measurement(k):
         measurement["lbc_spread"] = np.exp(-np.sum(ps*np.log(ps)))
     else:
         measurement["lbc_spread"] = None
+    print(f"    lbc_spread = {measurement['lbc_spread']}.", flush=True)
 
     # Open output DB and write to it
     lbrynomics_db = apsw.Connection("db/lbrynomics.db")
@@ -144,7 +145,6 @@ def make_measurement(k):
 
     cdb_conn.close()
 
-    print("    " + json.dumps(measurement, indent=4).replace("\n", "\n    "))
-    print("Done.\n", flush=True)
+    print("Measurement complete.\n", flush=True)
     return measurement
 
