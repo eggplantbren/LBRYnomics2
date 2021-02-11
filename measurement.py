@@ -145,6 +145,7 @@ def make_measurement(k):
 
     cdb_conn.close()
 
-    print("Measurement complete.\n", flush=True)
+    seconds = int(time.time() - now)
+    print(f"Measurement completed in {seconds} seconds.\n", flush=True)
     return measurement
 
