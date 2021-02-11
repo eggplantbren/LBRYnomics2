@@ -37,46 +37,26 @@ def make_measurement(k):
 
     # Query claims.db to get some measurement info
     query = """
-            SELECT COUNT(*), claim_type FROM claim
-            GROUP BY claim_type
-            HAVING claim_type NOT NULL
-            ORDER BY claim_type ASC;
+            SELECT num_streams, num_channels, num_reposts,
+                   lbc_deposits, lbc_supports, num_supports FROM totals;
             """
     cdb.execute("BEGIN;")
-    output = cdb.execute(query)
+    output = cdb.execute(query).fetchall()[0]
+    cdb.execute("COMMIT;")
 
-    measurement["num_streams"] = output.fetchone()[0]
-    measurement["num_channels"]  = output.fetchone()[0]
-    measurement["num_reposts"]  = output.fetchone()[0]
+    measurement["num_streams"] = output[0]
+    measurement["num_channels"]  = output[1]
+    measurement["num_reposts"]  = output[2]
+    measurement["lbc_deposits"] = output[3] / 1E8
+    measurement["lbc_supports"] = output[4] / 1E8
+    measurement["num_supports"] = output[5]
+
     print(f"    num_streams = {measurement['num_streams']}.", flush=True)
     print(f"    num_channels = {measurement['num_channels']}.", flush=True)
     print(f"    num_reposts = {measurement['num_reposts']}.", flush=True)
-    cdb.execute("COMMIT;")
-
-
-    # Query claims.db to get some measurement info
-    query = """
-            SELECT SUM(amount), SUM(support_amount) FROM claim;
-            """
-    cdb.execute("BEGIN;")
-    output = cdb.execute(query)
-    row = output.fetchone()
-    measurement["lbc_deposits"] = row[0] / 1E8
-    measurement["lbc_supports"] = row[1] / 1E8
     print(f"    lbc_deposits = {measurement['lbc_deposits']}.", flush=True)
     print(f"    lbc_supports = {measurement['lbc_supports']}.", flush=True)
-    cdb.execute("COMMIT;")
-
-
-    # Query claims.db to get some measurement info
-    query = """
-            SELECT COUNT(*) FROM support;
-            """
-    cdb.execute("BEGIN;")
-    output = cdb.execute(query)
-    measurement["num_supports"] = output.fetchone()[0]
     print(f"    num_supports = {measurement['num_supports']}.", flush=True)
-    cdb.execute("COMMIT;")
 
     # Get ytsync numbers
     url = "https://api.lbry.com/yt/queue_status"
