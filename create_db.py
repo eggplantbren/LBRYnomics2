@@ -22,10 +22,6 @@ def create_db():
     # Add indices to claims.db
     cdb.execute("""create index if not exists lbrynomics_cti_idx
                 on claim (claim_type, creation_timestamp);""")
-
-    # Add indices to claims.db
-    cdb.execute("""create index if not exists lbrynomics_sh_idx
-                on support (height);""")
     cdb.execute("""create index if not exists lbrynomics_test
                 on claim (claim_type, channel_hash, claim_id)""")
     cdb.execute("""create index if not exists lbrynomics_height_amount_idx
