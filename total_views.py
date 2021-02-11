@@ -22,10 +22,11 @@ def batch_views(claim_ids):
     data = dict(claim_id=cids, auth_token=auth_token)
     response = requests.post(url, data=data, timeout=30)
     result = response.json()
-    if result["success"]:
+    if response.status_code == 200 and result["success"]:
         views = result["data"]
     else:
-        views = None
+        print("Retrying.", flush=True)
+        views = batch_views(claim_ids)
     return views
 
 
