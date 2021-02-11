@@ -47,12 +47,24 @@ def do_measurement():
     db.execute("COMMIT;")
 
     now = time.time()
+    print("Loading claim hashes...", flush=True, end="")
+    db.execute("BEGIN;")
+    db.execute("CREATE TEMPORARY TABLE streams\
+        (claim_hash BLOB NOT NULL PRIMARY KEY) WITHOUT ROWID;")
     cdb.execute("BEGIN;")
+    num_streams = 0
+    for row in cdb.execute("""SELECT claim_id FROM claim
+                              WHERE claim_type = 1;"""):
+        db.execute("INSERT INTO streams VALUES (?);", row)
+        num_streams += 1
+    cdb.execute("COMMIT;")
+    db.execute("COMMIT;")
+    print(f"done loading {num_streams} claim hashes.")
+
     total_views = 0
     num_claims = 0
     claim_ids = []
-    for row in cdb.execute("""SELECT claim_id FROM claim
-                              WHERE claim_type = 1;"""):
+    for row in db.execute("SELECT claim_hash FROM streams;"):
         claim_ids.append(row[0])
 
         if len(claim_ids) == BATCH_SIZE:
@@ -61,8 +73,6 @@ def do_measurement():
             claim_ids = []
             print("\r", end="")
             print(num_claims, total_views)
-
-    cdb.execute("COMMIT;")
 
     num_claims += len(claim_ids)
     total_views += sum(batch_views(claim_ids))
