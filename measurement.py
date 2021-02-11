@@ -39,16 +39,17 @@ def make_measurement(k):
     query = """
             SELECT COUNT(*), claim_type FROM claim
             GROUP BY claim_type
-            ORDER BY claim_type DESC;
+            HAVING claim_type NOT NULL
+            ORDER BY claim_type ASC;
             """
     cdb.execute("BEGIN;")
     output = cdb.execute(query)
 
-    measurement["num_channels"] = output.fetchone()[0]
-    measurement["num_streams"]  = output.fetchone()[0]
+    measurement["num_streams"] = output.fetchone()[0]
+    measurement["num_channels"]  = output.fetchone()[0]
     measurement["num_reposts"]  = output.fetchone()[0]
-    print(f"    num_channels = {measurement['num_channels']}.", flush=True)
     print(f"    num_streams = {measurement['num_streams']}.", flush=True)
+    print(f"    num_channels = {measurement['num_channels']}.", flush=True)
     print(f"    num_reposts = {measurement['num_reposts']}.", flush=True)
     cdb.execute("COMMIT;")
 
@@ -132,11 +133,11 @@ def make_measurement(k):
     # Open output DB and write to it
     lbrynomics_db = apsw.Connection("db/lbrynomics.db")
     query = """
-            INSERT INTO measurements (time, num_channels, num_streams,
-                                      lbc_deposits, num_supports, lbc_supports,
+            INSERT INTO measurements (time, num_streams, num_channels, num_reposts,
+                                      lbc_deposits, lbc_supports, num_supports,
                                       ytsync_new_pending, ytsync_pending_update,
                                       ytsync_pending_upgrade, ytsync_failed,
-                                      circulating_supply, num_reposts, lbc_spread)
+                                      circulating_supply, lbc_spread)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
     ldb.execute("BEGIN;")
