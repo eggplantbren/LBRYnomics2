@@ -19,16 +19,6 @@ def create_db():
     PRAGMA journal_mode = WAL;
     """)
 
-    # Add indices to claims.db
-    cdb.execute("""create index if not exists lbrynomics_cti_idx
-                on claim (claim_type, creation_timestamp);""")
-    cdb.execute("""create index if not exists lbrynomics_test
-                on claim (claim_type, channel_hash, claim_id)""")
-    cdb.execute("""create index if not exists lbrynomics_height_amount_idx
-                on support (height, amount);""")
-    cdb.execute("""create index if not exists lbrynomics_amount_height_idx
-                on support (amount, height);""")
-
     # Create tables for measurements etc.
     ldb.execute("""
     CREATE TABLE IF NOT EXISTS measurements
