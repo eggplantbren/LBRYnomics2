@@ -1,9 +1,9 @@
 ---
 # Full path to claims.db from a running wallet server
-claims_db_file: "/lbrynomics_ssd/lbry-sdk/lbryum_data/claims.db"
+claims_db_file: "/home/brewer/lbry-sdk/lbryum_data/claims.db"
 
 # Sleep interval in seconds
 interval: 300.0
 
 # Full path to lbry daemon binary
-lbrynet_bin: "/usr/bin/lbrynet"
+lbrynet_bin: "/home/brewer/lbrynet"

@@ -12,6 +12,8 @@ import time
 ldb_conn = apsw.Connection("db/lbrynomics.db")
 ldb = ldb_conn.cursor()
 ldb.execute("PRAGMA JOURNAL_MODE=WAL;")
+ldb.execute("PRAGMA SYNCHRONOUS=0;")
+ldb.execute("PRAGMA AUTOVACUUM=ON;")
 
 def make_measurement(k):
 
@@ -38,7 +40,7 @@ def make_measurement(k):
     # Query claims.db to get some measurement info
     query = """
             SELECT num_streams, num_channels, num_reposts,
-                   lbc_deposits, lbc_supports, num_supports FROM totals;
+                   deposits_deweys, supports_deweys, num_supports FROM totals;
             """
     cdb.execute("BEGIN;")
     output = cdb.execute(query).fetchall()[0]
@@ -99,6 +101,7 @@ def make_measurement(k):
     # Measure number of claims over which LBC is spread (exp of shannon entropy)
     ps = []
     if k % 10 == 0:
+        cdb.execute("PRAGMA THREADS = 3;")
         cdb.execute("BEGIN;")
         for row in cdb.execute("SELECT (amount + support_amount) FROM claim;"):
             ps.append(row[0])

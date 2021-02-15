@@ -27,6 +27,8 @@ ldb = lconn.cursor()
 conn = apsw.Connection("db/top_channels.db")
 db = conn.cursor()
 db.execute("PRAGMA JOURNAL_MODE=WAL;")
+db.execute("PRAGMA SYNCHRONOUS=0;")
+db.execute("PRAGMA AUTOVACUUM = ON;")
 
 # LBC threshold for auto-qualification
 LBC_THRESHOLD = 10000.0

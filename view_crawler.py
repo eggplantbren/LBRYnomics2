@@ -16,6 +16,7 @@ NUM_PER_API_CALL = 1000
 # Database connections
 conn = apsw.Connection("db/view_crawler.db")
 db = conn.cursor()
+db.execute("PRAGMA AUTOVACUUM = ON;")
 
 def initialise_database():
     db.execute("PRAGMA JOURNAL_MODE=WAL;")
