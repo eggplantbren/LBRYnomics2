@@ -74,18 +74,33 @@ def update_streams_in_channel(channel):
     cconn = apsw.Connection(claims_db_file, flags=apsw.SQLITE_OPEN_READONLY)
     cdb = cconn.cursor()
     db.execute("begin;")
-    for row in cdb.execute("select claim_hash, claim_name,\
+    for row in cdb.execute("select claim_hash, claim_id, claim_name,\
                                    amount + support_amount\
                             from claim\
                             where channel_hash = ? and claim_type = 1;",
                            (channel.claim_hash, )):
-        claim_hash, claim_name, deweys = row
+        claim_hash, claim_id, claim_name, deweys = row
         my_row = [claim_hash, now, deweys/1E8]
         db.execute("insert into streams values (?, ?, ?)\
                     on conflict (claim_hash) do nothing;",
                    (claim_hash, channel.claim_hash, claim_name))
         db.execute("insert into stream_measurements (stream, time, lbc)\
                     values (?, ?, ?);", my_row)
+
+        # Count comments!
+        comments = None
+        try:
+            response = requests.post("http://localhost:5279",
+                                     json={"method": "comment_list",
+                                           "params": {"claim_id": claim_id}})
+            if response.status_code == 200:
+                comments = response.json()["result"]["total_items"]
+        except:
+            pass
+        print(comments, end=" ", flush=True)
+        db.execute("UPDATE stream_measurements SET comments = ?\
+                    WHERE stream = ?;", (comments, claim_hash))
+    print("")
     db.execute("commit;")
     cconn.close()
 
