@@ -12,6 +12,8 @@ import time
 ldb_conn = apsw.Connection("db/lbrynomics.db")
 ldb = ldb_conn.cursor()
 ldb.execute("PRAGMA JOURNAL_MODE=WAL;")
+ldb.execute("PRAGMA SYNCHRONOUS=0;")
+ldb.execute("PRAGMA AUTOVACUUM=ON;")
 
 def make_measurement(k):
 
@@ -37,39 +39,26 @@ def make_measurement(k):
 
     # Query claims.db to get some measurement info
     query = """
-            SELECT COUNT(*), claim_type FROM claim
-            GROUP BY claim_type
-            HAVING claim_type = 1 OR claim_type = 2
-            ORDER BY claim_type DESC;
+            SELECT num_streams, num_channels, num_reposts,
+                   deposits_deweys, supports_deweys, num_supports FROM totals;
             """
     cdb.execute("BEGIN;")
-    output = cdb.execute(query)
-
-    measurement["num_channels"] = output.fetchone()[0]
-    measurement["num_streams"]  = output.fetchone()[0]
-#    measurement["num_reposts"] = output.fetchone()[0]
+    output = cdb.execute(query).fetchall()[0]
     cdb.execute("COMMIT;")
 
+    measurement["num_streams"] = output[0]
+    measurement["num_channels"]  = output[1]
+    measurement["num_reposts"]  = output[2]
+    measurement["lbc_deposits"] = output[3] / 1E8
+    measurement["lbc_supports"] = output[4] / 1E8
+    measurement["num_supports"] = output[5]
 
-    # Query claims.db to get some measurement info
-    query = """
-            SELECT SUM(amount)/1E8 FROM claim;
-            """
-    cdb.execute("BEGIN;")
-    output = cdb.execute(query)
-    measurement["lbc_deposits"] = output.fetchone()[0]
-    cdb.execute("COMMIT;")
-
-
-    # Query claims.db to get some measurement info
-    query = """
-            SELECT COUNT(*), SUM(amount)/1E8 FROM support;
-            """
-    cdb.execute("BEGIN;")
-    output = cdb.execute(query)
-    row = output.fetchone()
-    cdb.execute("COMMIT;")
-    measurement["num_supports"], measurement["lbc_supports"] = row
+    print(f"    num_streams = {measurement['num_streams']}.", flush=True)
+    print(f"    num_channels = {measurement['num_channels']}.", flush=True)
+    print(f"    num_reposts = {measurement['num_reposts']}.", flush=True)
+    print(f"    lbc_deposits = {measurement['lbc_deposits']}.", flush=True)
+    print(f"    lbc_supports = {measurement['lbc_supports']}.", flush=True)
+    print(f"    num_supports = {measurement['num_supports']}.", flush=True)
 
     # Get ytsync numbers
     url = "https://api.lbry.com/yt/queue_status"
@@ -88,6 +77,9 @@ def make_measurement(k):
         measurement["ytsync_pending_update"] = None
         measurement["ytsync_pending_upgrade"] = None
         measurement["ytsync_failed"] = None
+    for key in measurement:
+        if key[0:6] == "ytsync":
+            print(f"    {key} = {measurement[key]}.", flush=True)
 
     # Get circulating supply
     measurement["circulating_supply"] = None
@@ -103,21 +95,13 @@ def make_measurement(k):
             measurement["circulating_supply"] = response["utxosupply"]["circulating"]
             if measurement["circulating_supply"] <= 0.0:
                 measurement["circulating_supply"] = None
-
-    # Count reposts
-    query = "SELECT COUNT(claim_hash) FROM claim WHERE claim_type=3;"
-    measurement["num_reposts"] = None
-    cdb.execute("BEGIN;")
-    try:
-        measurement["num_reposts"] = cdb.execute(query).fetchone()[0]
-    except:
-        pass
-    cdb.execute("COMMIT;")
-
+    print(f"    circulating_supply = {measurement['circulating_supply']}.",
+          flush=True)
 
     # Measure number of claims over which LBC is spread (exp of shannon entropy)
     ps = []
     if k % 10 == 0:
+        cdb.execute("PRAGMA THREADS = 3;")
         cdb.execute("BEGIN;")
         for row in cdb.execute("SELECT (amount + support_amount) FROM claim;"):
             ps.append(row[0])
@@ -127,15 +111,16 @@ def make_measurement(k):
         measurement["lbc_spread"] = np.exp(-np.sum(ps*np.log(ps)))
     else:
         measurement["lbc_spread"] = None
+    print(f"    lbc_spread = {measurement['lbc_spread']}.", flush=True)
 
     # Open output DB and write to it
     lbrynomics_db = apsw.Connection("db/lbrynomics.db")
     query = """
-            INSERT INTO measurements (time, num_channels, num_streams,
-                                      lbc_deposits, num_supports, lbc_supports,
+            INSERT INTO measurements (time, num_streams, num_channels, num_reposts,
+                                      lbc_deposits, lbc_supports, num_supports,
                                       ytsync_new_pending, ytsync_pending_update,
                                       ytsync_pending_upgrade, ytsync_failed,
-                                      circulating_supply, num_reposts, lbc_spread)
+                                      circulating_supply, lbc_spread)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
     ldb.execute("BEGIN;")
@@ -144,7 +129,7 @@ def make_measurement(k):
 
     cdb_conn.close()
 
-    print("    " + json.dumps(measurement, indent=4).replace("\n", "\n    "))
-    print("Done.\n", flush=True)
+    seconds = int(time.time() - now)
+    print(f"Measurement completed in {seconds} seconds.\n", flush=True)
     return measurement
 

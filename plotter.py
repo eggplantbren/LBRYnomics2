@@ -204,6 +204,8 @@ def title(mode, value):
         string += f"Number of reposts = {num}"
     if mode == "lbc_spread":
         string += f"LBC spread = {num} claims."
+    if mode == "total_views":
+        string += f"Total views of all content = {num}."
     return string
 
 
@@ -233,10 +235,12 @@ def ylabel(mode):
         string += "Number of reposts"
     if mode == "lbc_spread":
         string += "Number of claims"
+    if mode == "total_views":
+        string += "Views"
     return string
 
 def set_ylim(mode, subplot=1):
-    if mode in ["num_streams", "num_channels", "num_reposts"]:
+    if mode in ["num_streams", "num_channels", "num_reposts", "total_views"]:
         plt.ylim(bottom=-0.5)
 #    if mode == "followers":
 #        plt.ylim(bottom=-0.5)
@@ -307,7 +311,11 @@ def make_plot(mode, production=True, ts=None, ys=None):
     plt.figure(figsize=(15, 12))
     plt.subplot(2, 1, 1)
 
-    plt.plot(mdates.epoch2num(ts), ys, "w-", linewidth=1.5)
+    thin = 1
+    if len(ys) > 20000:
+        thin = len(ys)//20000
+
+    plt.plot(mdates.epoch2num(ts)[0::thin], ys[0::thin], "w-", linewidth=1.5)
     plt.xticks([])
     plt.xlim(xlim)
 
@@ -424,6 +432,18 @@ def make_plots(production=True):
     make_plot("views", production, ts, ys)
 
     make_plot("num_reposts", production)
+
+    # Total views
+    tvconn = apsw.Connection("db/total_views.db",
+                             flags=apsw.SQLITE_OPEN_READONLY)
+    tvdb = tvconn.cursor()
+    ts, ys = [], []
+    for row in tvdb.execute("SELECT time, total_views FROM measurements;"):
+        ts.append(row[0])
+        ys.append(row[1])
+    make_plot("total_views", production, ts, ys)
+    tvconn.close()
+
 
     print("Done.\n")
 

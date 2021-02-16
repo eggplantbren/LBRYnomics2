@@ -27,6 +27,8 @@ ldb = lconn.cursor()
 conn = apsw.Connection("db/top_channels.db")
 db = conn.cursor()
 db.execute("PRAGMA JOURNAL_MODE=WAL;")
+db.execute("PRAGMA SYNCHRONOUS=0;")
+db.execute("PRAGMA AUTOVACUUM = ON;")
 
 # LBC threshold for auto-qualification
 LBC_THRESHOLD = 10000.0
@@ -516,6 +518,7 @@ def export_json():
 
 if __name__ == "__main__":
     create_tables()
+    import total_views
 
     k = 1
     while True:
@@ -528,6 +531,7 @@ if __name__ == "__main__":
             plotter2.html_plot(mode="random")
             upload.upload(html_plot=True)
             print("done.", flush=True)
+            total_views.do_measurement()
         else:
             print(".", end="", flush=True)
             if k % 60 == 0:
