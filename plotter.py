@@ -59,10 +59,10 @@ def moving_average(ys, length=10):
     return result
 
 # Load LBRY Social logo
-logo = plt.imread("assets/logo_and_url.png")
+#logo = plt.imread("assets/logo_and_url.svg")
 
 # Configure Matplotlib
-matplotlib.rcParams["figure.dpi"] = 500
+matplotlib.rcParams["figure.dpi"] = 100
 matplotlib.rcParams["font.family"] = "Roboto"
 plt.rcParams["font.size"] = 16
 plt.style.use("dark_background")
@@ -97,6 +97,9 @@ def annotate_all(mode, subplot=1):
         stamp = "Produced at " + str(now) + " UTC"
         plt.text(xlims[0] + 0.0*xwidth, ylims[0] - 0.05*ywidth,
                  stamp, color="w", alpha=0.5)
+
+        plt.text(xlims[0] + 0.01*xwidth, ylims[1] - 0.07*ywidth,
+                 "(c) https://lbrynomics.com", color="#3490ff")
 
     # Nikooooo
     if "ytsync" in mode:
@@ -312,8 +315,8 @@ def make_plot(mode, production=True, ts=None, ys=None):
     plt.subplot(2, 1, 1)
 
     thin = 1
-    if len(ys) > 20000:
-        thin = len(ys)//20000
+    if len(ys) > 10000:
+        thin = len(ys)//10000
 
     plt.plot(mdates.epoch2num(ts)[0::thin], ys[0::thin], "w-", linewidth=1.5)
     plt.xticks([])
@@ -328,10 +331,10 @@ def make_plot(mode, production=True, ts=None, ys=None):
     annotate_all(mode)
 
     # Add logo and tweak its position
-    ax = plt.gca()
-    axins = ax.inset_axes([0.01, 0.80, 0.20, 0.18])
-    axins.imshow(logo)
-    axins.axis("off")
+    #ax = plt.gca()
+    #axins = ax.inset_axes([0.01, 0.80, 0.20, 0.18])
+    #axins.imshow(logo)
+    #axins.axis("off")
 
     plt.subplot(2, 1, 2)
 
