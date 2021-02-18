@@ -30,7 +30,7 @@ def upload(secrets_file="secrets.yaml", html_plot=False):
     if html_plot:
         os.system("cp plots/*.html upload")
     else:
-        os.system("cp plots/*.svg upload")
+        os.system("cp plots/*.png upload")
         os.system("cp json/*.json upload")
 
     f = open(secrets_file)

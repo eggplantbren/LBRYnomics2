@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from numba import njit
 import numpy as np
+import subprocess
 import time
 
 # Read-only connection to top channels database
@@ -62,7 +63,7 @@ def moving_average(ys, length=10):
 #logo = plt.imread("assets/logo_and_url.svg")
 
 # Configure Matplotlib
-matplotlib.rcParams["figure.dpi"] = 100
+#matplotlib.rcParams["figure.dpi"] = 100
 matplotlib.rcParams["font.family"] = "Roboto"
 plt.rcParams["font.size"] = 16
 plt.style.use("dark_background")
@@ -377,19 +378,16 @@ def make_plot(mode, production=True, ts=None, ys=None):
     annotate_all(mode, 2)
 
     plt.legend()
-    fname = "{mode}.svg"
+    fname = f"{mode}.png"
     if production:
         fname = "plots/" + fname
     plt.savefig(fname.format(mode=mode),
                 bbox_inches=matplotlib.transforms.Bbox\
-                    (np.array([[0.5, -0.0], [14.5, 11.0]])))
+                    (np.array([[0.5, -0.0], [14.5, 11.0]])), dpi=100)
     plt.close("all")
-    print(f"    Figure saved to {mode}.svg.")
-
-
-    # Make bokeh plot
-#    if mode == "num_streams":
-#        bokeh_plot(ts, ys)
+    command = f"convert -strip -resize 1200x943 -colors 256 -depth 8 +dither {fname} png8:{fname}"
+    subprocess.run(command, shell=True)
+    print(f"    Figure saved to {fname}.")
 
 
 def make_plots(production=True):
