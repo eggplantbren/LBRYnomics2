@@ -23,14 +23,17 @@ def backup(secrets_file="secrets.yaml"):
     os.system("rm lbrynomics.db.zst")
 
 
-def upload(secrets_file="secrets.yaml", html_plot=False):
+def upload(secrets_file="secrets.yaml", html_plot=False, include_pngs=True):
 
-    print("Uploading files...", end="", flush=True)
+    print("Uploading files:", flush=True)
+
+    os.system("rm upload/*")
 
     if html_plot:
         os.system("cp plots/*.html upload")
     else:
-        os.system("cp plots/*.png upload")
+        if include_pngs:
+            os.system("cp plots/*.png upload")
         os.system("cp json/*.json upload")
 
     f = open(secrets_file)
@@ -40,6 +43,8 @@ def upload(secrets_file="secrets.yaml", html_plot=False):
     wildcard = "*"
     if html_plot:
         wildcard += ".html"
+
+    print(f"upload/{wildcard}", flush=True)
 
     cmd = "sshpass -e scp -C -P {port} upload/{wildcard} {user}@{dest}"\
             .format(user=secrets["user"], wildcard=wildcard,

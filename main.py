@@ -36,10 +36,12 @@ while True:
     lbrynomics_meta.lbrynomics_meta(result["time"], d)
 
     # Make plots
-    plotter.make_plots()
-
-    # Upload
-    upload.upload()
+    if k%2 == 0:
+        plotter.make_plots(production=True, truncate=False)
+        plotter.make_plots(production=True, truncate=True)
+        upload.upload(include_pngs=True)
+    else:
+        upload.upload(include_pngs=False)
 #    upload.upload("secrets2.yaml")
 
     # Backup db periodically
