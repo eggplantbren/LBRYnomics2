@@ -78,7 +78,7 @@ plt.rcParams["savefig.facecolor"] = "#3c3d3c"
 #   ...: print(names)
 
 
-def annotate_all(mode, subplot=1):
+def annotate_all(mode, subplot=1,):
 
     # Everyone gets year lines
     # Add vertical lines for new years (approximately)
@@ -276,6 +276,13 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
     ts = np.array(ts)
     ys = np.array(ys)
 
+    # Truncate
+    if "truncate" in kwargs and kwargs["truncate"]:
+        now = time.time()
+        keep = ts >= now - 90*86400
+        ts = ts[keep]
+        ys = ys[keep]
+
     # Convert ts to datetimes to facilitate good tick positions
     datetimes = []
     for i in range(len(ts)):
@@ -306,6 +313,9 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
     # Handle very short datasets differently
     if (ts[-1] - ts[0]) < 20*86400.0:
         ticks = np.unique([dt.date() for dt in datetimes])
+    elif (ts[-1] - ts[0]) < 100*86400.0:
+        ticks = np.unique([dt.date() for dt in datetimes])
+        ticks = ticks[0::7]
 
     # Compute xlim
     xlim = [mdates.epoch2num(ts[0])  - 1.0,
@@ -325,7 +335,8 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
 
     plt.ylabel(ylabel(mode), fontsize=16)
     plt.title(title(mode, ys[-1]))
-    set_ylim(mode)
+    if "truncate" not in kwargs or not kwargs["truncate"]:
+        set_ylim(mode)
     plt.gca().tick_params(labelright=True)
 
     # Add annotations
@@ -378,9 +389,12 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
     annotate_all(mode, 2)
 
     plt.legend()
-    fname = f"{mode}.png"
+    fname = f"{mode}"
     if "production" in kwargs and kwargs["production"]:
         fname = "plots/" + fname
+    if "truncate" in kwargs and kwargs["truncate"]:
+        fname += "_90d"
+    fname += ".png"
     plt.savefig(fname.format(mode=mode),
                 bbox_inches=matplotlib.transforms.Bbox\
                     (np.array([[0.5, -0.0], [14.5, 11.0]])), dpi=100)
@@ -450,6 +464,6 @@ def make_plots(**kwargs):
 
 
 if __name__ == "__main__":
-    make_plots(production=False)
+    make_plots(production=False, truncate=True)
 
 
