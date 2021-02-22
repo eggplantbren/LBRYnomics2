@@ -257,7 +257,7 @@ def set_ylim(mode, subplot=1):
         plt.ylim(bottom=-0.5)
 
 
-def make_plot(mode, production=True, ts=None, ys=None):
+def make_plot(mode, ts=None, ys=None, **kwargs):
     """
     Plot quantity history. ts and ys may be presupplied. If not, it will
     try to get them from the measurements table.
@@ -379,7 +379,7 @@ def make_plot(mode, production=True, ts=None, ys=None):
 
     plt.legend()
     fname = f"{mode}.png"
-    if production:
+    if "production" in kwargs and kwargs["production"]:
         fname = "plots/" + fname
     plt.savefig(fname.format(mode=mode),
                 bbox_inches=matplotlib.transforms.Bbox\
@@ -390,17 +390,17 @@ def make_plot(mode, production=True, ts=None, ys=None):
     print(f"    Figure saved to {fname}.")
 
 
-def make_plots(production=True):
+def make_plots(**kwargs):
     print("Making plots.", flush=True)
-    make_plot("num_channels", production)
-    make_plot("num_streams", production)
-    make_plot("lbc_deposits", production)
-    make_plot("num_supports", production)
-    make_plot("lbc_supports", production)
-    make_plot("ytsync_new_pending", production)
-    make_plot("ytsync_pending_update", production)
-    make_plot("circulating_supply", production)
-    make_plot("lbc_spread", production)
+    make_plot("num_channels", **kwargs)
+    make_plot("num_streams", **kwargs)
+    make_plot("lbc_deposits", **kwargs)
+    make_plot("num_supports", **kwargs)
+    make_plot("lbc_supports", **kwargs)
+    make_plot("ytsync_new_pending", **kwargs)
+    make_plot("ytsync_pending_update", **kwargs)
+    make_plot("circulating_supply", **kwargs)
+    make_plot("lbc_spread", **kwargs)
 
     # Followers data
     query = """
@@ -415,7 +415,7 @@ def make_plots(production=True):
     for row in tcdb.execute(query):
         ts.append(row[0])
         ys.append(row[1])
-    make_plot("followers", production, ts, ys)
+    make_plot("followers", ts, ys, **kwargs)
 
     # Views data
     query = """
@@ -430,9 +430,9 @@ def make_plots(production=True):
     for row in tcdb.execute(query):
         ts.append(row[0])
         ys.append(row[1])
-    make_plot("views", production, ts, ys)
+    make_plot("views", ts, ys, **kwargs)
 
-    make_plot("num_reposts", production)
+    make_plot("num_reposts", **kwargs)
 
     # Total views
     tvconn = apsw.Connection("db/total_views.db",
@@ -442,7 +442,7 @@ def make_plots(production=True):
     for row in tvdb.execute("SELECT time, total_views FROM measurements;"):
         ts.append(row[0])
         ys.append(row[1])
-    make_plot("total_views", production, ts, ys)
+    make_plot("total_views", ts, ys, **kwargs)
     tvconn.close()
 
 
