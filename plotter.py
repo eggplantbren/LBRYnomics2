@@ -42,12 +42,23 @@ class quantile:
 tcdb_conn.createaggregatefunction("QUANTILE", quantile.factory)
 
 
-@njit
-def derivative(ts, ys):
-    result = np.empty(len(ys) - 1)
-    for i in range(len(result)):
-        result[i] = (ys[i+1] - ys[i])/(ts[i+1] - ts[i])
-    return result
+def thin(ts, ys, gap=86400.0):
+    assert len(ts) == len(ys)
+    thinned_ts, thinned_ys = [ts[0]], [ys[0]]
+    for i in range(1, len(ts)):
+        if (ts[i] - thinned_ts[-1] >= gap) or (i == len(ts) - 1):
+            thinned_ts.append(ts[i])
+            thinned_ys.append(ys[i])
+    return np.array(thinned_ts), np.array(thinned_ys)
+
+def simple_diff(ts, ys):
+    assert len(ts) == len(ys)
+    midpoints = 0.5*(ts[0:-1] + ts[1:])
+    widths = np.diff(ts)
+    derivs = np.diff(ys)/widths
+    return [midpoints, widths, derivs]
+
+
 
 @njit
 def moving_average(ys, length=10):
@@ -283,6 +294,10 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
         ts = ts[keep]
         ys = ys[keep]
 
+    # Thin to daily
+    ts, ys = thin(ts, ys)
+    mpl_times = mdates.epoch2num(ts)
+
     # Convert ts to datetimes to facilitate good tick positions
     datetimes = []
     for i in range(len(ts)):
@@ -325,11 +340,11 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
     plt.figure(figsize=(15, 12))
     plt.subplot(2, 1, 1)
 
-    thin = 1
-    if len(ys) > 10000:
-        thin = len(ys)//10000
+    style = "-"
+    if "truncate" in kwargs and kwargs["truncate"]:
+        style = "o-"
 
-    plt.plot(mdates.epoch2num(ts)[0::thin], ys[0::thin], "w-", linewidth=1.5)
+    plt.plot(mpl_times, ys, style, color="w", linewidth=1.5)
     plt.xticks([])
     plt.xlim(xlim)
 
@@ -349,23 +364,16 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
     #axins.axis("off")
 
     plt.subplot(2, 1, 2)
-
-    # It's ts[1:] because if a claim appears at a certain measurement, it
-    # was published BEFORE that.
     color = "#3490ff"
-    thin = 1
-    if len(ts) >= 2:
-        interval = np.mean(np.diff(ts))
-        thin = int(86400.0/interval)
-        thin = max(thin, 1)
 
-    t = mdates.epoch2num(ts[0::thin])
-    y = derivative(t, ys[0::thin])
+    midpoints, widths, derivs = simple_diff(ts, ys)
+    derivs *= 86400.0
+    midpoints = mdates.epoch2num(midpoints)
 
-    plt.plot(t[1:], y, color=color, label="Raw")
-    m = moving_average(y)
+    plt.plot(midpoints, derivs, style, color=color, label="Raw")
+    m = moving_average(derivs)
     if len(m) >= 2:
-        plt.plot(t[1:], m, color="w",
+        plt.plot(midpoints, m, style, color="w",
                     label="10-day moving average")
 
     # Find 30-day gap if possible
@@ -464,6 +472,7 @@ def make_plots(**kwargs):
 
 
 if __name__ == "__main__":
+    make_plots(production=False, truncate=False)
     make_plots(production=False, truncate=True)
 
 
