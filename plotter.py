@@ -294,8 +294,13 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
         ts = ts[keep]
         ys = ys[keep]
 
-    # Thin to daily
-    ts, ys = thin(ts, ys)
+        # Thin to 6x daily
+        ts, ys = thin(ts, ys, gap=86400/6)
+
+    else:
+        # Thin to daily
+        ts, ys = thin(ts, ys)
+
     mpl_times = mdates.epoch2num(ts)
 
     # Convert ts to datetimes to facilitate good tick positions
@@ -348,8 +353,8 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
     plt.subplot(2, 1, 1)
 
     style = "-"
-    if "truncate" in kwargs and kwargs["truncate"]:
-        style = "o-"
+    #if "truncate" in kwargs and kwargs["truncate"]:
+    #    style = "o-"
 
     plt.plot(mpl_times, ys, style, color="w", linewidth=1.5)
     plt.xticks([])
