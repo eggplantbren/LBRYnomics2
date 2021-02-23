@@ -46,7 +46,7 @@ def thin(ts, ys, gap=86400.0):
     assert len(ts) == len(ys)
     thinned_ts, thinned_ys = [ts[0]], [ys[0]]
     for i in range(1, len(ts)):
-        if (ts[i] - thinned_ts[-1] >= gap) or (i == len(ts) - 1):
+        if (ts[i] - thinned_ts[-1] >= 0.5*gap) or (i == len(ts) - 1):
             thinned_ts.append(ts[i])
             thinned_ys.append(ys[i])
     return np.array(thinned_ts), np.array(thinned_ys)
@@ -328,9 +328,13 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
     # Handle very short datasets differently
     if (ts[-1] - ts[0]) < 20*86400.0:
         ticks = np.unique([dt.date() for dt in datetimes])
+    elif (ts[-1] - ts[0]) < 50*86400.0:
+        ticks = [dt.date() for dt in datetimes]
+        ticks = np.unique(ticks[0::3] + [ticks[-1]])
     elif (ts[-1] - ts[0]) < 100*86400.0:
-        ticks = np.unique([dt.date() for dt in datetimes])
-        ticks = ticks[0::7]
+        ticks = [dt.date() for dt in datetimes]
+        ticks = np.unique(ticks[0::5] + [ticks[-1]])
+
 
     # Compute xlim
     xlim = [mdates.epoch2num(ts[0])  - 1.0,

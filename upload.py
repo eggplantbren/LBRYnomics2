@@ -25,16 +25,16 @@ def backup(secrets_file="secrets.yaml"):
 
 def upload(secrets_file="secrets.yaml", html_plot=False, include_pngs=True):
 
-    print("Uploading files:", flush=True)
+    print("Uploading files: ", flush=True, end="")
 
-    os.system("rm upload/*")
+    #os.system("rm upload/*")
 
     if html_plot:
-        os.system("cp plots/*.html upload")
+        os.system("mv plots/*.html upload")
     else:
         if include_pngs:
-            os.system("cp plots/*.png upload")
-        os.system("cp json/*.json upload")
+            os.system("mv plots/*.png upload")
+        os.system("mv json/*.json upload")
 
     f = open(secrets_file)
     secrets = yaml.load(f, Loader=yaml.SafeLoader)
@@ -53,8 +53,8 @@ def upload(secrets_file="secrets.yaml", html_plot=False, include_pngs=True):
     env["SSHPASS"] = secrets["password"]
     result = subprocess.run(cmd, env=env, shell=True)
 
-    if html_plot:
-        os.system("rm upload/*.html")
+    #if html_plot:
+    #    os.system("rm upload/*.html")
 
     print("done.\n", flush=True)
 
