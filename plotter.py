@@ -326,14 +326,17 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
             break
 
     # Handle very short datasets differently
+    gap = None
     if (ts[-1] - ts[0]) < 20*86400.0:
-        ticks = np.unique([dt.date() for dt in datetimes])
+        gap = 1.0
     elif (ts[-1] - ts[0]) < 50*86400.0:
-        ticks = [dt.date() for dt in datetimes]
-        ticks = np.unique(ticks[0::3] + [ticks[-1]])
+        gap = 3.0
     elif (ts[-1] - ts[0]) < 100*86400.0:
-        ticks = [dt.date() for dt in datetimes]
-        ticks = np.unique(ticks[0::5] + [ticks[-1]])
+        gap = 5.0
+    if gap is not None:
+        ticks = [datetimes[0].date()]
+        while ticks[-1] < datetimes[-1].date():
+            ticks.append(ticks[-1] + datetime.timedelta(gap))
 
 
     # Compute xlim
