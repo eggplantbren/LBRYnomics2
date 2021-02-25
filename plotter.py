@@ -186,7 +186,7 @@ def annotate_all(mode, subplot=1,):
         plt.ylim(bottom=5.0E4, top=2.0E8)
 
 
-def title(mode, value):
+def title(mode, value, truncate):
     if type(value) == np.int64:
         value = int(value)
     elif type(value) == np.float64:
@@ -196,31 +196,39 @@ def title(mode, value):
 
     string = ""
     if mode == "num_channels":
-        string += f"Number of channels = {num}"
+        string += f"Channels, "
     if mode == "num_streams":
-        string += f"Number of publications = {num}"
+        string += f"Publications, "
     if mode == "lbc_deposits":
-        string += f"LBC staked in deposits = {num} LBC"
+        string += f"LBC in deposits, "
     if mode == "num_supports":
-        string += f"Number of active supports+tips = {num}"
+        string += f"Active supports+tips, "
     if mode == "lbc_supports":
-        string += f"LBC locked in active supports+tips = {num} LBC"
+        string += f"LBC in active supports+tips, "
     if mode == "ytsync_new_pending":
-        string += f"New channels in queue to sync = {num}"
+        string += f"New channels in ytsync queue, "
     if mode == "ytsync_pending_update":
-        string += f"Channels with new videos awaiting sync = {num}"
+        string += f"Channels w/new unsynced videos, "
     if mode == "circulating_supply":
-        string += f"Circulating supply = {num} LBC (max supply=1.083202 billion)"
+        string += f"Circulating LBC supply, "
     if mode == "followers":
-        string += f"Median followers of top 200 channels = {num}"
+        string += f"Median followers, Top 200 channels, "
     if mode == "views":
-        string += f"Median views of top 200 channels = {num}"
+        string += f"Median views, Top 200 channels, "
     if mode == "num_reposts":
-        string += f"Number of reposts = {num}"
+        string += f"Number of reposts, "
     if mode == "lbc_spread":
-        string += f"LBC spread = {num} claims."
+        string += f"LBC spread, "
     if mode == "total_views":
-        string += f"Total views of all content = {num}."
+        string += f"Total views of all content, "
+
+    if truncate:
+        string += "recent history. "
+    else:
+        string += "full history. "
+
+    string += f"Current value = {num}."
+
     return string
 
 
@@ -361,7 +369,10 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
     plt.xlim(xlim)
 
     plt.ylabel(ylabel(mode), fontsize=16)
-    plt.title(title(mode, ys[-1]))
+
+    the_title = title(mode, ys[-1], "truncate" in kwargs and kwargs["truncate"])
+    plt.title(the_title)
+
     if "truncate" not in kwargs or not kwargs["truncate"]:
         set_ylim(mode)
     plt.gca().tick_params(labelright=True)
@@ -395,7 +406,7 @@ def make_plot(mode, ts=None, ys=None, **kwargs):
     run =  ts[-1] - ts[index]
     if run == 0.0:
         run = 1.0
-    plt.title("Recent average daily change (last 30 days) = {value}"\
+    plt.title("Recent average daily change = {value}."\
                 .format(value=round(float(rise/(run/86400.0)))))
 
     plt.xticks(mdates.date2num(ticks), ticks, rotation=70)
