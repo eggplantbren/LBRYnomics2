@@ -327,6 +327,11 @@ def do_epoch(force=False):
         lbc = get_lbc(channels[i])
         passed.append(quality_filter(followers[i], views, lbc)\
                         or channels[i][::-1].hex() in lists.white_list)
+
+        # Hacky auto fail for this term
+        if "hentai" in vanity_name.lower():
+            passed[-1] = False
+
         print(f"\nDone. Quality filter passed = {passed[-1]}.\n", flush=True)
 
         _rank = None
