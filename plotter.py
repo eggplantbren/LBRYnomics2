@@ -75,8 +75,8 @@ def moving_average(ys, length=10):
 
 # Configure Matplotlib
 #matplotlib.rcParams["figure.dpi"] = 100
-matplotlib.rcParams["font.family"] = "Roboto"
-plt.rcParams["font.size"] = 16
+matplotlib.rcParams["font.family"] = "Nimbus Sans"
+plt.rcParams["font.size"] = 14
 plt.style.use("dark_background")
 plt.rcParams["axes.facecolor"] = "#3c3d3c"
 plt.rcParams["savefig.facecolor"] = "#3c3d3c"
