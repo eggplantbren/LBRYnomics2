@@ -144,6 +144,20 @@ def annotate_all(mode, subplot=1,):
                  tp,
                  "Odysee.com launched", color="#e50054",
                  fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
+
+    # SEC
+    if mode in ["num_channels", "num_streams", "num_reposts", "total_views",
+                "followers", "views", "lbc_supports", "lbc_deposits", "num_supports",
+                "lbc_spread"]:
+        loc = mdates.date2num(datetime.date(2021, 3, 30))
+        plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
+
+        tp = text_pos
+        plt.text(loc - 0.020*xwidth,
+                 tp,
+                 "SEC sues LBRY Inc",
+                 fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
+
     # MH
     if mode == "num_channels" or mode == "num_streams":
         loc = mdates.date2num(datetime.date(2019, 6, 9))
