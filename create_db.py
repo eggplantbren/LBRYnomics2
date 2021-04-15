@@ -35,7 +35,8 @@ def create_db():
          ytsync_failed INTEGER,
          circulating_supply REAL,
          num_reposts INTEGER,
-         lbc_spread REAL);
+         lbc_spread REAL,
+         purchases INTEGER);
     """)
 
     # Create indices

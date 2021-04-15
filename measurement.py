@@ -113,6 +113,18 @@ def make_measurement(k):
         measurement["lbc_spread"] = None
     print(f"    lbc_spread = {measurement['lbc_spread']}.", flush=True)
 
+
+    # Get number of purchases from chainquery
+    measurement["purchases"] = None
+    if k % 10 == 0:
+        try:
+            response = requests.get("http://chainquery.lbry.com/api/sql?query=" \
+                                + "select count(*) as count from purchase;")
+            measurement["purchases"] = response.json()["data"][0]["count"]
+        except:
+            pass
+    print(f"    purchases = {measurement['purchases']}.", flush=True)
+
     # Open output DB and write to it
     lbrynomics_db = apsw.Connection("db/lbrynomics.db")
     query = """
@@ -120,8 +132,8 @@ def make_measurement(k):
                                       lbc_deposits, lbc_supports, num_supports,
                                       ytsync_new_pending, ytsync_pending_update,
                                       ytsync_pending_upgrade, ytsync_failed,
-                                      circulating_supply, lbc_spread)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                                      circulating_supply, lbc_spread, purchases)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
     ldb.execute("BEGIN;")
     ldb.execute(query, tuple(measurement.values()))
