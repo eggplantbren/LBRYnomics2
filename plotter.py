@@ -5,7 +5,6 @@ import matplotlib
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from numba import njit
 import numpy as np
@@ -235,6 +234,8 @@ def title(mode, value, truncate):
         string += f"LBC spread, "
     if mode == "total_views":
         string += f"Total views of all content, "
+    if mode == "purchases":
+        string += f"Purchases of paid content, "
 
     if truncate:
         string += "recent history. "
@@ -274,10 +275,14 @@ def ylabel(mode):
         string += "Number of claims"
     if mode == "total_views":
         string += "Views"
+    if mode == "purchases":
+        string += "Purchases of paid content"
+
     return string
 
 def set_ylim(mode, subplot=1):
-    if mode in ["num_streams", "num_channels", "num_reposts", "total_views"]:
+    if mode in ["num_streams", "num_channels", "num_reposts", "total_views",
+                "purchases"]:
         plt.ylim(bottom=-0.5)
 #    if mode == "followers":
 #        plt.ylim(bottom=-0.5)
@@ -460,6 +465,7 @@ def make_plots(**kwargs):
     make_plot("ytsync_pending_update", **kwargs)
     make_plot("circulating_supply", **kwargs)
     make_plot("lbc_spread", **kwargs)
+    make_plot("purchases", **kwargs)
 
     # Followers data
     query = """
