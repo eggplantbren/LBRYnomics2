@@ -27,7 +27,7 @@ def measure_channel(claim_hash):
                             WHERE channel_hash = ?\
                             AND claim_type = 1;",
                            (claim_hash, )):
-        streams[row[0]] = dict(views=None, likes=None, dislikes=None, attempts=0)
+        streams[row[0]] = dict(views=None, likes=None, dislikes=None, solo_attempts=0)
     print(f"done. There are {len(streams)} streams.", flush=True)
 
     # Get the view counts. Dicts are mutable.
@@ -112,9 +112,10 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
     auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
     f.close()
 
-    # Increment attempts
-    for cid in todo:
-        streams[cid]["attempts"] += 1
+    # Increment solo attempts
+    if len(todo) == 1:
+        for cid in todo:
+            streams[cid]["solo_attempts"] += 1
 
     # Create query
     cids = ",".join(todo)
@@ -137,9 +138,9 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
             next_batch_size = 1
         success = False
 
-        # After ten failed attempts, just give up and set result to zero
+        # After three failed solo attempts, just give up and set result to zero
         for cid in todo:
-            if streams[cid]["attempts"] >= 10:
+            if streams[cid]["solo_attempts"] >= 3:
                 streams[cid]["likes"] = 0
                 streams[cid]["dislikes"] = 0
                 next_batch_size = MAX_BATCH_SIZE
@@ -153,7 +154,7 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
 
 
 if __name__ == "__main__":
-    result = measure_channel(bytes.fromhex("aaeda15cc0cafe689793a00d5e6c5a231e3b6ee8")[::-1])
+    result = measure_channel(bytes.fromhex("36b7bd81c1f975878da8cfe2960ed819a1c85bb5")[::-1])
     print(result)
 
 
