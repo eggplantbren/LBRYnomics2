@@ -95,66 +95,76 @@ def get_views(streams, batch_size=MAX_BATCH_SIZE):
 
 def get_likes(streams, batch_size=MAX_BATCH_SIZE):
 
-    # Find up to batch_size streams without a view count
-    todo = []
-    for claim_id in streams:
-        if streams[claim_id]["likes"] is None or streams[claim_id]["dislikes"] is None:
-            todo.append(claim_id)
-        if len(todo) >= batch_size:
-            break
+    total_failures = 0
 
-    # Terminate if nothing left to do
-    if len(todo) == 0:
-        return
+    while True:
 
-    # Get auth token
-    f= open("secrets.yaml")
-    auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
-    f.close()
+        # Find up to batch_size streams without a view count
+        todo = []
+        for claim_id in streams:
+            if streams[claim_id]["likes"] is None or streams[claim_id]["dislikes"] is None:
+                todo.append(claim_id)
+            if len(todo) >= batch_size:
+                break
 
-    # Increment solo attempts
-    if len(todo) == 1:
-        for cid in todo:
-            streams[cid]["solo_attempts"] += 1
+        # Terminate if nothing left to do
+        if len(todo) == 0:
+            return
 
-    # Create query
-    cids = ",".join(todo)
-    try:
-        response = requests.post("https://api.lbry.com/reaction/list",
-                             data={"auth_token": auth_token,
-                                   "claim_ids": cids}, timeout=30.0)
-        data = response.json()["data"]
-        for i in range(len(todo)):
-            streams[todo[i]]["likes"] = data["my_reactions"][todo[i]]["like"]
-            streams[todo[i]]["likes"] += data["others_reactions"][todo[i]]["like"]
-            streams[todo[i]]["dislikes"] = data["my_reactions"][todo[i]]["dislike"]
-            streams[todo[i]]["dislikes"] += data["others_reactions"][todo[i]]["dislike"]
-        next_batch_size = MAX_BATCH_SIZE
-        success = True
+        # Get auth token
+        f= open("secrets.yaml")
+        auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
+        f.close()
 
-    except:
-        next_batch_size = len(todo) // 2
-        if next_batch_size == 0:
-            next_batch_size = 1
-        success = False
+        # Increment solo attempts
+        if len(todo) == 1:
+            for cid in todo:
+                streams[cid]["solo_attempts"] += 1
 
-        # After three failed solo attempts, just give up and set result to zero
-        for cid in todo:
-            if streams[cid]["solo_attempts"] >= 3:
+        # Create query
+        cids = ",".join(todo)
+        try:
+            response = requests.post("https://api.lbry.com/reaction/list",
+                                 data={"auth_token": auth_token,
+                                       "claim_ids": cids}, timeout=30.0)
+            data = response.json()["data"]
+            for i in range(len(todo)):
+                streams[todo[i]]["likes"] = data["my_reactions"][todo[i]]["like"]
+                streams[todo[i]]["likes"] += data["others_reactions"][todo[i]]["like"]
+                streams[todo[i]]["dislikes"] = data["my_reactions"][todo[i]]["dislike"]
+                streams[todo[i]]["dislikes"] += data["others_reactions"][todo[i]]["dislike"]
+            next_batch_size = MAX_BATCH_SIZE
+            success = True
+
+        except:
+            next_batch_size = len(todo) // 2
+            if next_batch_size == 0:
+                next_batch_size = 1
+            success = False
+
+            # After three failed solo attempts, just give up and set result to zero
+            for cid in todo:
+                if streams[cid]["solo_attempts"] >= 3:
+                    streams[cid]["likes"] = 0
+                    streams[cid]["dislikes"] = 0
+                    next_batch_size = MAX_BATCH_SIZE
+                    total_failures += 1
+                    success = "ABORTED, IMPUTING ZERO"
+
+        print(f"(batch_size={len(todo)}, success={success}) ", end="", flush=True)
+        batch_size = next_batch_size
+
+        if total_failures >= 20:
+            for cid in todo:
                 streams[cid]["likes"] = 0
                 streams[cid]["dislikes"] = 0
-                next_batch_size = MAX_BATCH_SIZE
-                success = "ABORTED, IMPUTING ZERO"
+            print("Giving up on channel. Too many failures.", flush=True)
 
-    print(f"(batch_size={len(todo)}, success={success}) ", end="", flush=True)
-
-    if next_batch_size >= 1:
-        get_likes(streams, next_batch_size)
 
 
 
 if __name__ == "__main__":
-    result = measure_channel(bytes.fromhex("36b7bd81c1f975878da8cfe2960ed819a1c85bb5")[::-1])
+    result = measure_channel(bytes.fromhex("aaeda15cc0cafe689793a00d5e6c5a231e3b6ee8")[::-1])
     print(result)
 
 
