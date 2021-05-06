@@ -175,7 +175,7 @@ def read_top(num=1000):
             title = "Not yet scraped :-("
         result["titles"].append(title)
         result["claim_ids"].append(claim_id)
-        result["tv_urls"].append("https://lbry.tv/" + result["names"][-1] + ":"\
+        result["tv_urls"].append("https://odysee.com/" + result["names"][-1] + ":"\
                                    + claim_id)
         result["views"].append(row[3])
         k += 1
@@ -210,7 +210,7 @@ def popular_recently(num=1000):
             title = "Not yet scraped :-("
         result["titles"].append(title)
         result["claim_ids"].append(claim_id)
-        result["tv_urls"].append("https://lbry.tv/" + result["names"][-1] + ":"\
+        result["tv_urls"].append("https://odysee.com/" + result["names"][-1] + ":"\
                                    + claim_id)
         result["view_rates"].append(row[3]*86400.0)
         k += 1
