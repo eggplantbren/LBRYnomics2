@@ -133,7 +133,7 @@ def annotate_all(mode, subplot=1,):
                  rotation_mode="anchor", va="top", ha="right")
 
     # Odysee
-    if mode in ["num_channels", "num_streams", "num_reposts", "followers",
+    if mode in ["num_channels", "num_streams", "num_reposts", "collections", "followers",
                 "views"]:
         loc = mdates.date2num(datetime.date(2020, 9, 18))
         plt.axvline(loc, color="#e50054", linestyle="--", linewidth=1.5)
@@ -145,7 +145,7 @@ def annotate_all(mode, subplot=1,):
                  fontsize=14, rotation=90, rotation_mode="anchor", va="top", ha="right")
 
     # SEC
-    if mode in ["num_channels", "num_streams", "num_reposts", "total_views",
+    if mode in ["num_channels", "num_streams", "num_reposts", "collections", "total_views",
                 "followers", "views", "lbc_supports", "lbc_deposits", "num_supports",
                 "lbc_spread"]:
         loc = mdates.date2num(datetime.date(2021, 3, 30))
@@ -189,7 +189,7 @@ def annotate_all(mode, subplot=1,):
     # Zero lines on some lower panels
     if subplot == 2:
         if mode in ["num_supports", "followers", "views", "lbc_deposits",
-                    "lbc_supports", "num_reposts", "ytsync_new_pending",
+                    "lbc_supports", "num_reposts", "collections", "ytsync_new_pending",
                     "ytsync_pending_update", "lbc_spread"]:
             plt.axhline(0.0, color="w", linestyle="--", alpha=0.3)
 
@@ -230,6 +230,8 @@ def title(mode, value, truncate):
         string += f"Median views, Top 200 channels, "
     if mode == "num_reposts":
         string += f"Number of reposts, "
+    if mode == "collections":
+        string += f"Number of collections, "
     if mode == "lbc_spread":
         string += f"LBC spread, "
     if mode == "total_views":
@@ -271,6 +273,8 @@ def ylabel(mode):
         string += "Views"
     if mode == "num_reposts":
         string += "Number of reposts"
+    if mode == "collections":
+        string += "Number of collections"
     if mode == "lbc_spread":
         string += "Number of claims"
     if mode == "total_views":
@@ -281,7 +285,7 @@ def ylabel(mode):
     return string
 
 def set_ylim(mode, subplot=1):
-    if mode in ["num_streams", "num_channels", "num_reposts", "total_views",
+    if mode in ["num_streams", "num_channels", "num_reposts", "collections", "total_views",
                 "purchases"]:
         plt.ylim(bottom=-0.5)
 #    if mode == "followers":
@@ -498,6 +502,7 @@ def make_plots(**kwargs):
     make_plot("views", ts, ys, **kwargs)
 
     make_plot("num_reposts", **kwargs)
+    make_plot("collections", **kwargs)
 
     # Total views
     tvconn = apsw.Connection("db/total_views.db",
