@@ -36,7 +36,8 @@ def create_db():
          circulating_supply REAL,
          num_reposts INTEGER,
          lbc_spread REAL,
-         purchases INTEGER);
+         purchases INTEGER,
+         collections INTEGER);
     """)
 
     # Create indices

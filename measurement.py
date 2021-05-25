@@ -40,7 +40,8 @@ def make_measurement(k):
     # Query claims.db to get some measurement info
     query = """
             SELECT num_streams, num_channels, num_reposts,
-                   deposits_deweys, supports_deweys, num_supports FROM totals;
+                   deposits_deweys, supports_deweys, num_supports,
+                   num_collections FROM totals;
             """
     cdb.execute("BEGIN;")
     output = cdb.execute(query).fetchall()[0]
@@ -52,10 +53,12 @@ def make_measurement(k):
     measurement["lbc_deposits"] = output[3] / 1E8
     measurement["lbc_supports"] = output[4] / 1E8
     measurement["num_supports"] = output[5]
+    measurement["num_collections"] = output[6]
 
     print(f"    num_streams = {measurement['num_streams']}.", flush=True)
     print(f"    num_channels = {measurement['num_channels']}.", flush=True)
     print(f"    num_reposts = {measurement['num_reposts']}.", flush=True)
+    print(f"    num_collections = {measurement['num_collections']}.", flush=True)
     print(f"    lbc_deposits = {measurement['lbc_deposits']}.", flush=True)
     print(f"    lbc_supports = {measurement['lbc_supports']}.", flush=True)
     print(f"    num_supports = {measurement['num_supports']}.", flush=True)
@@ -130,10 +133,11 @@ def make_measurement(k):
     query = """
             INSERT INTO measurements (time, num_streams, num_channels, num_reposts,
                                       lbc_deposits, lbc_supports, num_supports,
+                                      collections,
                                       ytsync_new_pending, ytsync_pending_update,
                                       ytsync_pending_upgrade, ytsync_failed,
                                       circulating_supply, lbc_spread, purchases)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
     ldb.execute("BEGIN;")
     ldb.execute(query, tuple(measurement.values()))

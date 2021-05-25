@@ -1,7 +1,7 @@
 import apsw
 import config
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
@@ -23,7 +23,7 @@ start_block = 0 #block - int(back)
 conn = apsw.Connection(x["claims_db_file"])
 db = conn.cursor()
 
-channels = ["@drsambailey", "@paulvanderklay", "@alaslewisandbarnes", "@emmyhucker", "@thewoodgies"]
+channels = ["@drsambailey", "@paulvanderklay", "@chaia", "@emmyhucker", "@thewoodgies"]
 
 #channels = ["@emmyhucker", "@justinmurphy", "@paulvanderklay", "@mikenayna",
 #            "@theworthyhouse", "@AlasLewisAndBarnes", "@veritasium",
@@ -82,8 +82,8 @@ plt.axvline(block, linestyle="--", color="r", alpha=0.3)
 #plt.xlim([block - 576, block + 10])
 #plt.xlim([block - 4032 - 10, block + 10])
 plt.ylim(bottom=0.0)
-print("Saving supported.png")
-plt.savefig("supported.png", dpi=450)
-#plt.show()
+#print("Saving supported.png")
+#plt.savefig("supported.png", dpi=450)
+plt.show()
 conn.close()
 
