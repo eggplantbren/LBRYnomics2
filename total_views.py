@@ -20,13 +20,17 @@ def batch_views(claim_ids):
     url = "https://api.lbry.com/file/view_count"
     cids = ",".join(claim_ids)
     data = dict(claim_id=cids, auth_token=auth_token)
-    response = requests.post(url, data=data, timeout=30)
-    result = response.json()
-    if response.status_code == 200 and result["success"]:
-        views = result["data"]
-    else:
-        print("Retrying.", flush=True)
-        views = batch_views(claim_ids)
+
+    success = False
+    while not success:
+        try:
+            response = requests.post(url, data=data, timeout=30)
+            result = response.json()
+            if response.status_code == 200 and result["success"]:
+                views = result["data"]
+                success = True
+        except:
+            print("Retrying.", flush=True)
     return views
 
 
