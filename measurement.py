@@ -131,13 +131,12 @@ def make_measurement(k):
 
     # Get number of transactions
     measurement["transactions"] = None
-    if k % 10 == 0:
-        output = subprocess.run([config.lbrycrd_cli,
-                        "getchaintxstats"],
-                        capture_output=True).stdout.decode("utf8")
-        data = json.loads(output)
-        measurement["transactions"] = data["txcount"]
-        print(f"    transactions = {measurement['transactions']}.", flush=True)
+    output = subprocess.run([config.lbrycrd_cli,
+                    "getchaintxstats"],
+                    capture_output=True).stdout.decode("utf8")
+    data = json.loads(output)
+    measurement["transactions"] = data["txcount"]
+    print(f"    transactions = {measurement['transactions']}.", flush=True)
 
     # Open output DB and write to it
     lbrynomics_db = apsw.Connection("db/lbrynomics.db")
