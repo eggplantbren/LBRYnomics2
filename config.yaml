@@ -2,6 +2,9 @@
 # Full path to claims.db from a running wallet server
 claims_db_file: "/home/brewer/local/lbrynomics_hub/lbryum_data/claims.db"
 
+# Path to lbrycrd-cli
+lbrycrd_cli: "/home/brewer/local/lbrycrd/lbrycrd-cli"
+
 # Sleep interval in seconds
 interval: 300.0
 

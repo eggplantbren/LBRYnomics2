@@ -4,6 +4,7 @@ import datetime
 import config
 import json
 import numpy as np
+import subprocess
 import requests
 import time
 
@@ -128,6 +129,16 @@ def make_measurement(k):
             pass
     print(f"    purchases = {measurement['purchases']}.", flush=True)
 
+    # Get number of transactions
+    measurement["transactions"] = None
+    if k % 10 == 0:
+        output = subprocess.run([config.lbrycrd_cli,
+                        "getchaintxstats"],
+                        capture_output=True).stdout.decode("utf8")
+        data = json.loads(output)
+        measurement["transactions"] = data["txcount"]
+        print(f"    transactions = {measurement['transactions']}.", flush=True)
+
     # Open output DB and write to it
     lbrynomics_db = apsw.Connection("db/lbrynomics.db")
     query = """
@@ -136,8 +147,9 @@ def make_measurement(k):
                                       collections,
                                       ytsync_new_pending, ytsync_pending_update,
                                       ytsync_pending_upgrade, ytsync_failed,
-                                      circulating_supply, lbc_spread, purchases)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                                      circulating_supply, lbc_spread, purchases,
+                                      transactions)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
     ldb.execute("BEGIN;")
     ldb.execute(query, tuple(measurement.values()))

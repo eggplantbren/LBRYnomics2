@@ -134,7 +134,7 @@ def annotate_all(mode, subplot=1,):
 
     # Odysee
     if mode in ["num_channels", "num_streams", "num_reposts", "collections", "followers",
-                "views"]:
+                "views", "transactions"]:
         loc = mdates.date2num(datetime.date(2020, 9, 18))
         plt.axvline(loc, color="#e50054", linestyle="--", linewidth=1.5)
 
@@ -147,7 +147,7 @@ def annotate_all(mode, subplot=1,):
     # SEC
     if mode in ["num_channels", "num_streams", "num_reposts", "collections", "total_views",
                 "followers", "views", "lbc_supports", "lbc_deposits", "num_supports",
-                "lbc_spread"]:
+                "lbc_spread", "transactions"]:
         loc = mdates.date2num(datetime.date(2021, 3, 30))
         plt.axvline(loc, color="limegreen", linestyle="--", linewidth=1.5)
 
@@ -190,7 +190,7 @@ def annotate_all(mode, subplot=1,):
     if subplot == 2:
         if mode in ["num_supports", "followers", "views", "lbc_deposits",
                     "lbc_supports", "num_reposts", "collections", "ytsync_new_pending",
-                    "ytsync_pending_update", "lbc_spread"]:
+                    "ytsync_pending_update", "lbc_spread", "transactions"]:
             plt.axhline(0.0, color="w", linestyle="--", alpha=0.3)
 
     # Log scales
@@ -238,6 +238,8 @@ def title(mode, value, truncate):
         string += f"Total views of all content, "
     if mode == "purchases":
         string += f"Purchases of paid content, "
+    if mode == "transactions":
+        string += f"Transactions, "
 
     if truncate:
         string += "recent history. "
@@ -281,12 +283,14 @@ def ylabel(mode):
         string += "Views"
     if mode == "purchases":
         string += "Purchases of paid content"
+    if mode == "transactions":
+        string += "Transactions"
 
     return string
 
 def set_ylim(mode, subplot=1):
     if mode in ["num_streams", "num_channels", "num_reposts", "collections", "total_views",
-                "purchases"]:
+                "purchases", "transactions"]:
         plt.ylim(bottom=-0.5)
 #    if mode == "followers":
 #        plt.ylim(bottom=-0.5)
@@ -503,6 +507,7 @@ def make_plots(**kwargs):
 
     make_plot("num_reposts", **kwargs)
     make_plot("collections", **kwargs)
+    make_plot("transactions", **kwargs)
 
     # Total views
     tvconn = apsw.Connection("db/total_views.db",
