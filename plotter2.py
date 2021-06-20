@@ -63,7 +63,8 @@ def make_fig(channels, quantity="followers"):
                             for t in channels[claim_hash]["data"]["ts"]]
         #print(channels[claim_hash]["vanity_name"], datetimes[-1])
         visible = True
-        if channels[claim_hash]["vanity_name"] in ["@lbry", "@lbrycast"]:
+        if channels[claim_hash]["vanity_name"] in ["@lbry", "@lbrycast",
+                                                   "@Odysee", "@OdyseeHelp"]:
             visible = "legendonly"
         fig.add_trace(go.Scatter(x=datetimes,
                                  y=channels[claim_hash]["data"][quantity],
