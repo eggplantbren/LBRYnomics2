@@ -6,7 +6,9 @@ import yaml
 
 
 MAX_BATCH_SIZE = 1024
+MAX_BATCH_SIZE2 = 64
 assert MAX_BATCH_SIZE % 2 == 0
+assert MAX_BATCH_SIZE2 % 2 == 0
 
 
 def measure_channel(claim_hash):
@@ -93,7 +95,7 @@ def get_views(streams, batch_size=MAX_BATCH_SIZE):
         get_views(streams, next_batch_size)
 
 
-def get_likes(streams, batch_size=MAX_BATCH_SIZE):
+def get_likes(streams, batch_size=MAX_BATCH_SIZE2):
 
     total_failures = 0
 
@@ -133,7 +135,7 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
                 streams[todo[i]]["likes"] += data["others_reactions"][todo[i]]["like"]
                 streams[todo[i]]["dislikes"] = data["my_reactions"][todo[i]]["dislike"]
                 streams[todo[i]]["dislikes"] += data["others_reactions"][todo[i]]["dislike"]
-            next_batch_size = MAX_BATCH_SIZE
+            next_batch_size = MAX_BATCH_SIZE2
             success = True
 
         except:
@@ -147,7 +149,7 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE):
                 if streams[cid]["solo_attempts"] >= 3:
                     streams[cid]["likes"] = 0
                     streams[cid]["dislikes"] = 0
-                    next_batch_size = MAX_BATCH_SIZE
+                    next_batch_size = MAX_BATCH_SIZE2
                     total_failures += 1
                     success = "ABORTED, IMPUTING ZERO"
 
