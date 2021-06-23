@@ -157,10 +157,13 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE2):
         batch_size = next_batch_size
 
         if total_failures >= 20:
-            for cid in todo:
-                streams[cid]["likes"] = 0
-                streams[cid]["dislikes"] = 0
             print("Giving up on channel. Too many failures.", flush=True)
+            for claim_id in streams:
+                if streams[claim_id]["likes"] is None\
+                     or streams[claim_id]["dislikes"] is None:
+                    streams[claim_id]["likes"] = 0
+                    streams[claim_id]["dislikes"] = 0
+            return
 
 
 

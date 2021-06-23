@@ -12,7 +12,7 @@ secrets = yaml.load(f, Loader=yaml.SafeLoader)
 auth_token = secrets["auth_token"]
 f.close()
 
-BATCH_SIZE = 22500
+BATCH_SIZE = 1000
 
 
 def batch_views(claim_ids):
