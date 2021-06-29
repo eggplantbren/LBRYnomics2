@@ -7,7 +7,7 @@ import numpy as np
 import subprocess
 import requests
 import time
-
+import trending_tags
 
 # Database connections
 ldb_conn = apsw.Connection("db/lbrynomics.db")
@@ -90,6 +90,7 @@ def make_measurement(k):
     url = "https://explorer.lbry.com/api/v1/supply"
     if k % 10 == 0:
 
+
         try:
             response = requests.get(url, timeout=5).json()
         except:
@@ -155,6 +156,11 @@ def make_measurement(k):
     ldb.execute("COMMIT;")
 
     cdb_conn.close()
+
+
+    # Do trending tags
+    if k%10 == 0:
+        trending_tags.run()
 
     seconds = int(time.time() - now)
     print(f"Measurement completed in {seconds} seconds.\n", flush=True)
