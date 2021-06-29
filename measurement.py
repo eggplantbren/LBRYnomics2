@@ -160,6 +160,7 @@ def make_measurement(k):
 
     # Do trending tags
     if k%10 == 0:
+        print("    ", end="")
         trending_tags.run()
 
     seconds = int(time.time() - now)
