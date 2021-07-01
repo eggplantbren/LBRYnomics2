@@ -6,7 +6,6 @@ import requests
 import time
 
 def run():
-
     print("Finding trending tags...", flush=True, end="")
 
     try:
@@ -23,7 +22,9 @@ def run():
         bin_size = 1000
         result = {}
         result["human_time_utc"] = str(datetime.datetime.utcfromtimestamp(time.time()))
-        result["items"] = []
+        result["rank"] = []
+        result["tag"] = []
+        result["count"] = []
 
         rank = 1
         for row in cdb.execute("SELECT tag, COUNT(*) AS number FROM tag\
@@ -31,7 +32,9 @@ def run():
                                     GROUP BY tag.tag\
                                     ORDER BY number DESC\
                                     LIMIT 200;", (height - bin_size, )):
-            result["items"].append(dict(rank=rank, tag=row[0], count=row[1]))
+            result["rank"].append(rank)
+            result["tag"].append(row[0])
+            result["count"].append(row[1])
             rank += 1
 
         f = open("json/popular_tags_last_1000_blocks.json", "w")
