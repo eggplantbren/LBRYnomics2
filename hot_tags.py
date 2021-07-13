@@ -5,8 +5,10 @@ import json
 import requests
 import time
 
-def run():
-    print("Finding trending tags...", flush=True, end="")
+def run(mode):
+    assert mode in set(["day", "week", "month", "year", "all_time"])
+
+    print(f"    Finding hot tags (mode = {mode})...", flush=True, end="")
 
     try:
         # Get readers
@@ -19,7 +21,16 @@ def run():
                                  json=dict(method="status", params={})).json()
         height = response["result"]["wallet"]["blocks"]
 
-        bin_size = 1000
+        limit = 0
+        if mode == "day":
+            limit = height - 576
+        elif mode == "week":
+            limit = height - 7*576
+        elif mode == "month":
+            limit = height - 30*576
+        elif mode == "year":
+            limit = height - 365*576
+
         result = {}
         result["human_time_utc"] = str(datetime.datetime.utcfromtimestamp(time.time()))
         result["rank"] = []
@@ -31,13 +42,13 @@ def run():
                                     WHERE height >= ?\
                                     GROUP BY tag.tag\
                                     ORDER BY number DESC\
-                                    LIMIT 200;", (height - bin_size, )):
+                                    LIMIT 50;", (limit, )):
             result["rank"].append(rank)
             result["tag"].append(row[0])
             result["count"].append(row[1])
             rank += 1
 
-        f = open("json/popular_tags_last_1000_blocks.json", "w")
+        f = open(f"json/hot_tags_{mode}.json", "w")
         json.dump(result, f)
         f.close()
         print("done.")
@@ -45,5 +56,6 @@ def run():
         print("something went wrong.")
 
 if __name__ == "__main__":
-    run()
+    for mode in set(["day", "week", "month", "year", "all_time"]):
+        run(mode)
 

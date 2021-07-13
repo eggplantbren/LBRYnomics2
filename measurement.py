@@ -2,12 +2,12 @@ import apsw
 import collections
 import datetime
 import config
+import hot_tags
 import json
 import numpy as np
 import subprocess
 import requests
 import time
-import trending_tags
 
 # Database connections
 ldb_conn = apsw.Connection("db/lbrynomics.db")
@@ -161,7 +161,8 @@ def make_measurement(k):
     # Do trending tags
     if k%10 == 0:
         print("    ", end="")
-        trending_tags.run()
+        for mode in ["day", "week", "month", "year"]:
+            hot_tags.run(mode)
 
     seconds = int(time.time() - now)
     print(f"Measurement completed in {seconds} seconds.\n", flush=True)
