@@ -159,7 +159,7 @@ def make_measurement(k):
 
 
     # Do trending tags
-    if k%10 == 0:
+    if (k + 5)%10 == 0:
         print("    ", end="")
         for mode in ["day", "week", "month", "year"]:
             hot_tags.run(mode)
