@@ -1,7 +1,7 @@
 import json
 import pandas
 
-f = open("json/top_2000.json")
+f = open("upload/top_2000.json")
 x = json.load(f)
 f.close()
 
