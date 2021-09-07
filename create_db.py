@@ -38,7 +38,8 @@ def create_db():
          lbc_spread REAL,
          purchases INTEGER,
          collections INTEGER,
-         transactions INTEGER);
+         transactions INTEGER,
+         lbrycrd_nodes INTEGER);
     """)
 
     # Create indices

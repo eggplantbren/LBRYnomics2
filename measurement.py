@@ -139,6 +139,15 @@ def make_measurement(k):
     measurement["transactions"] = data["txcount"]
     print(f"    transactions = {measurement['transactions']}.", flush=True)
 
+
+    # Get number of lbrycrd nodes
+    nodes = None
+    if (k + 5) % 10 == 0:
+        nodes = lbrycrd_nodes()
+    measurement["lbrycrd_nodes"] = nodes
+    print(f"    lbrycrd_nodes = {nodes}.", flush=True)
+
+
     # Open output DB and write to it
     lbrynomics_db = apsw.Connection("db/lbrynomics.db")
     query = """
@@ -148,8 +157,8 @@ def make_measurement(k):
                                       ytsync_new_pending, ytsync_pending_update,
                                       ytsync_pending_upgrade, ytsync_failed,
                                       circulating_supply, lbc_spread, purchases,
-                                      transactions)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                                      transactions, lbrycrd_nodes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """
     ldb.execute("BEGIN;")
     ldb.execute(query, tuple(measurement.values()))
