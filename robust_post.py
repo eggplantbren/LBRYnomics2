@@ -2,7 +2,7 @@ import requests
 import time
 import yaml
 
-BATCH_SIZE = 200
+BATCH_SIZE = 500
 
 def get_counts(claim_ids, mode="views", batch_size=BATCH_SIZE):
     """
