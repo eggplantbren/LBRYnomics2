@@ -240,6 +240,8 @@ def title(mode, value, truncate):
         string += f"Purchases of paid content, "
     if mode == "transactions":
         string += f"Transactions, "
+    if mode == "lbrycrd_nodes":
+        string += f"LBRYcrd Full Nodes, "
 
     if truncate:
         string += "recent history. "
@@ -285,6 +287,9 @@ def ylabel(mode):
         string += "Purchases of paid content"
     if mode == "transactions":
         string += "Transactions"
+    if mode == "lbrycrd_nodes":
+        string += "Nodes"
+
 
     return string
 
@@ -508,6 +513,7 @@ def make_plots(**kwargs):
     make_plot("num_reposts", **kwargs)
     make_plot("collections", **kwargs)
     make_plot("transactions", **kwargs)
+    make_plot("lbrycrd_nodes", **kwargs)
 
     # Total views
     tvconn = apsw.Connection("db/total_views.db",
