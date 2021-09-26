@@ -51,7 +51,7 @@ def do_measurement():
     db.execute("COMMIT;")
 
     now = time.time()
-    print("Loading claim hashes...", flush=True, end="")
+    print("Copying snapshot of claim hashes...", flush=True, end="")
     db.execute("BEGIN;")
     db.execute("CREATE TEMPORARY TABLE streams\
         (claim_hash BLOB NOT NULL PRIMARY KEY) WITHOUT ROWID;")
@@ -63,7 +63,7 @@ def do_measurement():
         num_streams += 1
     cdb.execute("COMMIT;")
     db.execute("COMMIT;")
-    print(f"done loading {num_streams} claim hashes.")
+    print(f"done copying {num_streams} claim hashes.")
 
     total_views = 0
     num_claims = 0
