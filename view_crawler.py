@@ -182,7 +182,7 @@ def read_top(num=1000):
     return result
 
 def popular_recently(num=1000):
-    start = time.time() - 30.0*86400.0
+    start = time.time() - 90.0*86400.0
 
     k = 1
     result = dict()
