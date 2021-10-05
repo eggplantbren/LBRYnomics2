@@ -88,3 +88,8 @@ def do_measurement():
                (now, total_views))
     db.execute("COMMIT;")
 
+
+if __name__ == "__main__":
+    do_measurement()
+
+
