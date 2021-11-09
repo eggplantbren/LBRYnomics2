@@ -19,7 +19,7 @@ def get_counts(claim_ids, mode="views", batch_size=BATCH_SIZE):
     auth_token = yaml.load(f, Loader=yaml.SafeLoader)["auth_token"]
     f.close()
 
-    url = "https://api.lbry.com/"
+    url = "https://api.odysee.com/"
     if mode == "views":
         url += "file/view_count"
     elif mode == "followers":

@@ -66,7 +66,7 @@ def make_measurement(k):
     print(f"    num_supports = {measurement['num_supports']}.", flush=True)
 
     # Get ytsync numbers
-    url = "https://api.lbry.com/yt/queue_status"
+    url = "https://api.odysee.com/yt/queue_status"
     try:
         response = requests.get(url, timeout=5).json()
     except:

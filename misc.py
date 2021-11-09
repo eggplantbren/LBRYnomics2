@@ -11,7 +11,7 @@ def get_view_counts(claim_ids):
     f.close()
 
     cids = ",".join(claim_ids)
-    response = requests.post("https://api.lbry.com/file/view_count",
+    response = requests.post("https://api.odysee.com/file/view_count",
                              data={"auth_token": auth_token,
                                    "claim_id": cids}, timeout=20.0)
     if response.status_code == 200:

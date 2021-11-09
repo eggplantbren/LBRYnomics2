@@ -72,7 +72,7 @@ def get_views(streams, batch_size=MAX_BATCH_SIZE):
     # Create query
     cids = ",".join(todo)
     try:
-        response = requests.post("https://api.lbry.com/file/view_count",
+        response = requests.post("https://api.odysee.com/file/view_count",
                                  data={"auth_token": auth_token,
                                        "claim_id": cids}, timeout=30.0)
         query_returned = True
@@ -126,7 +126,7 @@ def get_likes(streams, batch_size=MAX_BATCH_SIZE2):
         # Create query
         cids = ",".join(todo)
         try:
-            response = requests.post("https://api.lbry.com/reaction/list",
+            response = requests.post("https://api.odysee.com/reaction/list",
                                  data={"auth_token": auth_token,
                                        "claim_ids": cids}, timeout=30.0)
             data = response.json()["data"]

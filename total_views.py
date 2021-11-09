@@ -17,7 +17,7 @@ BATCH_SIZE = 1000
 
 def batch_views(claim_ids):
 
-    url = "https://api.lbry.com/file/view_count"
+    url = "https://api.odysee.com/file/view_count"
     cids = ",".join(claim_ids)
     data = dict(claim_id=cids, auth_token=auth_token)
 
