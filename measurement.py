@@ -143,7 +143,7 @@ def make_measurement(k):
 
     # Get number of lbrycrd nodes
     nodes = None
-    if (k + 5) % 10 == 0:
+    if k == 0 or (k + 5) % 10 == 0:
         nodes = lbrycrd_nodes()
     measurement["lbrycrd_nodes"] = nodes
     print(f"    lbrycrd_nodes = {nodes}.", flush=True)
