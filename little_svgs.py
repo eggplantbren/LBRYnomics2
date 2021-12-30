@@ -18,11 +18,19 @@ def get_data(rank):
                            ORDER BY epoch DESC LIMIT 8;",
                           (rank, )):
         if row[0] is None:
-            row[0] = 0
+            row[0] = None
         views.append(row[0])
 
     # Reverse order to go forward in time again
-    return np.diff(views[::-1])
+    views = views[::-1]
+    result = []
+    for i in range(len(views)-1):
+        if views[i] is None or views[i+1] is None:
+            result.append(0)
+        else:
+            result.append(views[i+1]-views[i])
+
+    return result
 
 def make_svg(rank):
     plt.clf()
@@ -37,6 +45,6 @@ def make_svg(rank):
     print(filename)
 
 if __name__ == "__main__":
-    for i in range(20):
+    for i in range(100):
         make_svg(i+1)
 
