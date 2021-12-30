@@ -34,6 +34,7 @@ def upload(secrets_file="secrets.yaml", html_plot=False, include_pngs=True):
     else:
         if include_pngs:
             os.system("mv plots/*.png upload")
+            os.system("mv plots/*.svg upload")
         os.system("mv json/*.json upload")
 
     f = open(secrets_file)
