@@ -33,11 +33,12 @@ def get_data(rank):
     return result
 
 def make_svg(rank):
+    plt.figure(figsize=(7, 2))
     plt.clf()
     data = get_data(rank)
 #    data[2] = -100
     colors = ["g" if data[i] >= 0 else "r" for i in range(len(data))]
-    plt.bar(np.arange(len(data)), data, width=0.5, color=colors)
+    plt.bar(np.arange(len(data)), data, width=1, color=colors)
     plt.axhline(0.0, color="k")
     plt.gca().axis("off")
     filename = f"plots/rank{rank}.svg"
