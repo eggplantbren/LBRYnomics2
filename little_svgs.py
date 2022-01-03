@@ -42,7 +42,8 @@ def make_svg(rank):
     plt.axhline(0.0, color="k")
     plt.gca().axis("off")
     filename = f"plots/rank{rank}.svg"
-    plt.savefig(filename)
+    plt.xlim([-0.5, 6.5])
+    plt.savefig(filename, bbox_inches="tight")
     print(filename)
 
 if __name__ == "__main__":
