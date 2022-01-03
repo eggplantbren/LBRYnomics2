@@ -43,7 +43,7 @@ def make_svg(rank):
     plt.gca().axis("off")
     filename = f"plots/rank{rank}.svg"
     plt.xlim([-0.5, 6.5])
-    plt.savefig(filename, bbox_inches="tight")
+    plt.savefig(filename, bbox_inches="tight", pad_inches=0)
     print(filename)
 
 if __name__ == "__main__":
