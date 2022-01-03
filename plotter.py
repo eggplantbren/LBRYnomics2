@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from numba import njit
+#from numba import njit
 import numpy as np
 import subprocess
 import time
@@ -59,7 +59,7 @@ def simple_diff(ts, ys):
 
 
 
-@njit
+#@njit
 def moving_average(ys, length=10):
     result = np.empty(len(ys))
     for i in range(len(ys)):
