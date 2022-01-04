@@ -530,10 +530,13 @@ if __name__ == "__main__":
         done = do_epoch()
         if done:
             import plotter2
+            import little_svgs
             print("Making and uploading daily interactive graphs...",
                   flush=True, end="")
             plotter2.html_plot(mode="top")
             plotter2.html_plot(mode="random")
+            for i in range(100):
+                little_svgs.make_svg(i+1)
             upload.upload(html_plot=True)
             print("done.", flush=True)
             total_views.do_measurement()

@@ -31,10 +31,10 @@ def upload(secrets_file="secrets.yaml", html_plot=False, include_pngs=True):
 
     if html_plot:
         os.system("mv plots/*.html upload")
+        os.system("mv plots/*.svg upload")
     else:
         if include_pngs:
             os.system("mv plots/*.png upload")
-            os.system("mv plots/*.svg upload")
         os.system("mv json/*.json upload")
 
     f = open(secrets_file)
@@ -54,8 +54,19 @@ def upload(secrets_file="secrets.yaml", html_plot=False, include_pngs=True):
     env["SSHPASS"] = secrets["password"]
     result = subprocess.run(cmd, env=env, shell=True)
 
-    #if html_plot:
-    #    os.system("rm upload/*.html")
+    if html_plot:
+        wildcard = "*.svg"
+        print(f"upload/{wildcard}", flush=True)
+
+        cmd = "sshpass -e scp -C -P {port} upload/{wildcard} {user}@{dest}"\
+                .format(user=secrets["user"], wildcard=wildcard,
+                        dest=secrets["destination"], port=secrets["port"])
+        env = os.environ.copy()
+        env["SSHPASS"] = secrets["password"]
+        result = subprocess.run(cmd, env=env, shell=True)
+        os.system("rm upload/*.html")
+        os.system("rm upload/*.svg")
+
 
     print("done.\n", flush=True)
 
