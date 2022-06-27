@@ -1,6 +1,8 @@
 # LBRYnomics2
 
-This is a program which runs on a LBRY wallet server. Periodically,
+This is a program which runs on a LBRY wallet server (it has to be v0.92
+which is old, and it has to have extra database indexes added, so 
+this code is of historical interest only). Periodically,
 it measures various quantities from both the wallet server's `claims.db`
 database and LBRY Inc's APIs, saving the measurements to its own 
 database. It also generates plots of the history of the quantities it 
