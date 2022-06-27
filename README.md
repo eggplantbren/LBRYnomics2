@@ -1,4 +1,6 @@
-# LBRYnomics2 --- RETIRED, ARCHIVED
+# LBRYnomics2
+
+Warning: nobody should be running this
 
 This is a program which runs on a LBRY wallet server (it has to be v0.92
 which is old, and it has to have extra database indexes added, so 
